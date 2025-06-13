@@ -14,12 +14,9 @@ const xaiClient = new OpenAI({
 
 // Función para determinar qué proveedor usar
 function getAIProvider() {
-  // Prioridad: xAI (más económico) > OpenAI
-  if (process.env.XAI_API_KEY && process.env.XAI_API_KEY !== "default_key") {
-    return { client: xaiClient, model: "grok-2-1212", provider: "xai" };
-  }
+  // Usar OpenAI GPT-4o-mini (económico y de alta calidad)
   if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "default_key") {
-    return { client: openaiClient, model: "gpt-4o-mini", provider: "openai" }; // gpt-4o-mini es más económico
+    return { client: openaiClient, model: "gpt-4o-mini", provider: "openai" };
   }
   return null;
 }
