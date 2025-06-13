@@ -109,13 +109,13 @@ export default function Home() {
         </section>
 
         {/* Booking Section */}
-        <section id="reservas" className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          <div className="lg:col-span-2">
-            <BookingForm />
-          </div>
-          <div>
-            <CalendarView />
-          </div>
+        <section id="reservas" className="mb-12">
+          <BookingForm />
+        </section>
+
+        {/* Calendar Section */}
+        <section className="mb-12">
+          <CalendarView />
         </section>
 
         {/* Appointments List */}
