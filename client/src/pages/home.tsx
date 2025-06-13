@@ -1,9 +1,49 @@
 import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
 import { Link } from "wouter";
-import { EcofisioLogoExerciseTech } from "@/assets/logo-variants";
 import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentsList from "@/components/appointments-list";
+
+// Logo component inline
+const EcofisioLogo = ({ size = 32 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32">
+    <defs>
+      <linearGradient id="exerciseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+      </linearGradient>
+    </defs>
+    <circle cx="16" cy="16" r="15" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1"/>
+    {/* Persona 1: Levantando pesas */}
+    <g transform="translate(8, 8)">
+      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
+      <rect x="-0.5" y="1.5" width="1" height="3" fill="url(#exerciseGradient)"/>
+      <line x1="-2" y1="2.5" x2="2" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="-2.5" y="2" width="1" height="1" fill="#64748b"/>
+      <rect x="1.5" y="2" width="1" height="1" fill="#64748b"/>
+      <line x1="-0.5" y1="4.5" x2="-1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0.5" y1="4.5" x2="1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <circle cx="-2" cy="2.5" r="0.3" fill="#22c55e"/>
+      <circle cx="2" cy="2.5" r="0.3" fill="#22c55e"/>
+    </g>
+    {/* Persona 2: Corriendo */}
+    <g transform="translate(16, 20)">
+      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
+      <line x1="0" y1="1.5" x2="0.5" y2="3.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="0" y1="2" x2="-1.5" y2="1.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0" y1="2" x2="1.5" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0.5" y1="3.5" x2="0" y2="5.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0.5" y1="3.5" x2="1.5" y2="4.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <rect x="-1.7" y="1.3" width="0.4" height="0.4" fill="#8b5cf6"/>
+      <circle cx="0" cy="2.5" r="0.3" fill="#ef4444"/>
+    </g>
+    {/* Conexiones */}
+    <path d="M6 11 Q16 8 26 11" stroke="#06b6d4" strokeWidth="1" strokeDasharray="2,2" fill="none" opacity="0.6"/>
+    <circle cx="4" cy="4" r="1" fill="#22c55e" opacity="0.8"/>
+    <circle cx="28" cy="28" r="1" fill="#ef4444" opacity="0.8"/>
+  </svg>
+);
 
 export default function Home() {
   return (
@@ -13,7 +53,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <EcofisioLogoExerciseTech size={32} />
+              <EcofisioLogo size={32} />
               <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
@@ -23,9 +63,7 @@ export default function Home() {
               <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-colors">
                 Mis Reservas
               </a>
-              <Link href="/logos" className="text-slate-600 hover:text-blue-600 transition-colors">
-                Ver Logos
-              </Link>
+
               <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-colors">
                 Contacto
               </a>
@@ -90,7 +128,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-3 mb-4">
-                <EcofisioLogoExerciseTech size={32} />
+                <EcofisioLogo size={32} />
                 <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
               </div>
               <p className="text-slate-600 mb-4">
