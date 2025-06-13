@@ -318,6 +318,94 @@ export const EcofisioLogoTech6 = ({ size = 32, className = "" }: { size?: number
   </svg>
 );
 
+// Logo Opción 13: Personas haciendo ejercicio con tecnología
+export const EcofisioLogoExerciseTech = ({ size = 32, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" className={className}>
+    <defs>
+      <linearGradient id="exerciseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+        <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+      </linearGradient>
+      <linearGradient id="techBg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style={{ stopColor: '#1e293b', stopOpacity: 0.05 }} />
+        <stop offset="100%" style={{ stopColor: '#475569', stopOpacity: 0.1 }} />
+      </linearGradient>
+    </defs>
+    
+    {/* Fondo tecnológico circular */}
+    <circle cx="16" cy="16" r="15" fill="url(#techBg)" stroke="#e2e8f0" strokeWidth="1"/>
+    
+    {/* Persona 1: Levantando pesas con sensores */}
+    <g transform="translate(8, 8)">
+      {/* Cabeza */}
+      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
+      {/* Cuerpo */}
+      <rect x="-0.5" y="1.5" width="1" height="3" fill="url(#exerciseGradient)"/>
+      {/* Brazos con pesas */}
+      <line x1="-2" y1="2.5" x2="2" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Pesas */}
+      <rect x="-2.5" y="2" width="1" height="1" fill="#64748b"/>
+      <rect x="1.5" y="2" width="1" height="1" fill="#64748b"/>
+      {/* Piernas */}
+      <line x1="-0.5" y1="4.5" x2="-1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0.5" y1="4.5" x2="1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      {/* Sensores en muñecas */}
+      <circle cx="-2" cy="2.5" r="0.3" fill="#22c55e"/>
+      <circle cx="2" cy="2.5" r="0.3" fill="#22c55e"/>
+    </g>
+    
+    {/* Persona 2: Haciendo estiramiento con monitoreo */}
+    <g transform="translate(24, 8)">
+      {/* Cabeza */}
+      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
+      {/* Cuerpo inclinado (estiramiento) */}
+      <line x1="0" y1="1.5" x2="1.5" y2="3" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Brazo extendido */}
+      <line x1="0" y1="2" x2="-1.5" y2="1" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      {/* Piernas */}
+      <line x1="1.5" y1="3" x2="1" y2="5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="1.5" y1="3" x2="2" y2="5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      {/* Sensor de postura */}
+      <circle cx="0.5" cy="2.5" r="0.3" fill="#06b6d4"/>
+    </g>
+    
+    {/* Persona 3: Corriendo con wearables */}
+    <g transform="translate(16, 20)">
+      {/* Cabeza */}
+      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
+      {/* Cuerpo en movimiento */}
+      <line x1="0" y1="1.5" x2="0.5" y2="3.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Brazos en movimiento */}
+      <line x1="0" y1="2" x2="-1.5" y2="1.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0" y1="2" x2="1.5" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      {/* Piernas corriendo */}
+      <line x1="0.5" y1="3.5" x2="0" y2="5.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      <line x1="0.5" y1="3.5" x2="1.5" y2="4.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
+      {/* Smartwatch */}
+      <rect x="-1.7" y="1.3" width="0.4" height="0.4" fill="#8b5cf6"/>
+      {/* Sensor de frecuencia cardíaca */}
+      <circle cx="0" cy="2.5" r="0.3" fill="#ef4444"/>
+    </g>
+    
+    {/* Conexiones de datos entre sensores */}
+    <path d="M6 11 Q16 8 26 11" stroke="#06b6d4" strokeWidth="1" strokeDasharray="2,2" fill="none" opacity="0.6"/>
+    <path d="M8 18 Q16 15 24 18" stroke="#3b82f6" strokeWidth="1" strokeDasharray="2,2" fill="none" opacity="0.6"/>
+    
+    {/* Indicadores de datos en tiempo real */}
+    <circle cx="4" cy="4" r="1" fill="#22c55e" opacity="0.8"/>
+    <circle cx="28" cy="4" r="1" fill="#06b6d4" opacity="0.8"/>
+    <circle cx="4" cy="28" r="1" fill="#8b5cf6" opacity="0.8"/>
+    <circle cx="28" cy="28" r="1" fill="#ef4444" opacity="0.8"/>
+    
+    {/* Pequeñas ondas de señal */}
+    <path d="M4 6 Q5 5 6 6" stroke="#22c55e" strokeWidth="0.5" fill="none"/>
+    <path d="M28 6 Q29 5 30 6" stroke="#06b6d4" strokeWidth="0.5" fill="none"/>
+    <path d="M4 26 Q5 25 6 26" stroke="#8b5cf6" strokeWidth="0.5" fill="none"/>
+    <path d="M28 26 Q29 25 30 26" stroke="#ef4444" strokeWidth="0.5" fill="none"/>
+  </svg>
+);
+
 export const LogoShowcase = () => {
   const logos = [
     { component: EcofisioLogo1, name: "Hoja con Figura Humana", desc: "Combina naturaleza con el cuerpo humano" },
@@ -331,7 +419,8 @@ export const LogoShowcase = () => {
     { component: EcofisioLogoTech3, name: "Corazón Digital", desc: "Latido cardíaco con ondas digitales" },
     { component: EcofisioLogoTech4, name: "Sensores Biomédicos", desc: "Articulación con sensores IoT" },
     { component: EcofisioLogoTech5, name: "Cerebro IA", desc: "Red neuronal con código binario" },
-    { component: EcofisioLogoTech6, name: "Asistente Robot", desc: "IA cuidadora con cruz médica" }
+    { component: EcofisioLogoTech6, name: "Asistente Robot", desc: "IA cuidadora con cruz médica" },
+    { component: EcofisioLogoExerciseTech, name: "Ejercicio Conectado", desc: "Personas ejercitándose con tecnología wearable" }
   ];
 
   return (

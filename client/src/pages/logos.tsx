@@ -1,4 +1,4 @@
-import { LogoShowcase, EcofisioLogo1, EcofisioLogo2, EcofisioLogo3, EcofisioLogo4, EcofisioLogo5, EcofisioLogo6, EcofisioLogoTech1, EcofisioLogoTech2, EcofisioLogoTech3, EcofisioLogoTech4, EcofisioLogoTech5, EcofisioLogoTech6 } from '../assets/logo-variants';
+import { LogoShowcase, EcofisioLogo1, EcofisioLogo2, EcofisioLogo3, EcofisioLogo4, EcofisioLogo5, EcofisioLogo6, EcofisioLogoTech1, EcofisioLogoTech2, EcofisioLogoTech3, EcofisioLogoTech4, EcofisioLogoTech5, EcofisioLogoTech6, EcofisioLogoExerciseTech } from '../assets/logo-variants';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 
@@ -23,7 +23,7 @@ export default function LogosPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Opciones de Logo para Ecofisio</h2>
           <p className="text-gray-600 mb-6">
-            Aquí tienes 12 alternativas de logo: 6 que combinan fisioterapia con conceptos ecológicos y 6 nuevas opciones que fusionan kinesiología con tecnología moderna.
+            Aquí tienes 13 alternativas de logo: 6 que combinan fisioterapia con conceptos ecológicos y 7 nuevas opciones que fusionan kinesiología con tecnología moderna.
             Cada diseño está optimizado para verse bien tanto en tamaños pequeños como grandes.
           </p>
         </div>
@@ -48,7 +48,8 @@ export default function LogosPage() {
               { component: EcofisioLogoTech3, name: "Opción 9: Corazón Digital", category: "Tecnológico" },
               { component: EcofisioLogoTech4, name: "Opción 10: Sensores Biomédicos", category: "Tecnológico" },
               { component: EcofisioLogoTech5, name: "Opción 11: Cerebro IA", category: "Tecnológico" },
-              { component: EcofisioLogoTech6, name: "Opción 12: Asistente Robot", category: "Tecnológico" }
+              { component: EcofisioLogoTech6, name: "Opción 12: Asistente Robot", category: "Tecnológico" },
+              { component: EcofisioLogoExerciseTech, name: "Opción 13: Ejercicio Conectado", category: "Tecnológico" }
             ].map((logo, index) => {
               const LogoComponent = logo.component;
               return (
