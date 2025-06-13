@@ -153,11 +153,12 @@ export default function BookingForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="medicina-general">Medicina General</SelectItem>
-                        <SelectItem value="pediatria">Pediatría</SelectItem>
-                        <SelectItem value="cardiologia">Cardiología</SelectItem>
-                        <SelectItem value="dermatologia">Dermatología</SelectItem>
-                        <SelectItem value="ginecologia">Ginecología</SelectItem>
+                        <SelectItem value="rehabilitacion-deportiva">Rehabilitación Deportiva</SelectItem>
+                        <SelectItem value="terapia-manual">Terapia Manual</SelectItem>
+                        <SelectItem value="neurorehabilitacion">Neurorehabilitación</SelectItem>
+                        <SelectItem value="pediatrica">Kinesiología Pediátrica</SelectItem>
+                        <SelectItem value="respiratoria">Kinesiología Respiratoria</SelectItem>
+                        <SelectItem value="geriatrica">Kinesiología Geriátrica</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
