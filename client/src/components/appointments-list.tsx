@@ -126,8 +126,11 @@ export default function AppointmentsList() {
                       </div>
                       <div>
                         <h4 className="font-medium text-slate-900">
-                          {appointment.kinesiologistName} - {getServiceLabel(appointment.specialty)}
+                          {appointment.kinesiologistName}
                         </h4>
+                        <p className="text-sm text-blue-600 font-medium">
+                          {getServiceLabel(appointment.specialty)}
+                        </p>
                         <p className="text-sm text-slate-600">
                           {formatDate(appointment.date)} - {appointment.time}
                         </p>
