@@ -1,4 +1,5 @@
 import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
+import { Link } from "wouter";
 import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentsList from "@/components/appointments-list";
@@ -23,6 +24,9 @@ export default function Home() {
               <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-colors">
                 Mis Reservas
               </a>
+              <Link href="/logos" className="text-slate-600 hover:text-blue-600 transition-colors">
+                Ver Logos
+              </Link>
               <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-colors">
                 Contacto
               </a>
