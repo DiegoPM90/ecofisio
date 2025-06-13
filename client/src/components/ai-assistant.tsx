@@ -102,7 +102,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
                 )}
                 
                 <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                  <strong>Aviso:</strong> Esta es solo orientación inicial. Consulta siempre con un médico profesional.
+                  <strong>Aviso:</strong> Esta es solo orientación inicial. Consulta siempre con un kinesiólogo profesional.
                 </div>
               </div>
             ) : (
