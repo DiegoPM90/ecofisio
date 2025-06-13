@@ -138,10 +138,9 @@ export default function Home() {
             <div>
               <h3 className="font-semibold text-slate-900 mb-4">Servicios</h3>
               <ul className="space-y-2 text-sm text-slate-600">
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Rehabilitación Deportiva</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Terapia Manual</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Neurorehabilitación</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Kinesiología Respiratoria</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">Sesiones de Kinesiterapia y Fisioterapia</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">Masaje Descontracturante</a></li>
+                <li><a href="#" className="hover:text-blue-600 transition-colors">Masaje de Relajación</a></li>
               </ul>
             </div>
             <div>
