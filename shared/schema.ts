@@ -13,7 +13,7 @@ export const appointments = pgTable("appointments", {
   date: text("date").notNull(),
   time: text("time").notNull(),
   status: text("status").notNull().default("confirmed"),
-  doctorName: text("doctor_name"),
+  kinesiologistName: text("kinesiologist_name"),
   aiRecommendation: text("ai_recommendation"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

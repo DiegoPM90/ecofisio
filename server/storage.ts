@@ -1,4 +1,4 @@
-import { appointments, type Appointment, type InsertAppointment } from "@shared/schema";
+import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -47,9 +47,16 @@ export class MemStorage implements IStorage {
     const id = this.currentAppointmentId++;
     const appointment: Appointment = {
       id,
-      ...insertAppointment,
+      patientName: insertAppointment.patientName,
+      email: insertAppointment.email,
+      phone: insertAppointment.phone,
+      specialty: insertAppointment.specialty,
+      reason: insertAppointment.reason,
+      reasonDetail: insertAppointment.reasonDetail || null,
+      date: insertAppointment.date,
+      time: insertAppointment.time,
       status: "confirmed",
-      doctorName: this.getDoctorForSpecialty(insertAppointment.specialty),
+      kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       aiRecommendation: null,
       createdAt: new Date(),
     };
@@ -90,15 +97,16 @@ export class MemStorage implements IStorage {
     return updatedAppointment;
   }
 
-  private getDoctorForSpecialty(specialty: string): string {
-    const doctors = {
-      "medicina-general": "Dr. García López",
-      "pediatria": "Dra. Martínez Ruiz",
-      "cardiologia": "Dr. Hernández Villa",
-      "dermatologia": "Dra. López Santos",
-      "ginecologia": "Dra. Rodríguez García"
+  private getKinesiologistForSpecialty(specialty: string): string {
+    const kinesiologists = {
+      "rehabilitacion-deportiva": "Lic. García López",
+      "terapia-manual": "Lic. Martínez Ruiz", 
+      "neurorehabilitacion": "Lic. Hernández Villa",
+      "pediatrica": "Lic. López Santos",
+      "respiratoria": "Lic. Rodríguez García",
+      "geriatrica": "Lic. Fernández Castro"
     };
-    return doctors[specialty as keyof typeof doctors] || "Dr. García López";
+    return kinesiologists[specialty as keyof typeof kinesiologists] || "Lic. García López";
   }
 }
 

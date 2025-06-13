@@ -9,7 +9,7 @@ const openai = new OpenAI({
 export async function getAIConsultationResponse(consultation: AIConsultationRequest) {
   try {
     const prompt = `
-Eres un asistente médico de IA que ayuda con orientación inicial para consultas médicas.
+Eres un asistente de kinesiología especializado en orientación inicial para consultas fisioterapéuticas.
 Basándote en la siguiente información del paciente, proporciona una respuesta estructurada en JSON.
 
 Información del paciente:
@@ -19,14 +19,14 @@ Información del paciente:
 
 Proporciona una respuesta en formato JSON con la siguiente estructura:
 {
-  "recommendation": "Recomendación médica inicial y si la especialidad seleccionada es apropiada",
-  "preparation": "Qué debe preparar el paciente para la consulta (documentos, medicamentos, etc.)",
+  "recommendation": "Recomendación kinesiológica inicial y si la especialidad seleccionada es apropiada",
+  "preparation": "Qué debe preparar el paciente para la sesión (ropa cómoda, estudios médicos, etc.)",
   "urgency": "Nivel de urgencia: 'baja', 'media', 'alta'",
   "urgencyText": "Explicación del nivel de urgencia",
-  "additionalNotes": "Notas adicionales o consejos generales"
+  "additionalNotes": "Ejercicios preventivos o consejos generales de kinesiología"
 }
 
-IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con un médico profesional.
+IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con un kinesiólogo profesional.
 `;
 
     const response = await openai.chat.completions.create({
@@ -34,7 +34,7 @@ IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con 
       messages: [
         {
           role: "system",
-          content: "Eres un asistente médico profesional que proporciona orientación inicial responsable."
+          content: "Eres un asistente de kinesiología profesional que proporciona orientación inicial responsable para pacientes."
         },
         {
           role: "user",
@@ -59,11 +59,11 @@ IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con 
     return {
       success: false,
       data: {
-        recommendation: "Recomendamos proceder con la consulta médica programada para una evaluación profesional completa.",
-        preparation: "Traer lista de medicamentos actuales, historial médico relevante y descripción detallada de síntomas.",
+        recommendation: "Recomendamos proceder con la sesión de kinesiología programada para una evaluación profesional completa.",
+        preparation: "Traer ropa cómoda para ejercicios, estudios médicos relevantes (radiografías, resonancias) y descripción detallada de síntomas.",
         urgency: "media",
-        urgencyText: "Consulta programada recomendada",
-        additionalNotes: "Un profesional médico podrá proporcionar la evaluación más precisa de su condición."
+        urgencyText: "Sesión programada recomendada",
+        additionalNotes: "Un kinesiólogo profesional podrá proporcionar la evaluación más precisa de su condición física."
       }
     };
   }
