@@ -28,7 +28,26 @@ export default function LogosPage() {
           </p>
         </div>
 
-        {/* Showcase de logos */}
+        {/* Logo destacado: Ejercicio Conectado */}
+        <div className="mb-12 bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-xl border-2 border-blue-200">
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">✨ Nuevo: Ejercicio Conectado</h3>
+            <div className="flex justify-center mb-4">
+              <EcofisioLogoExerciseTech size={64} />
+            </div>
+            <p className="text-gray-700 max-w-2xl mx-auto">
+              Personas realizando ejercicios con tecnología wearable integrada. 
+              Incluye sensores de movimiento, smartwatch, monitor cardíaco y conexiones de datos en tiempo real.
+            </p>
+            <div className="mt-4 flex justify-center space-x-4 text-sm text-gray-600">
+              <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Tecnológico</span>
+              <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">Wearables</span>
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full">Monitoreo</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Showcase de todos los logos */}
         <LogoShowcase />
 
         {/* Ejemplos individuales con diferentes tamaños */}
