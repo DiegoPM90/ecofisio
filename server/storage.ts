@@ -53,6 +53,7 @@ export class MemStorage implements IStorage {
       specialty: insertAppointment.specialty,
       reason: insertAppointment.reason,
       reasonDetail: insertAppointment.reasonDetail || null,
+      sessions: insertAppointment.sessions || 1,
       date: insertAppointment.date,
       time: insertAppointment.time,
       status: "confirmed",

@@ -30,6 +30,7 @@ export default function BookingForm() {
       specialty: "",
       reason: "",
       reasonDetail: "",
+      sessions: 1,
       date: "",
       time: "",
     },
@@ -148,20 +149,17 @@ export default function BookingForm() {
                 name="specialty"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Especialidad *</FormLabel>
+                    <FormLabel>Servicio *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar especialidad" />
+                          <SelectValue placeholder="Seleccionar servicio" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="rehabilitacion-deportiva">Rehabilitación Deportiva</SelectItem>
-                        <SelectItem value="terapia-manual">Terapia Manual</SelectItem>
-                        <SelectItem value="neurorehabilitacion">Neurorehabilitación</SelectItem>
-                        <SelectItem value="pediatrica">Kinesiología Pediátrica</SelectItem>
-                        <SelectItem value="respiratoria">Kinesiología Respiratoria</SelectItem>
-                        <SelectItem value="geriatrica">Kinesiología Geriátrica</SelectItem>
+                        <SelectItem value="sesiones-kinesiterapia-fisioterapia">Sesiones de Kinesiterapia y Fisioterapia</SelectItem>
+                        <SelectItem value="masaje-descontracturante">Masaje Descontracturante</SelectItem>
+                        <SelectItem value="masaje-relajacion">Masaje de Relajación</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -169,6 +167,37 @@ export default function BookingForm() {
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="sessions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de Sesiones *</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar cantidad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1">1 sesión</SelectItem>
+                      <SelectItem value="2">2 sesiones</SelectItem>
+                      <SelectItem value="3">3 sesiones</SelectItem>
+                      <SelectItem value="4">4 sesiones</SelectItem>
+                      <SelectItem value="5">5 sesiones</SelectItem>
+                      <SelectItem value="6">6 sesiones</SelectItem>
+                      <SelectItem value="8">8 sesiones</SelectItem>
+                      <SelectItem value="10">10 sesiones</SelectItem>
+                      <SelectItem value="12">12 sesiones</SelectItem>
+                      <SelectItem value="15">15 sesiones</SelectItem>
+                      <SelectItem value="20">20 sesiones</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -237,8 +266,12 @@ export default function BookingForm() {
                   <span className="font-medium">{selectedTime || "No seleccionada"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Especialidad:</span>
-                  <span className="font-medium">{form.watch("specialty") || "No seleccionada"}</span>
+                  <span className="text-slate-600">Servicio:</span>
+                  <span className="font-medium">{form.watch("specialty") || "No seleccionado"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Sesiones:</span>
+                  <span className="font-medium">{form.watch("sessions") || 1}</span>
                 </div>
               </div>
 
