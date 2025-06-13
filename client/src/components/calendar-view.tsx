@@ -137,6 +137,12 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
               </Button>
             </div>
           </div>
+          
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 font-medium">
+              📅 Solo disponible los sábados de 10:00 a 14:00 hrs
+            </p>
+          </div>
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {weekDays.map(day => (

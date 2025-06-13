@@ -78,15 +78,22 @@ export class MemStorage implements IStorage {
   }
 
   async getAvailableTimeSlots(date: string, specialty: string): Promise<string[]> {
-    const allSlots = [
-      "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-      "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"
+    // Check if the date is a Saturday
+    const selectedDate = new Date(date);
+    if (selectedDate.getDay() !== 6) {
+      return []; // Only Saturdays are available
+    }
+    
+    // Saturday slots from 10:00 to 14:00
+    const saturdaySlots = [
+      "10:00", "10:30", "11:00", "11:30", 
+      "12:00", "12:30", "13:00", "13:30"
     ];
     
     const bookedSlots = await this.getAppointmentsByDate(date);
     const bookedTimes = bookedSlots.map(apt => apt.time);
     
-    return allSlots.filter(slot => !bookedTimes.includes(slot));
+    return saturdaySlots.filter(slot => !bookedTimes.includes(slot));
   }
 
   async updateAppointment(id: number, updates: Partial<Appointment>): Promise<Appointment | undefined> {
