@@ -15,12 +15,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("medicina-general");
 
-  const { data: availabilityData } = useQuery({
-    queryKey: ["/api/appointments/availability", selectedDate, selectedSpecialty],
-    enabled: !!selectedDate && !!selectedSpecialty,
-  });
-
-  const availableSlots = availabilityData?.availableSlots || [];
+  // Remove API call since we're using fixed Saturday slots
 
   const weekDays = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
   const monthNames = [
@@ -56,6 +51,11 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+    const selectedDate = new Date(year, month, day);
+    
+    // Only allow Saturdays (day 6)
+    if (selectedDate.getDay() !== 6) return;
+    
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
     setSelectedDate(dateString);
@@ -103,15 +103,20 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     return cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   };
 
-  const morningSlots = availableSlots.filter(slot => {
-    const hour = parseInt(slot.split(':')[0]);
-    return hour < 14;
-  });
+  const isSaturday = (day: number | null) => {
+    if (!day) return false;
+    const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    return cellDate.getDay() === 6;
+  };
 
-  const afternoonSlots = availableSlots.filter(slot => {
-    const hour = parseInt(slot.split(':')[0]);
-    return hour >= 14;
-  });
+  const isAvailableDay = (day: number | null) => {
+    return isSaturday(day) && !isPastDate(day);
+  };
+
+  // Saturday slots from 10:00 to 14:00
+  const saturdaySlots = selectedDate && isSaturday(parseInt(selectedDate.split('-')[2])) 
+    ? ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30']
+    : [];
 
   return (
     <div className="space-y-6">
@@ -149,12 +154,12 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                 className={`
                   calendar-day aspect-square p-0 text-sm h-10 w-10
                   ${!day ? 'invisible' : ''}
-                  ${isPastDate(day) ? 'text-slate-400 cursor-not-allowed' : 'hover:bg-slate-100'}
-                  ${isToday(day) ? 'bg-slate-100 font-bold' : ''}
+                  ${!isAvailableDay(day) ? 'text-slate-400 cursor-not-allowed bg-slate-50' : 'hover:bg-blue-50 text-blue-600 border border-blue-200'}
+                  ${isToday(day) && isSaturday(day) ? 'bg-blue-100 font-bold' : ''}
                   ${selectedDate === `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
                 `}
                 onClick={() => handleDateSelect(day)}
-                disabled={!day || isPastDate(day)}
+                disabled={!day || !isAvailableDay(day)}
               >
                 {day}
               </Button>
@@ -173,11 +178,11 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
             </div>
 
             <div className="space-y-4">
-              {morningSlots.length > 0 && (
+              {saturdaySlots.length > 0 ? (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Mañana</h4>
+                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles (10:00 - 14:00)</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {morningSlots.map((slot) => (
+                    {saturdaySlots.map((slot) => (
                       <Button
                         key={slot}
                         variant={selectedTime === slot ? "default" : "outline"}
@@ -193,35 +198,14 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                     ))}
                   </div>
                 </div>
-              )}
-
-              {afternoonSlots.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Tarde</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {afternoonSlots.map((slot) => (
-                      <Button
-                        key={slot}
-                        variant={selectedTime === slot ? "default" : "outline"}
-                        size="sm"
-                        className={`
-                          time-slot
-                          ${selectedTime === slot ? 'bg-blue-600 text-white' : 'hover:border-blue-600 hover:bg-blue-50'}
-                        `}
-                        onClick={() => handleTimeSelect(slot)}
-                      >
-                        {slot}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {availableSlots.length === 0 && selectedDate && (
+              ) : (
                 <div className="text-center py-4 text-slate-500">
-                  No hay horarios disponibles para esta fecha
+                  <p>Solo disponible los sábados de 10:00 a 14:00</p>
+                  <p>Selecciona un sábado en el calendario</p>
                 </div>
               )}
+
+
             </div>
           </CardContent>
         </Card>
