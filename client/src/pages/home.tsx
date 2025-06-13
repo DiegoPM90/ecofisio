@@ -14,7 +14,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <HeartPulse className="text-white w-4 h-4" />
               </div>
-              <h1 className="text-xl font-semibold text-slate-900">KinesioReservas</h1>
+              <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
               <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">
@@ -90,7 +90,7 @@ export default function Home() {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <HeartPulse className="text-white w-4 h-4" />
                 </div>
-                <h1 className="text-xl font-semibold text-slate-900">KinesioReservas</h1>
+                <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
               </div>
               <p className="text-slate-600 mb-4">
                 Sistema inteligente de reservas de kinesiología con asistencia de IA para una mejor atención fisioterapéutica.
@@ -109,13 +109,13 @@ export default function Home() {
               <h3 className="font-semibold text-slate-900 mb-4">Contacto</h3>
               <ul className="space-y-2 text-sm text-slate-600">
                 <li>+34 900 123 456</li>
-                <li>info@kinesioreservas.com</li>
+                <li>info@ecofisio.com</li>
                 <li>Calle Rehabilitación 123, Madrid</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-200 mt-8 pt-8 text-center text-sm text-slate-600">
-            <p>&copy; 2024 KinesioReservas. Todos los derechos reservados.</p>
+            <p>&copy; 2024 Ecofisio. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
