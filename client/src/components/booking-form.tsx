@@ -79,9 +79,12 @@ export default function BookingForm() {
   };
 
   const commonReasons = [
-    { value: "dolor-cabeza", label: "Dolor de cabeza" },
-    { value: "fiebre", label: "Fiebre" },
-    { value: "checkup", label: "Chequeo general" },
+    { value: "dolor-muscular", label: "Dolor muscular" },
+    { value: "lesion-deportiva", label: "Lesión deportiva" },
+    { value: "rehabilitacion-postoperatoria", label: "Rehabilitación post-operatoria" },
+    { value: "problemas-respiratorios", label: "Problemas respiratorios" },
+    { value: "contracturas", label: "Contracturas" },
+    { value: "mejora-movilidad", label: "Mejora de movilidad" },
     { value: "otro", label: "Otro motivo" },
   ];
 
@@ -208,6 +211,7 @@ export default function BookingForm() {
                       className="resize-none"
                       rows={3}
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -217,7 +221,7 @@ export default function BookingForm() {
 
             <AIAssistant
               reason={form.watch("reason")}
-              reasonDetail={form.watch("reasonDetail")}
+              reasonDetail={form.watch("reasonDetail") ?? undefined}
               specialty={form.watch("specialty")}
             />
 

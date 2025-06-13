@@ -67,7 +67,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
             <Bot className="text-white w-4 h-4" />
           </div>
           <div className="flex-1">
-            <h4 className="font-medium text-slate-900 mb-2">Asistente Médico IA</h4>
+            <h4 className="font-medium text-slate-900 mb-2">Asistente de Kinesiología IA</h4>
             
             {generateAIMutation.isPending ? (
               <div className="space-y-2">
@@ -107,7 +107,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
               </div>
             ) : (
               <p className="text-sm text-slate-600">
-                Completa el motivo de consulta para recibir orientación personalizada de nuestro asistente IA.
+                Completa el motivo de la sesión para recibir orientación personalizada de nuestro asistente IA.
               </p>
             )}
             

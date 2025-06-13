@@ -26,11 +26,12 @@ export default function AppointmentsList() {
 
   const getSpecialtyLabel = (specialty: string) => {
     const labels = {
-      "medicina-general": "Medicina General",
-      "pediatria": "Pediatría",
-      "cardiologia": "Cardiología",
-      "dermatologia": "Dermatología",
-      "ginecologia": "Ginecología"
+      "rehabilitacion-deportiva": "Rehabilitación Deportiva",
+      "terapia-manual": "Terapia Manual",
+      "neurorehabilitacion": "Neurorehabilitación",
+      "pediatrica": "Kinesiología Pediátrica",
+      "respiratoria": "Kinesiología Respiratoria",
+      "geriatrica": "Kinesiología Geriátrica"
     };
     return labels[specialty as keyof typeof labels] || specialty;
   };
@@ -95,7 +96,7 @@ export default function AppointmentsList() {
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
                 <ListChecks className="text-white w-4 h-4" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-900">Mis Citas Médicas</h3>
+              <h3 className="text-xl font-semibold text-slate-900">Mis Sesiones de Kinesiología</h3>
             </div>
             <Button
               variant="ghost"
@@ -111,8 +112,8 @@ export default function AppointmentsList() {
           {appointments.length === 0 ? (
             <div className="text-center py-8">
               <UserRound className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h4 className="text-lg font-medium text-slate-600 mb-2">No tienes citas programadas</h4>
-              <p className="text-slate-500">Reserva tu primera consulta usando el formulario de arriba</p>
+              <h4 className="text-lg font-medium text-slate-600 mb-2">No tienes sesiones programadas</h4>
+              <p className="text-slate-500">Reserva tu primera sesión de kinesiología usando el formulario de arriba</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -128,7 +129,7 @@ export default function AppointmentsList() {
                       </div>
                       <div>
                         <h4 className="font-medium text-slate-900">
-                          {appointment.doctorName} - {getSpecialtyLabel(appointment.specialty)}
+                          {appointment.kinesiologistName} - {getSpecialtyLabel(appointment.specialty)}
                         </h4>
                         <p className="text-sm text-slate-600">
                           {formatDate(appointment.date)} - {appointment.time}
