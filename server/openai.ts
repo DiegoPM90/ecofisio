@@ -1,12 +1,45 @@
 import OpenAI from "openai";
 import type { AIConsultationRequest } from "@shared/schema";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key"
+// Configuración para múltiples proveedores de IA
+const openaiClient = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || "default_key"
 });
 
+// Cliente para xAI (Grok) - más económico
+const xaiClient = new OpenAI({
+  baseURL: "https://api.x.ai/v1", 
+  apiKey: process.env.XAI_API_KEY || "default_key"
+});
+
+// Función para determinar qué proveedor usar
+function getAIProvider() {
+  // Prioridad: xAI (más económico) > OpenAI
+  if (process.env.XAI_API_KEY && process.env.XAI_API_KEY !== "default_key") {
+    return { client: xaiClient, model: "grok-2-1212", provider: "xai" };
+  }
+  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "default_key") {
+    return { client: openaiClient, model: "gpt-4o-mini", provider: "openai" }; // gpt-4o-mini es más económico
+  }
+  return null;
+}
+
 export async function getAIConsultationResponse(consultation: AIConsultationRequest) {
+  const aiProvider = getAIProvider();
+  
+  if (!aiProvider) {
+    return {
+      success: false,
+      data: {
+        recommendation: "Para usar el asistente de IA necesitas configurar una clave API de OpenAI o xAI.",
+        preparation: "Traer ropa cómoda para ejercicios, estudios médicos relevantes (radiografías, resonancias) y descripción detallada de síntomas.",
+        urgency: "media",
+        urgencyText: "Sesión programada recomendada",
+        additionalNotes: "Un kinesiólogo profesional podrá proporcionar la evaluación más precisa de su condición física."
+      }
+    };
+  }
+
   try {
     const prompt = `
 Eres un asistente de kinesiología especializado en orientación inicial para consultas fisioterapéuticas.
@@ -29,8 +62,8 @@ Proporciona una respuesta en formato JSON con la siguiente estructura:
 IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con un kinesiólogo profesional.
 `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const requestConfig: any = {
+      model: aiProvider.model,
       messages: [
         {
           role: "system",
@@ -41,21 +74,40 @@ IMPORTANTE: Esta es solo orientación inicial. Siempre recomienda consultar con 
           content: prompt
         }
       ],
-      response_format: { type: "json_object" },
       max_tokens: 500,
-    });
+    };
 
-    const aiResponse = JSON.parse(response.choices[0].message.content || "{}");
+    // Solo agregar response_format para OpenAI (xAI no lo soporta igual)
+    if (aiProvider.provider === "openai") {
+      requestConfig.response_format = { type: "json_object" };
+    }
+
+    const response = await aiProvider.client.chat.completions.create(requestConfig);
+
+    let aiResponse;
+    try {
+      aiResponse = JSON.parse(response.choices[0].message.content || "{}");
+    } catch {
+      // Si no es JSON válido, crear respuesta estructurada
+      const content = response.choices[0].message.content || "";
+      aiResponse = {
+        recommendation: content.substring(0, 200) + "...",
+        preparation: "Traer ropa cómoda para ejercicios y estudios médicos relevantes.",
+        urgency: "media",
+        urgencyText: "Sesión programada recomendada",
+        additionalNotes: "Consulta con un kinesiólogo profesional."
+      };
+    }
     
     return {
       success: true,
-      data: aiResponse
+      data: aiResponse,
+      provider: aiProvider.provider
     };
 
   } catch (error) {
-    console.error("OpenAI API error:", error);
+    console.error(`${aiProvider.provider} API error:`, error);
     
-    // Fallback response if OpenAI fails
     return {
       success: false,
       data: {
