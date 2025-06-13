@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
 import { Link } from "wouter";
 import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
+import AppointmentSummary from "@/components/appointment-summary";
 import AppointmentsList from "@/components/appointments-list";
 
 // Logo component inline
@@ -46,6 +48,18 @@ const EcofisioLogo = ({ size = 32 }: { size?: number }) => (
 );
 
 export default function Home() {
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [formData, setFormData] = useState({
+    patientName: "",
+    email: "",
+    phone: "",
+    specialty: "",
+    sessions: 1,
+    reason: "",
+    reasonDetail: "",
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -110,12 +124,27 @@ export default function Home() {
 
         {/* Booking Section */}
         <section id="reservas" className="mb-12">
-          <BookingForm />
+          <BookingForm 
+            onFormDataChange={setFormData}
+            formData={formData}
+          />
         </section>
 
         {/* Calendar Section */}
         <section className="mb-12">
-          <CalendarView />
+          <CalendarView 
+            onDateSelect={setSelectedDate}
+            onTimeSelect={setSelectedTime}
+          />
+        </section>
+
+        {/* Appointment Summary */}
+        <section className="mb-12">
+          <AppointmentSummary
+            formData={formData}
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+          />
         </section>
 
         {/* Appointments List */}

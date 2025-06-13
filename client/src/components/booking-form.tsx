@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertAppointmentSchema, type InsertAppointment } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -8,18 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
-import { UserRound, CalendarCheck } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserRound } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import AIAssistant from "./ai-assistant";
 
-export default function BookingForm() {
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+interface BookingFormProps {
+  onFormDataChange: (data: any) => void;
+  formData: any;
+}
+
+export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
 
   const form = useForm<InsertAppointment>({
     resolver: zodResolver(insertAppointmentSchema),
@@ -253,37 +253,6 @@ export default function BookingForm() {
               reasonDetail={form.watch("reasonDetail") ?? undefined}
               specialty={form.watch("specialty")}
             />
-
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Resumen de la Cita</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Fecha:</span>
-                  <span className="font-medium">{selectedDate || "No seleccionada"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Hora:</span>
-                  <span className="font-medium">{selectedTime || "No seleccionada"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Servicio:</span>
-                  <span className="font-medium">{form.watch("specialty") || "No seleccionado"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Sesiones:</span>
-                  <span className="font-medium">{form.watch("sessions") || 1}</span>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
-                disabled={createAppointmentMutation.isPending}
-              >
-                <CalendarCheck className="w-4 h-4 mr-2" />
-                {createAppointmentMutation.isPending ? "Confirmando..." : "Confirmar Reserva"}
-              </Button>
-            </div>
           </form>
         </Form>
       </CardContent>
