@@ -85,7 +85,7 @@ export class MemStorage implements IStorage {
     
     switch (weekday) {
       case 3: // Wednesday
-        availableSlots = ['08:30', '09:30', '19:30', '20:30'];
+        availableSlots = ['19:30', '20:30'];
         break;
       case 5: // Friday
         availableSlots = ['18:30', '19:30'];

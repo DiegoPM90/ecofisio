@@ -125,7 +125,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     
     switch (weekday) {
       case 3: // Wednesday
-        return ['08:30', '09:30', '19:30', '20:30'];
+        return ['19:30', '20:30'];
       case 5: // Friday
         return ['18:30', '19:30'];
       case 6: // Saturday
@@ -161,7 +161,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
             <div className="text-sm text-blue-800 font-medium">
               <p className="mb-1">📅 Horarios disponibles:</p>
               <ul className="text-xs space-y-1">
-                <li>• Miércoles: 08:30-09:30 y 19:30-20:30</li>
+                <li>• Miércoles: 19:30-20:30</li>
                 <li>• Viernes: 18:30-19:30</li>
                 <li>• Sábados: 10:00-13:00</li>
               </ul>
