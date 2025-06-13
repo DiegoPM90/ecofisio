@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertAppointmentSchema, type InsertAppointment } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,8 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UserRound } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 import AIAssistant from "./ai-assistant";
 
 interface BookingFormProps {
@@ -20,64 +17,17 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
-
   const form = useForm<InsertAppointment>({
     resolver: zodResolver(insertAppointmentSchema),
-    defaultValues: {
-      patientName: "",
-      email: "",
-      phone: "",
-      specialty: "",
-      reason: "",
-      reasonDetail: "",
-      sessions: 1,
-      date: "",
-      time: "",
-    },
+    defaultValues: formData,
   });
 
-  const createAppointmentMutation = useMutation({
-    mutationFn: async (data: InsertAppointment) => {
-      const response = await apiRequest("POST", "/api/appointments", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "¡Cita reservada con éxito!",
-        description: "Recibirás un email de confirmación",
-      });
-      form.reset();
-      setSelectedDate("");
-      setSelectedTime("");
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error al reservar la cita",
-        description: "Por favor, inténtalo de nuevo",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onSubmit = (data: InsertAppointment) => {
-    if (!selectedDate || !selectedTime) {
-      toast({
-        title: "Fecha y hora requeridas",
-        description: "Por favor selecciona fecha y hora en el calendario",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const appointmentData = {
-      ...data,
-      date: selectedDate,
-      time: selectedTime,
-    };
-
-    createAppointmentMutation.mutate(appointmentData);
-  };
+  // Watch form values and update parent state
+  const watchedValues = form.watch();
+  
+  useEffect(() => {
+    onFormDataChange(watchedValues);
+  }, [watchedValues, onFormDataChange]);
 
   const commonReasons = [
     { value: "dolor-muscular", label: "Dolor muscular" },
@@ -100,7 +50,7 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -253,7 +203,7 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
               reasonDetail={form.watch("reasonDetail") ?? undefined}
               specialty={form.watch("specialty")}
             />
-          </form>
+          </div>
         </Form>
       </CardContent>
     </Card>
