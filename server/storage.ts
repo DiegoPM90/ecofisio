@@ -84,9 +84,9 @@ export class MemStorage implements IStorage {
       return []; // Only Saturdays are available
     }
     
-    // Saturday slots from 10:00 to 14:00 (cada hora)
+    // Saturday slots from 10:00 to 13:00 (cada hora)
     const saturdaySlots = [
-      "10:00", "11:00", "12:00", "13:00", "14:00"
+      "10:00", "11:00", "12:00", "13:00"
     ];
     
     const bookedSlots = await this.getAppointmentsByDate(date);

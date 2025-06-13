@@ -113,9 +113,9 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     return isSaturday(day) && !isPastDate(day);
   };
 
-  // Saturday slots from 10:00 to 14:00 (cada hora)
+  // Saturday slots from 10:00 to 13:00 (cada hora)
   const saturdaySlots = selectedDate && isSaturday(parseInt(selectedDate.split('-')[2])) 
-    ? ['10:00', '11:00', '12:00', '13:00', '14:00']
+    ? ['10:00', '11:00', '12:00', '13:00']
     : [];
 
   return (
@@ -140,7 +140,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
           
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 font-medium">
-              📅 Solo disponible los sábados de 10:00 a 14:00 hrs
+              📅 Solo disponible los sábados de 10:00 a 13:00 hrs
             </p>
           </div>
 
@@ -186,7 +186,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
             <div className="space-y-4">
               {saturdaySlots.length > 0 ? (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles (10:00 - 14:00)</h4>
+                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles (10:00 - 13:00)</h4>
                   <div className="grid grid-cols-2 gap-2">
                     {saturdaySlots.map((slot) => (
                       <Button
@@ -206,7 +206,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                 </div>
               ) : (
                 <div className="text-center py-4 text-slate-500">
-                  <p>Solo disponible los sábados de 10:00 a 14:00</p>
+                  <p>Solo disponible los sábados de 10:00 a 13:00</p>
                   <p>Selecciona un sábado en el calendario</p>
                 </div>
               )}
