@@ -51,10 +51,11 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const selectedDate = new Date(year, month, day);
+    const selectedDateObj = new Date(year, month, day);
+    const weekday = selectedDateObj.getDay();
     
-    // Only allow Saturdays (day 6)
-    if (selectedDate.getDay() !== 6) return;
+    // Only allow Wednesdays (3), Fridays (5), and Saturdays (6)
+    if (weekday !== 3 && weekday !== 5 && weekday !== 6) return;
     
     const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     
@@ -103,20 +104,38 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     return cellDate < new Date(today.getFullYear(), today.getMonth(), today.getDate());
   };
 
-  const isSaturday = (day: number | null) => {
-    if (!day) return false;
+  const getWeekday = (day: number | null) => {
+    if (!day) return -1;
     const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-    return cellDate.getDay() === 6;
+    return cellDate.getDay();
   };
 
   const isAvailableDay = (day: number | null) => {
-    return isSaturday(day) && !isPastDate(day);
+    if (!day || isPastDate(day)) return false;
+    const weekday = getWeekday(day);
+    // 3 = Wednesday, 5 = Friday, 6 = Saturday
+    return weekday === 3 || weekday === 5 || weekday === 6;
   };
 
-  // Saturday slots from 10:00 to 13:00 (cada hora)
-  const saturdaySlots = selectedDate && isSaturday(parseInt(selectedDate.split('-')[2])) 
-    ? ['10:00', '11:00', '12:00', '13:00']
-    : [];
+  const getAvailableSlots = (selectedDateStr: string) => {
+    if (!selectedDateStr) return [];
+    
+    const selectedDay = parseInt(selectedDateStr.split('-')[2]);
+    const weekday = getWeekday(selectedDay);
+    
+    switch (weekday) {
+      case 3: // Wednesday
+        return ['08:30', '09:30', '19:30', '20:30'];
+      case 5: // Friday
+        return ['18:30', '19:30'];
+      case 6: // Saturday
+        return ['10:00', '11:00', '12:00', '13:00'];
+      default:
+        return [];
+    }
+  };
+
+  const availableSlots = getAvailableSlots(selectedDate);
 
   return (
     <div className="space-y-6">
@@ -139,9 +158,14 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
           </div>
           
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium">
-              📅 Solo disponible los sábados de 10:00 a 13:00 hrs
-            </p>
+            <div className="text-sm text-blue-800 font-medium">
+              <p className="mb-1">📅 Horarios disponibles:</p>
+              <ul className="text-xs space-y-1">
+                <li>• Miércoles: 08:30-09:30 y 19:30-20:30</li>
+                <li>• Viernes: 18:30-19:30</li>
+                <li>• Sábados: 10:00-13:00</li>
+              </ul>
+            </div>
           </div>
 
           <div className="grid grid-cols-7 gap-1 mb-2">
@@ -161,7 +185,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                   calendar-day aspect-square p-0 text-sm h-10 w-10
                   ${!day ? 'invisible' : ''}
                   ${!isAvailableDay(day) ? 'text-slate-400 cursor-not-allowed bg-slate-50' : 'hover:bg-blue-50 text-blue-600 border border-blue-200'}
-                  ${isToday(day) && isSaturday(day) ? 'bg-blue-100 font-bold' : ''}
+                  ${isToday(day) && isAvailableDay(day) ? 'bg-blue-100 font-bold' : ''}
                   ${selectedDate === `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}` ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
                 `}
                 onClick={() => handleDateSelect(day)}
@@ -184,11 +208,11 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
             </div>
 
             <div className="space-y-4">
-              {saturdaySlots.length > 0 ? (
+              {availableSlots.length > 0 ? (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles (10:00 - 13:00)</h4>
+                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles</h4>
                   <div className="grid grid-cols-2 gap-2">
-                    {saturdaySlots.map((slot) => (
+                    {availableSlots.map((slot) => (
                       <Button
                         key={slot}
                         variant={selectedTime === slot ? "default" : "outline"}
@@ -206,12 +230,10 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                 </div>
               ) : (
                 <div className="text-center py-4 text-slate-500">
-                  <p>Solo disponible los sábados de 10:00 a 13:00</p>
-                  <p>Selecciona un sábado en el calendario</p>
+                  <p>Selecciona una fecha disponible en el calendario</p>
+                  <p>Miércoles, viernes o sábado</p>
                 </div>
               )}
-
-
             </div>
           </CardContent>
         </Card>
