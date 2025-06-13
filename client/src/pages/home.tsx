@@ -147,14 +147,12 @@ export default function Home() {
             <div>
               <h3 className="font-semibold text-slate-900 mb-4">Contacto</h3>
               <ul className="space-y-2 text-sm text-slate-600">
-                <li>+34 900 123 456</li>
-                <li>info@ecofisio.com</li>
-                <li>Calle Rehabilitación 123, Madrid</li>
+                <li>canalmovimiento@gmail.com</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-200 mt-8 pt-8 text-center text-sm text-slate-600">
-            <p>&copy; 2024 Ecofisio. Todos los derechos reservados.</p>
+            <p>&copy; 2025 Ecofisio. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
