@@ -24,14 +24,11 @@ export default function AppointmentsList() {
     return `${dayName}, ${day} de ${month} ${year}`;
   };
 
-  const getSpecialtyLabel = (specialty: string) => {
+  const getServiceLabel = (specialty: string) => {
     const labels = {
-      "rehabilitacion-deportiva": "Rehabilitación Deportiva",
-      "terapia-manual": "Terapia Manual",
-      "neurorehabilitacion": "Neurorehabilitación",
-      "pediatrica": "Kinesiología Pediátrica",
-      "respiratoria": "Kinesiología Respiratoria",
-      "geriatrica": "Kinesiología Geriátrica"
+      "sesiones-kinesiterapia-fisioterapia": "Sesiones de Kinesiterapia y Fisioterapia",
+      "masaje-descontracturante": "Masaje Descontracturante",
+      "masaje-relajacion": "Masaje de Relajación"
     };
     return labels[specialty as keyof typeof labels] || specialty;
   };
@@ -129,13 +126,13 @@ export default function AppointmentsList() {
                       </div>
                       <div>
                         <h4 className="font-medium text-slate-900">
-                          {appointment.kinesiologistName} - {getSpecialtyLabel(appointment.specialty)}
+                          {appointment.kinesiologistName} - {getServiceLabel(appointment.specialty)}
                         </h4>
                         <p className="text-sm text-slate-600">
                           {formatDate(appointment.date)} - {appointment.time}
                         </p>
                         <p className="text-xs text-slate-500 mt-1">
-                          Motivo: {appointment.reason}
+                          Motivo: {appointment.reason} • {appointment.sessions} sesión{appointment.sessions > 1 ? 'es' : ''}
                         </p>
                         {appointment.patientName && (
                           <p className="text-xs text-slate-500">

@@ -100,12 +100,9 @@ export class MemStorage implements IStorage {
 
   private getKinesiologistForSpecialty(specialty: string): string {
     const kinesiologists = {
-      "rehabilitacion-deportiva": "Lic. García López",
-      "terapia-manual": "Lic. Martínez Ruiz", 
-      "neurorehabilitacion": "Lic. Hernández Villa",
-      "pediatrica": "Lic. López Santos",
-      "respiratoria": "Lic. Rodríguez García",
-      "geriatrica": "Lic. Fernández Castro"
+      "sesiones-kinesiterapia-fisioterapia": "Lic. García López",
+      "masaje-descontracturante": "Lic. Martínez Ruiz",
+      "masaje-relajacion": "Lic. Fernández Castro"
     };
     return kinesiologists[specialty as keyof typeof kinesiologists] || "Lic. García López";
   }
