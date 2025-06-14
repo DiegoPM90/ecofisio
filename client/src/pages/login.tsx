@@ -1,9 +1,6 @@
 import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Lock, User, Shield } from 'lucide-react';
 
 export default function Login() {
-  const [, setLocation] = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,9 +30,9 @@ export default function Login() {
       
       // Redirigir según el rol
       if (data.user.role === 'admin') {
-        setLocation('/admin');
+        window.location.href = '/admin';
       } else {
-        setLocation('/');
+        window.location.href = '/';
       }
     } catch (err: any) {
       setError(err.message || 'Error de autenticación');
@@ -51,7 +48,7 @@ export default function Login() {
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-white" />
+              <span className="text-white font-bold text-2xl">🔒</span>
             </div>
           </div>
           <h1 className="text-2xl font-bold text-slate-900">Panel de Administración</h1>
@@ -76,7 +73,7 @@ export default function Login() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">👤</span>
                   <input 
                     type="text"
                     value={username}
@@ -92,7 +89,7 @@ export default function Login() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">🔑</span>
                   <input 
                     type="password"
                     value={password}
@@ -125,7 +122,7 @@ export default function Login() {
 
         <div className="text-center">
           <button 
-            onClick={() => setLocation('/')}
+            onClick={() => window.location.href = '/'}
             className="text-slate-600 hover:text-slate-900 bg-transparent border-none cursor-pointer"
           >
             ← Volver al inicio
