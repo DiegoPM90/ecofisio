@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect, useRef, useState } from 'react';
 
 export function useScrollIntoView(threshold = 0.1) {

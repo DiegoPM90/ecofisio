@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { HeartPulse, Calendar, Bot, Shield, Settings, LogIn, LogOut } from "lucide-react";
 import { Link } from "wouter";
