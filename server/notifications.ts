@@ -3,9 +3,9 @@ import type { Appointment } from '@shared/schema';
 
 // Configuración de nodemailer - múltiples opciones
 const getEmailTransporter = () => {
-  // Opción 1: Gmail con contraseña de aplicación
+  // Opción 1: Gmail con contraseña de aplicación o configuración OAuth
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
@@ -14,9 +14,25 @@ const getEmailTransporter = () => {
     });
   }
   
+  // Opción 1b: Gmail con configuración SMTP directa (menos segura pero funciona)
+  if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  }
+  
   // Opción 2: Outlook/Hotmail (más fácil de configurar)
   if (process.env.OUTLOOK_USER && process.env.OUTLOOK_PASS) {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       service: 'hotmail',
       auth: {
         user: process.env.OUTLOOK_USER,
@@ -27,7 +43,7 @@ const getEmailTransporter = () => {
   
   // Opción 3: SendGrid (recomendado para aplicaciones)
   if (process.env.SENDGRID_API_KEY) {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
       port: 587,
       secure: false,
