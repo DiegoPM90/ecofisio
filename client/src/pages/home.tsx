@@ -64,22 +64,21 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
+      <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 transition-all duration-300 hover:scale-110">
               <EcofisioLogo size={32} />
               <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
             <nav className="hidden md:flex space-x-6">
-              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1">
+              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
                 Inicio
               </a>
-              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-colors">
+              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
                 Mis Reservas
               </a>
-
-              <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-colors">
+              <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
                 Contacto
               </a>
             </nav>
@@ -89,31 +88,31 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <section id="inicio" className="text-center mb-12 opacity-0 animate-[fadeInUp_1s_ease-out_0.1s_forwards]">
+        <section id="inicio" className="text-center mb-12 opacity-0 animate-[bounceIn_1.2s_ease-out_0.1s_forwards]">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl font-bold text-slate-900 mb-4 opacity-0 animate-[fadeInUp_1s_ease-out_0.3s_forwards]">
               Reserva tu Sesión de Kinesiología
             </h2>
-            <p className="text-xl text-slate-600 mb-8">
+            <p className="text-xl text-slate-600 mb-8 opacity-0 animate-[fadeInUp_1s_ease-out_0.5s_forwards]">
               Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[slideInLeft_1s_ease-out_0.7s_forwards]">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite]">
                   <Calendar className="text-blue-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Reserva Rápida</h3>
                 <p className="text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[bounceIn_1s_ease-out_0.9s_forwards]">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_0.5s]">
                   <Bot className="text-green-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Asistente IA</h3>
                 <p className="text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[slideInRight_1s_ease-out_1.1s_forwards]">
+                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_1s]">
                   <Shield className="text-amber-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Datos Seguros</h3>
@@ -124,7 +123,7 @@ export default function Home() {
         </section>
 
         {/* Booking Section */}
-        <section id="reservas" className="mb-12 transition-all duration-700 ease-out transform hover:scale-[1.01] opacity-0 animate-[fadeInUp_0.8s_ease-out_0.2s_forwards]">
+        <section id="reservas" className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[slideInLeft_1.2s_ease-out_1.3s_forwards]">
           <BookingForm 
             onFormDataChange={setFormData}
             formData={formData}
@@ -132,7 +131,7 @@ export default function Home() {
         </section>
 
         {/* Calendar Section */}
-        <section className="mb-12 transition-all duration-700 ease-out transform hover:scale-[1.01] opacity-0 animate-[fadeInUp_0.8s_ease-out_0.4s_forwards]">
+        <section className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[slideInRight_1.2s_ease-out_1.5s_forwards]">
           <CalendarView 
             onDateSelect={setSelectedDate}
             onTimeSelect={setSelectedTime}
@@ -140,7 +139,7 @@ export default function Home() {
         </section>
 
         {/* Appointment Summary */}
-        <section className="mb-12 transition-all duration-700 ease-out transform hover:scale-[1.01] opacity-0 animate-[fadeInUp_0.8s_ease-out_0.6s_forwards]">
+        <section className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[bounceIn_1.2s_ease-out_1.7s_forwards]">
           <AppointmentSummary
             formData={formData}
             selectedDate={selectedDate}
@@ -149,7 +148,7 @@ export default function Home() {
         </section>
 
         {/* Appointments List */}
-        <section className="transition-all duration-700 ease-out transform hover:scale-[1.01] opacity-0 animate-[fadeInUp_0.8s_ease-out_0.8s_forwards]">
+        <section className="transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[fadeInUp_1.2s_ease-out_1.9s_forwards]">
           <AppointmentsList />
         </section>
       </main>
