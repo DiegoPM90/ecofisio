@@ -32,12 +32,12 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentAppointmentId = 1;
     
-    // Crear usuario administrador por defecto
-    // Nota: La contraseña será hasheada cuando se cree a través de la API
+    // Crear usuario administrador por defecto con contraseña hasheada
+    const hashedPassword = bcrypt.hashSync("admin123", 12);
     const adminUser: User = {
       id: 1,
       username: "admin",
-      password: "admin123", // Será hasheada en el primer login
+      password: hashedPassword,
       email: "admin@ecofisio.com",
       googleId: null,
       name: "Administrador",

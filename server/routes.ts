@@ -27,6 +27,9 @@ function requireAdmin(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configurar trust proxy para Replit
+  app.set('trust proxy', 1);
+
   // Configuración de seguridad con Helmet
   app.use(helmet({
     contentSecurityPolicy: {
@@ -150,8 +153,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verificar contraseña con bcrypt
       const isValidPassword = await bcrypt.compare(validatedData.password, user.password || '');
       if (!isValidPassword) {
+        // Log intento de login fallido
+        securityLogger.logFailedLogin(req.ip || 'unknown', validatedData.username, req.get('User-Agent'));
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
+
+      // Log login exitoso
+      securityLogger.logSuccessfulLogin(req.ip || 'unknown', user.username, req.get('User-Agent'));
 
       // Regenerar sesión para prevenir session fixation
       req.session.regenerate((err) => {
@@ -270,6 +278,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(userWithoutPassword);
     } catch (error) {
       res.status(500).json({ message: "Error actualizando usuario" });
+    }
+  });
+
+  // Endpoint para estadísticas de seguridad
+  app.get("/api/admin/security-stats", adminLimiter, requireAdmin, async (req, res) => {
+    try {
+      const stats = securityLogger.getSecurityStats();
+      res.json(stats);
+    } catch (error: any) {
+      console.error("Error obteniendo estadísticas de seguridad:", error);
+      res.status(500).json({ message: "Error obteniendo estadísticas de seguridad" });
     }
   });
 
