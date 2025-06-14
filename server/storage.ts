@@ -1,4 +1,5 @@
 import { type Appointment, type InsertAppointment } from "@shared/schema";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface IStorage {
   // Appointment methods
@@ -8,6 +9,8 @@ export interface IStorage {
   getAvailableTimeSlots(date: string, specialty: string): Promise<string[]>;
   updateAppointment(id: number, updates: Partial<Appointment>): Promise<Appointment | undefined>;
   deleteAppointment(id: number): Promise<boolean>;
+  getAppointmentByToken(token: string): Promise<Appointment | undefined>;
+  getAppointmentsForReminder(): Promise<Appointment[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -34,6 +37,8 @@ export class MemStorage implements IStorage {
       status: 'pendiente',
       kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       aiRecommendation: null,
+      cancelToken: uuidv4(),
+      reminderSent: false,
       createdAt: new Date(),
     };
 
@@ -81,6 +86,22 @@ export class MemStorage implements IStorage {
 
   async deleteAppointment(id: number): Promise<boolean> {
     return this.appointments.delete(id);
+  }
+
+  async getAppointmentByToken(token: string): Promise<Appointment | undefined> {
+    return Array.from(this.appointments.values()).find(appointment => appointment.cancelToken === token);
+  }
+
+  async getAppointmentsForReminder(): Promise<Appointment[]> {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowString = tomorrow.toISOString().split('T')[0];
+
+    return Array.from(this.appointments.values()).filter(appointment => 
+      appointment.date === tomorrowString && 
+      appointment.status === 'pendiente' && 
+      !appointment.reminderSent
+    );
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {

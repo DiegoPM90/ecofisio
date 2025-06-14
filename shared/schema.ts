@@ -16,6 +16,8 @@ export const appointments = pgTable("appointments", {
   status: text("status").notNull().default("confirmed"),
   kinesiologistName: text("kinesiologist_name"),
   aiRecommendation: text("ai_recommendation"),
+  cancelToken: text("cancel_token").notNull(),
+  reminderSent: boolean("reminder_sent").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
