@@ -14,8 +14,13 @@ const xaiClient = new OpenAI({
 
 // Función para determinar qué proveedor usar
 function getAIProvider() {
+  console.log('🔍 Checking AI provider configuration...');
+  console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+  console.log('Environment:', process.env.NODE_ENV);
+  
   // Usar OpenAI GPT-4o-mini (económico y de alta calidad)
   if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "default_key") {
+    console.log('✅ Using OpenAI provider');
     return { client: openaiClient, model: "gpt-4o-mini", provider: "openai" };
   }
   return null;
@@ -25,14 +30,16 @@ export async function getAIConsultationResponse(consultation: AIConsultationRequ
   const aiProvider = getAIProvider();
   
   if (!aiProvider) {
+    console.log('❌ No AI provider available');
     return {
       success: false,
+      error: "AI service not configured",
       data: {
-        recommendation: "Para usar el asistente de IA necesitas configurar una clave API de OpenAI o xAI.",
+        recommendation: "Servicio de IA temporalmente no disponible. La consulta con el kinesiólogo profesional proporcionará la evaluación más precisa.",
         preparation: "Traer ropa cómoda para ejercicios, estudios médicos relevantes (radiografías, resonancias) y descripción detallada de síntomas.",
         urgency: "media",
         urgencyText: "Sesión programada recomendada",
-        additionalNotes: "Un kinesiólogo profesional podrá proporcionar la evaluación más precisa de su condición física."
+        additionalNotes: "Un kinesiólogo profesional evaluará su condición específica y diseñará un plan de tratamiento personalizado."
       }
     };
   }

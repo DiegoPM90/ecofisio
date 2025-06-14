@@ -46,6 +46,10 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
         setAiResponse(response.data);
       } else {
         console.error("AI response format error:", response);
+        // Mostrar el mensaje de error o datos por defecto
+        if (response.data) {
+          setAiResponse(response.data);
+        }
       }
     },
     onError: (error) => {
