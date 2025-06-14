@@ -1,6 +1,19 @@
-import { appointments, type Appointment, type InsertAppointment } from "@shared/schema";
+import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
+import bcrypt from "bcryptjs";
+import { hipaaCompliance } from "./hipaaCompliance";
+import { auditLogger } from "./auditLogger";
 
 export interface IStorage {
+  // User authentication methods
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  authenticateUser(username: string, password: string): Promise<User | null>;
+  createGoogleUser(googleId: string, email: string, name: string): Promise<User>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  updateUserRole(id: number, role: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
+  
   // Appointment methods
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   getAppointments(): Promise<Appointment[]>;
@@ -11,12 +24,113 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<number, User>;
   private appointments: Map<number, Appointment>;
+  private currentUserId: number;
   private currentAppointmentId: number;
 
   constructor() {
+    this.users = new Map();
     this.appointments = new Map();
+    this.currentUserId = 1;
     this.currentAppointmentId = 1;
+    
+    // Crear usuario administrador por defecto con contraseña hasheada
+    const hashedPassword = bcrypt.hashSync("admin123", 12);
+    const adminUser: User = {
+      id: 1,
+      username: "admin",
+      password: hashedPassword,
+      email: "admin@ecofisio.com",
+      googleId: null,
+      name: "Administrador",
+      role: "admin",
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(1, adminUser);
+    this.currentUserId = 2;
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const userArray = Array.from(this.users.values());
+    for (const user of userArray) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(insertUser.password, 12);
+    const id = this.currentUserId++;
+    const user: User = { 
+      id,
+      username: insertUser.username,
+      password: hashedPassword,
+      email: insertUser.email || null,
+      googleId: null,
+      name: insertUser.name || null,
+      role: "user",
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async authenticateUser(username: string, password: string): Promise<User | null> {
+    const user = await this.getUserByUsername(username);
+    if (!user) return null;
+    
+    const isValid = await bcrypt.compare(password, user.password || '');
+    return isValid ? user : null;
+  }
+
+  async createGoogleUser(googleId: string, email: string, name: string): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = {
+      id,
+      username: email,
+      password: null,
+      email,
+      googleId,
+      name,
+      role: "user",
+      isActive: true,
+      createdAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const userArray = Array.from(this.users.values());
+    for (const user of userArray) {
+      if (user.googleId === googleId) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async updateUserRole(id: number, role: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (user) {
+      const updatedUser = { ...user, role };
+      this.users.set(id, updatedUser);
+      return updatedUser;
+    }
+    return undefined;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
   async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {

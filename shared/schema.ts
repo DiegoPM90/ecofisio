@@ -50,4 +50,37 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type AIConsultationRequest = z.infer<typeof aiConsultationSchema>;
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password"),
+  email: text("email"),
+  googleId: text("google_id"),
+  name: text("name"),
+  role: text("role").notNull().default("user"), // user, admin
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  email: true,
+  name: true,
+}).extend({
+  username: z.string().min(3, "Usuario debe tener al menos 3 caracteres"),
+  password: z.string().min(6, "Contraseña debe tener al menos 6 caracteres"),
+  email: z.string().email("Email inválido").optional(),
+  name: z.string().min(2, "Nombre debe tener al menos 2 caracteres").optional(),
+});
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Usuario requerido"),
+  password: z.string().min(1, "Contraseña requerida"),
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type LoginCredentials = z.infer<typeof loginSchema>;
+
 
