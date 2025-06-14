@@ -5,6 +5,7 @@ import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentSummary from "@/components/appointment-summary";
 import AppointmentsList from "@/components/appointments-list";
+import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 
 
 // Logo component inline
@@ -61,6 +62,13 @@ export default function Home() {
     reasonDetail: "",
   });
 
+  // Scroll animation hooks for each section
+  const heroRef = useScrollIntoView(0.2);
+  const bookingRef = useScrollIntoView(0.3);
+  const calendarRef = useScrollIntoView(0.3);
+  const summaryRef = useScrollIntoView(0.3);
+  const appointmentsRef = useScrollIntoView(0.3);
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -88,30 +96,58 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section */}
-        <section id="inicio" className="text-center mb-12 opacity-0 animate-[bounceIn_1.2s_ease-out_0.1s_forwards]">
+        <section 
+          ref={heroRef.ref}
+          id="inicio" 
+          className={`text-center mb-12 transition-all duration-1000 ${
+            heroRef.isVisible 
+              ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
+              : 'opacity-0 translate-y-20'
+          }`}
+        >
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4 opacity-0 animate-[fadeInUp_1s_ease-out_0.3s_forwards]">
+            <h2 className={`text-4xl font-bold text-slate-900 mb-4 transition-all duration-700 delay-200 ${
+              heroRef.isVisible 
+                ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.2s_forwards]' 
+                : 'opacity-0 translate-y-10'
+            }`}>
               Reserva tu Sesión de Kinesiología
             </h2>
-            <p className="text-xl text-slate-600 mb-8 opacity-0 animate-[fadeInUp_1s_ease-out_0.5s_forwards]">
+            <p className={`text-xl text-slate-600 mb-8 transition-all duration-700 delay-400 ${
+              heroRef.isVisible 
+                ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.4s_forwards]' 
+                : 'opacity-0 translate-y-10'
+            }`}>
               Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[slideInLeft_1s_ease-out_0.7s_forwards]">
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 ${
+                heroRef.isVisible 
+                  ? 'opacity-100 animate-[scrollSlideInLeft_0.8s_ease-out_0.6s_forwards]' 
+                  : 'opacity-0 -translate-x-20'
+              }`}>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite]">
                   <Calendar className="text-blue-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Reserva Rápida</h3>
                 <p className="text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[bounceIn_1s_ease-out_0.9s_forwards]">
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 ${
+                heroRef.isVisible 
+                  ? 'opacity-100 animate-[scrollBounceIn_0.8s_ease-out_0.8s_forwards]' 
+                  : 'opacity-0 translate-y-20'
+              }`}>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_0.5s]">
                   <Bot className="text-green-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Asistente IA</h3>
                 <p className="text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 opacity-0 animate-[slideInRight_1s_ease-out_1.1s_forwards]">
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 ${
+                heroRef.isVisible 
+                  ? 'opacity-100 animate-[scrollSlideInRight_0.8s_ease-out_1s_forwards]' 
+                  : 'opacity-0 translate-x-20'
+              }`}>
                 <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_1s]">
                   <Shield className="text-amber-600 w-6 h-6" />
                 </div>
@@ -123,7 +159,15 @@ export default function Home() {
         </section>
 
         {/* Booking Section */}
-        <section id="reservas" className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[slideInLeft_1.2s_ease-out_1.3s_forwards]">
+        <section 
+          ref={bookingRef.ref}
+          id="reservas" 
+          className={`mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
+            bookingRef.isVisible 
+              ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
+              : 'opacity-0 -translate-x-32 scale-95'
+          }`}
+        >
           <BookingForm 
             onFormDataChange={setFormData}
             formData={formData}
@@ -131,7 +175,14 @@ export default function Home() {
         </section>
 
         {/* Calendar Section */}
-        <section className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[slideInRight_1.2s_ease-out_1.5s_forwards]">
+        <section 
+          ref={calendarRef.ref}
+          className={`mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
+            calendarRef.isVisible 
+              ? 'opacity-100 animate-[scrollSlideInRight_1s_ease-out_forwards]' 
+              : 'opacity-0 translate-x-32 scale-95'
+          }`}
+        >
           <CalendarView 
             onDateSelect={setSelectedDate}
             onTimeSelect={setSelectedTime}
@@ -139,7 +190,14 @@ export default function Home() {
         </section>
 
         {/* Appointment Summary */}
-        <section className="mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[bounceIn_1.2s_ease-out_1.7s_forwards]">
+        <section 
+          ref={summaryRef.ref}
+          className={`mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
+            summaryRef.isVisible 
+              ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
+              : 'opacity-0 translate-y-32 scale-90'
+          }`}
+        >
           <AppointmentSummary
             formData={formData}
             selectedDate={selectedDate}
@@ -148,7 +206,14 @@ export default function Home() {
         </section>
 
         {/* Appointments List */}
-        <section className="transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl opacity-0 animate-[fadeInUp_1.2s_ease-out_1.9s_forwards]">
+        <section 
+          ref={appointmentsRef.ref}
+          className={`transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
+            appointmentsRef.isVisible 
+              ? 'opacity-100 animate-[scrollFadeInUp_1s_ease-out_forwards]' 
+              : 'opacity-0 translate-y-32 scale-95'
+          }`}
+        >
           <AppointmentsList />
         </section>
       </main>

@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useScrollEffects() {
+export function useScrollIntoView(threshold = 0.1) {
   const [isVisible, setIsVisible] = useState(false);
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !hasAnimated) {
           setIsVisible(true);
+          setHasAnimated(true);
         }
       },
       {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold,
+        rootMargin: '0px 0px -100px 0px'
       }
     );
 
@@ -28,33 +29,36 @@ export function useScrollEffects() {
         observer.unobserve(currentRef);
       }
     };
-  }, []);
+  }, [threshold, hasAnimated]);
+
+  return { ref, isVisible };
+}
+
+export function useScrollDirection() {
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    let lastScrollY = window.pageYOffset;
-    let timeoutId: NodeJS.Timeout;
-
     const handleScroll = () => {
-      const currentScrollY = window.pageYOffset;
+      const scrollY = window.pageYOffset;
       
-      if (Math.abs(currentScrollY - lastScrollY) > 10) {
-        setHasScrolled(true);
-        
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          setHasScrolled(false);
-        }, 150);
+      if (Math.abs(scrollY - lastScrollY) < 5) {
+        return;
       }
       
-      lastScrollY = currentScrollY;
+      const direction = scrollY > lastScrollY ? 'down' : 'up';
+      setScrollDirection(direction);
+      setLastScrollY(scrollY > 0 ? scrollY : 0);
+      
+      // Clear direction after animation
+      setTimeout(() => {
+        setScrollDirection(null);
+      }, 300);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(timeoutId);
-    };
-  }, []);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
-  return { ref, isVisible, hasScrolled };
+  return scrollDirection;
 }
