@@ -1,57 +1,47 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { loginSchema, LoginCredentials } from '@shared/schema';
-import { authApi } from '@/lib/authApi';
-import { useAuth } from '@/hooks/useAuth';
 import { Lock, User, Shield } from 'lucide-react';
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { login } = useAuth();
-  const { toast } = useToast();
-  
-  const form = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: '',
-      password: '',
-    },
-  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const loginMutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (data) => {
-      login(data.token, data.user);
-      toast({
-        title: "Login exitoso",
-        description: `Bienvenido, ${data.user.name || data.user.username}`,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
       });
+
+      if (!response.ok) {
+        throw new Error('Credenciales inválidas');
+      }
+
+      const data = await response.json();
       
+      // Guardar token en localStorage
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('auth_user', JSON.stringify(data.user));
+      
+      // Redirigir según el rol
       if (data.user.role === 'admin') {
         setLocation('/admin');
       } else {
         setLocation('/');
       }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error de autenticación",
-        description: error.message || "Credenciales inválidas",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onSubmit = (data: LoginCredentials) => {
-    loginMutation.mutate(data);
+    } catch (err: any) {
+      setError(err.message || 'Error de autenticación');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,70 +58,61 @@ export default function Login() {
           <p className="text-slate-600 mt-2">Accede a tu cuenta de EcoFisio</p>
         </div>
 
-        <Card className="shadow-lg border-0">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl text-center">Iniciar Sesión</CardTitle>
-            <CardDescription className="text-center">
+        <div className="bg-white shadow-lg border-0 rounded-lg">
+          <div className="space-y-1 p-6 pb-4">
+            <h2 className="text-xl text-center font-semibold">Iniciar Sesión</h2>
+            <p className="text-center text-slate-600 text-sm">
               Ingresa tus credenciales para acceder al sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Usuario</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                          <Input 
-                            {...field} 
-                            placeholder="Ingresa tu usuario"
-                            className="pl-10"
-                            disabled={loginMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                          <Input 
-                            {...field} 
-                            type="password" 
-                            placeholder="Ingresa tu contraseña"
-                            className="pl-10"
-                            disabled={loginMutation.isPending}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            </p>
+          </div>
+          <div className="p-6 pt-0">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <input 
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Ingresa tu usuario"
+                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <input 
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Ingresa tu contraseña"
+                    className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loginMutation.isPending}
-                >
-                  {loginMutation.isPending ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-                </Button>
-              </form>
-            </Form>
+              <button 
+                type="submit" 
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
+              >
+                {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              </button>
+            </form>
 
             {/* Demo credentials info */}
             <div className="mt-6 p-3 bg-blue-50 rounded-lg">
@@ -139,17 +120,16 @@ export default function Login() {
               <p className="text-xs text-blue-600">Usuario: admin</p>
               <p className="text-xs text-blue-600">Contraseña: admin123</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="text-center">
-          <Button 
-            variant="ghost" 
+          <button 
             onClick={() => setLocation('/')}
-            className="text-slate-600 hover:text-slate-900"
+            className="text-slate-600 hover:text-slate-900 bg-transparent border-none cursor-pointer"
           >
             ← Volver al inicio
-          </Button>
+          </button>
         </div>
       </div>
     </div>
