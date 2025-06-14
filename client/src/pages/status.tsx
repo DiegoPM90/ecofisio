@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Calendar, Clock, User, Stethoscope, ArrowLeft, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Search, Calendar, Clock, User, Stethoscope, ArrowLeft, CheckCircle, XCircle, AlertCircle, Menu, X } from "lucide-react";
 import type { Appointment } from "@shared/schema";
 
 // Logo component
@@ -54,6 +54,7 @@ export default function Status() {
   const { toast } = useToast();
   const [searchToken, setSearchToken] = useState("");
   const [foundAppointment, setFoundAppointment] = useState<Appointment | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const searchAppointmentMutation = useMutation({
     mutationFn: async (token: string) => {
@@ -105,33 +106,69 @@ export default function Status() {
   if (foundAppointment) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <header className="bg-white shadow-sm border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-3 transition-all duration-300 hover:scale-110">
-                <EcofisioLogo size={32} />
-                <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
+        <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-14 sm:h-16">
+              <div className="flex items-center space-x-2 sm:space-x-3 transition-all duration-300 hover:scale-110">
+                <EcofisioLogo size={28} />
+                <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Ecofisio</h1>
               </div>
-              <nav className="hidden md:flex space-x-6 items-center">
-                <Link href="/" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
+              
+              {/* Mobile menu button */}
+              <button 
+                className="md:hidden p-2 rounded-md text-slate-600 hover:text-blue-600 transition-colors"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+              
+              {/* Desktop navigation */}
+              <nav className="hidden md:flex space-x-4 lg:space-x-6 items-center">
+                <Link href="/" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
                   Inicio
                 </Link>
-                <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                  Mis Reservas
-                </a>
-                <a href="#status" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
-                  Estado de Cita
-                </a>
-                <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                  Contacto
-                </a>
+                <Link href="/#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
+                  Reservas
+                </Link>
+                <span className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 text-sm lg:text-base">
+                  Estado de Citas
+                </span>
               </nav>
             </div>
           </div>
+          
+          {/* Mobile navigation menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden bg-white border-t border-slate-200 shadow-lg">
+              <nav className="px-3 py-4 space-y-3">
+                <Link 
+                  href="/" 
+                  className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Inicio
+                </Link>
+                <Link 
+                  href="/#reservas" 
+                  className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Reservas
+                </Link>
+                <span className="block px-3 py-2 text-blue-600 font-medium bg-blue-50 rounded-md text-sm">
+                  Estado de Citas
+                </span>
+              </nav>
+            </div>
+          )}
         </header>
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <Card className="w-full max-w-md shadow-lg">
+        <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+          <Card className="w-full max-w-lg mx-2 shadow-lg">
             <CardHeader className="text-center pb-4">
               <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-8 h-8 text-blue-600" />
@@ -237,45 +274,81 @@ export default function Status() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3 transition-all duration-300 hover:scale-110">
-              <EcofisioLogo size={32} />
-              <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
+      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3 transition-all duration-300 hover:scale-110">
+              <EcofisioLogo size={28} />
+              <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
-            <nav className="hidden md:flex space-x-6 items-center">
-              <Link href="/" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
+            
+            {/* Mobile menu button */}
+            <button 
+              className="md:hidden p-2 rounded-md text-slate-600 hover:text-blue-600 transition-colors"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+            
+            {/* Desktop navigation */}
+            <nav className="hidden md:flex space-x-4 lg:space-x-6 items-center">
+              <Link href="/" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
                 Inicio
               </Link>
-              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Mis Reservas
-              </a>
-              <a href="#status" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
-                Estado de Cita
-              </a>
-              <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Contacto
-              </a>
+              <Link href="/#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
+                Reservas
+              </Link>
+              <span className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 text-sm lg:text-base">
+                Estado de Citas
+              </span>
             </nav>
           </div>
         </div>
+        
+        {/* Mobile navigation menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-200 shadow-lg">
+            <nav className="px-3 py-4 space-y-3">
+              <Link 
+                href="/" 
+                className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Inicio
+              </Link>
+              <Link 
+                href="/#reservas" 
+                className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Reservas
+              </Link>
+              <span className="block px-3 py-2 text-blue-600 font-medium bg-blue-50 rounded-md text-sm">
+                Estado de Citas
+              </span>
+            </nav>
+          </div>
+        )}
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="text-center pb-4">
-            <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <Search className="w-8 h-8 text-blue-600" />
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
+        <Card className="w-full max-w-lg mx-2 shadow-lg">
+          <CardHeader className="text-center p-4 sm:p-6 pb-2 sm:pb-4">
+            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3 sm:mb-4">
+              <Search className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
-            <CardTitle className="text-xl text-gray-800">Consultar Estado de Cita</CardTitle>
-            <p className="text-sm text-gray-600 mt-2">
+            <CardTitle className="text-lg sm:text-xl text-gray-800">Consultar Estado de Cita</CardTitle>
+            <p className="text-xs sm:text-sm text-gray-600 mt-2">
               Ingresa tu código para ver el estado de tu cita
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0">
             <div className="space-y-2">
-              <Label htmlFor="searchToken" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="searchToken" className="text-xs sm:text-sm font-medium text-gray-700">
                 Código de Cita
               </Label>
               <Input
@@ -284,20 +357,25 @@ export default function Status() {
                 placeholder="Ingresa tu código de cita o cancelación"
                 value={searchToken}
                 onChange={(e) => setSearchToken(e.target.value)}
-                className="w-full"
+                className="w-full h-12 text-base"
                 disabled={searchAppointmentMutation.isPending}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && searchToken.trim()) {
+                    handleSearchAppointment();
+                  }
+                }}
               />
               <p className="text-xs text-gray-500">
                 Este código te fue enviado por WhatsApp y correo cuando confirmaste tu cita
               </p>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
               <div className="flex items-start space-x-2">
-                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-700">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs sm:text-sm text-blue-700">
                   <p className="font-medium mb-1">¿Cómo encontrar tu código?</p>
-                  <ul className="list-disc list-inside space-y-1 text-xs">
+                  <ul className="list-disc list-inside space-y-0.5 sm:space-y-1 text-xs">
                     <li>Revisa el WhatsApp de confirmación</li>
                     <li>Busca en tu correo electrónico</li>
                     <li>Es el mismo código para consultar y cancelar</li>
@@ -306,11 +384,11 @@ export default function Status() {
               </div>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-2 sm:space-x-3">
               <Button
                 onClick={handleSearchAppointment}
                 disabled={!searchToken.trim() || searchAppointmentMutation.isPending}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 h-12 text-sm sm:text-base"
               >
                 {searchAppointmentMutation.isPending ? "Buscando..." : "Consultar Estado"}
               </Button>
@@ -318,7 +396,7 @@ export default function Status() {
                 variant="outline" 
                 onClick={() => setLocation("/")}
                 disabled={searchAppointmentMutation.isPending}
-                className="px-4"
+                className="px-3 sm:px-4 h-12"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
