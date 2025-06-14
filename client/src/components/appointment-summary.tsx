@@ -80,51 +80,31 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
   const isComplete = selectedDate && selectedTime && formData.patientName && formData.email && formData.specialty && formData.reason;
 
   return (
-    <Card className={`transition-all duration-700 ease-out ${
-      isComplete 
-        ? 'opacity-100 transform translate-y-0 scale-100' 
-        : 'opacity-50 transform translate-y-2 scale-98'
-    }`}>
+    <Card className="opacity-100">
       <CardContent className="p-6">
-        <h3 className={`text-lg font-semibold text-slate-900 mb-4 transition-all duration-500 ${
-          isComplete ? 'opacity-100' : 'opacity-70'
-        }`}>Resumen de la Cita</h3>
-        <div className={`space-y-3 text-sm transition-all duration-500 ${
-          isComplete ? 'opacity-100' : 'opacity-60'
-        }`}>
-          <div className={`flex justify-between transition-all duration-300 delay-100 ${
-            selectedDate ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Resumen de la Cita</h3>
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
             <span className="text-slate-600">Fecha:</span>
             <span className="font-medium">{selectedDate || "No seleccionada"}</span>
           </div>
-          <div className={`flex justify-between transition-all duration-300 delay-150 ${
-            selectedTime ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+          <div className="flex justify-between">
             <span className="text-slate-600">Hora:</span>
             <span className="font-medium">{selectedTime || "No seleccionada"}</span>
           </div>
-          <div className={`flex justify-between transition-all duration-300 delay-200 ${
-            formData.specialty ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+          <div className="flex justify-between">
             <span className="text-slate-600">Servicio:</span>
             <span className="font-medium">{getServiceLabel(formData.specialty)}</span>
           </div>
-          <div className={`flex justify-between transition-all duration-300 delay-250 ${
-            formData.sessions ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+          <div className="flex justify-between">
             <span className="text-slate-600">Sesiones:</span>
             <span className="font-medium">{formData.sessions || 1}</span>
           </div>
-          <div className={`flex justify-between transition-all duration-300 delay-300 ${
-            formData.patientName ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+          <div className="flex justify-between">
             <span className="text-slate-600">Paciente:</span>
             <span className="font-medium">{formData.patientName || "No especificado"}</span>
           </div>
-          <div className={`flex justify-between transition-all duration-300 delay-350 ${
-            formData.email ? 'opacity-100 transform translate-x-0' : 'opacity-50 transform translate-x-1'
-          }`}>
+          <div className="flex justify-between">
             <span className="text-slate-600">Email:</span>
             <span className="font-medium">{formData.email || "No especificado"}</span>
           </div>
@@ -132,11 +112,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
 
         <Button
           onClick={handleConfirmAppointment}
-          className={`w-full mt-6 bg-blue-600 hover:bg-blue-700 transition-all duration-500 ${
-            isComplete 
-              ? 'opacity-100 transform translate-y-0 scale-100' 
-              : 'opacity-70 transform translate-y-1 scale-98'
-          }`}
+          className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
           disabled={createAppointmentMutation.isPending || !isComplete}
         >
           <CalendarCheck className="w-4 h-4 mr-2" />
