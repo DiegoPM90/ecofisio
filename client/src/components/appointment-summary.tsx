@@ -128,7 +128,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
                 </div>
                 <div>
                   <span className="text-slate-600">Kinesiólogo:</span>
-                  <p className="font-medium">{bookedAppointment.kinesiologist}</p>
+                  <p className="font-medium">{bookedAppointment.kinesiologistName}</p>
                 </div>
               </div>
             </div>
@@ -155,12 +155,12 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
               </p>
               <div className="flex items-center gap-2 bg-white p-3 rounded border">
                 <code className="flex-1 font-mono text-sm text-slate-700">
-                  {bookedAppointment.cancellationToken}
+                  {bookedAppointment.cancelToken}
                 </code>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(bookedAppointment.cancellationToken)}
+                  onClick={() => copyToClipboard(bookedAppointment.cancelToken)}
                   className="shrink-0"
                 >
                   <Copy className="h-3 w-3" />
