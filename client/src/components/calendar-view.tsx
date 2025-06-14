@@ -140,27 +140,27 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
   return (
     <div className="space-y-6">
       {/* Date Selection Calendar */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-900">Seleccionar Fecha</h3>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" onClick={previousMonth}>
+      <Card className="w-full">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900">Seleccionar Fecha</h3>
+            <div className="flex items-center justify-center sm:justify-end space-x-2">
+              <Button variant="ghost" size="sm" onClick={previousMonth} className="p-2">
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <span className="font-medium text-slate-900 px-2 min-w-[140px] text-center">
+              <span className="font-medium text-slate-900 px-2 min-w-[120px] sm:min-w-[140px] text-center text-sm sm:text-base">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </span>
-              <Button variant="ghost" size="sm" onClick={nextMonth}>
+              <Button variant="ghost" size="sm" onClick={nextMonth} className="p-2">
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
           
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="text-sm text-blue-800 font-medium">
+          <div className="mb-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="text-xs sm:text-sm text-blue-800 font-medium">
               <p className="mb-1">📅 Horarios disponibles:</p>
-              <ul className="text-xs space-y-1">
+              <ul className="text-xs space-y-0.5 sm:space-y-1">
                 <li>• Miércoles: 19:30-20:30</li>
                 <li>• Viernes: 18:30-19:30</li>
                 <li>• Sábados: 10:00-13:00</li>
@@ -168,15 +168,15 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
             {weekDays.map(day => (
-              <div key={day} className="text-xs font-medium text-slate-500 text-center py-2">
+              <div key={day} className="text-xs font-medium text-slate-500 text-center py-1 sm:py-2">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
             {getDaysInMonth(currentDate).map((day, index) => (
               <Button
                 key={index}

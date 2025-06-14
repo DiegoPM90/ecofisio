@@ -40,18 +40,18 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
   ];
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <UserRound className="text-white w-4 h-4" />
+    <Card className="w-full">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <UserRound className="text-white w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900">Información de la Reserva</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900">Información de la Reserva</h3>
         </div>
 
         <Form {...form}>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <FormField
                 control={form.control}
                 name="patientName"

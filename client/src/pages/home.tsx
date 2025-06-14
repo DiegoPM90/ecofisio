@@ -72,90 +72,96 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3 transition-all duration-300 hover:scale-110">
-              <EcofisioLogo size={32} />
-              <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
+      <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards] sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3 transition-all duration-300 hover:scale-110">
+              <EcofisioLogo size={28} />
+              <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
-            <nav className="hidden md:flex space-x-6 items-center">
-              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
+            
+            {/* Mobile menu button */}
+            <button className="md:hidden p-2 rounded-md text-slate-600 hover:text-blue-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            
+            {/* Desktop navigation */}
+            <nav className="hidden md:flex space-x-4 lg:space-x-6 items-center">
+              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800 text-sm lg:text-base">
                 Inicio
               </a>
-              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Mis Reservas
+              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
+                Reservas
               </a>
-              <Link href="/status" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Estado de Cita
+              <Link href="/status" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
+                Estado
               </Link>
-              <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Contacto
-              </a>
             </nav>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Hero Section */}
         <section 
           ref={heroRef.ref}
           id="inicio" 
-          className={`text-center mb-12 transition-all duration-1000 ${
+          className={`text-center mb-8 sm:mb-12 transition-all duration-1000 ${
             heroRef.isVisible 
               ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
               : 'opacity-0 translate-y-20'
           }`}
         >
-          <div className="max-w-3xl mx-auto">
-            <h2 className={`text-4xl font-bold text-slate-900 mb-4 transition-all duration-700 delay-200 ${
+          <div className="max-w-3xl mx-auto px-2">
+            <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 sm:mb-4 transition-all duration-700 delay-200 ${
               heroRef.isVisible 
                 ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.2s_forwards]' 
                 : 'opacity-0 translate-y-10'
             }`}>
               Reserva tu Sesión de Kinesiología
             </h2>
-            <p className={`text-xl text-slate-600 mb-8 transition-all duration-700 delay-400 ${
+            <p className={`text-base sm:text-lg lg:text-xl text-slate-600 mb-6 sm:mb-8 px-2 transition-all duration-700 delay-400 ${
               heroRef.isVisible 
                 ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.4s_forwards]' 
                 : 'opacity-0 translate-y-10'
             }`}>
               Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
                   ? 'opacity-100 animate-[cardFadeIn_1.5s_ease-out_0.8s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Calendar className="text-blue-600 w-6 h-6" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Calendar className="text-blue-600 w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">Reserva Rápida</h3>
-                <p className="text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
+                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Reserva Rápida</h3>
+                <p className="text-xs sm:text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
                   ? 'opacity-100 animate-[cardSlideUp_1.5s_ease-out_1.2s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Bot className="text-green-600 w-6 h-6" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Bot className="text-green-600 w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">Asistente IA</h3>
-                <p className="text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
+                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Asistente IA</h3>
+                <p className="text-xs sm:text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] sm:col-span-2 lg:col-span-1 ${
                 heroRef.isVisible 
                   ? 'opacity-100 animate-[cardGentleScale_1.5s_ease-out_1.6s_forwards]' 
                   : 'opacity-0 scale-90'
               }`}>
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Shield className="text-amber-600 w-6 h-6" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <Shield className="text-amber-600 w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-2">Datos Seguros</h3>
-                <p className="text-sm text-slate-600">Tu información de salud protegida y confidencial</p>
+                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Datos Seguros</h3>
+                <p className="text-xs sm:text-sm text-slate-600">Tu información de salud protegida y confidencial</p>
               </div>
             </div>
           </div>
