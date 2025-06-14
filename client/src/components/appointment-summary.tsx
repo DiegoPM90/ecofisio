@@ -186,43 +186,45 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
   }
 
   return (
-    <Card className="opacity-100">
-      <CardContent className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Resumen de la Cita</h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
+    <Card className="opacity-100 w-full">
+      <CardContent className="p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4">Resumen de la Cita</h3>
+        <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+          <div className="flex justify-between items-center">
             <span className="text-slate-600">Fecha:</span>
-            <span className="font-medium">{selectedDate || "No seleccionada"}</span>
+            <span className="font-medium text-right">{selectedDate || "No seleccionada"}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-slate-600">Hora:</span>
-            <span className="font-medium">{selectedTime || "No seleccionada"}</span>
+            <span className="font-medium text-right">{selectedTime || "No seleccionada"}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-start">
             <span className="text-slate-600">Servicio:</span>
-            <span className="font-medium">{getServiceLabel(formData.specialty)}</span>
+            <span className="font-medium text-right flex-1 ml-2">{getServiceLabel(formData.specialty)}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="text-slate-600">Sesiones:</span>
-            <span className="font-medium">{formData.sessions || 1}</span>
+            <span className="font-medium text-right">{formData.sessions || 1}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-start">
             <span className="text-slate-600">Paciente:</span>
-            <span className="font-medium">{formData.patientName || "No especificado"}</span>
+            <span className="font-medium text-right flex-1 ml-2 break-words">{formData.patientName || "No especificado"}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-start">
             <span className="text-slate-600">Email:</span>
-            <span className="font-medium">{formData.email || "No especificado"}</span>
+            <span className="font-medium text-right flex-1 ml-2 break-all">{formData.email || "No especificado"}</span>
           </div>
         </div>
 
         <Button
           onClick={handleConfirmAppointment}
-          className="w-full mt-6 bg-blue-600 hover:bg-blue-700"
+          className="w-full mt-4 sm:mt-6 bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
           disabled={createAppointmentMutation.isPending || !isComplete}
         >
           <CalendarCheck className="w-4 h-4 mr-2" />
-          {createAppointmentMutation.isPending ? "Confirmando..." : "Confirmar Reserva"}
+          <span className="text-sm sm:text-base">
+            {createAppointmentMutation.isPending ? "Confirmando..." : "Confirmar Reserva"}
+          </span>
         </Button>
         
         {!isComplete && (

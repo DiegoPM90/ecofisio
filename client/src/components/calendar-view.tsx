@@ -182,7 +182,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                 key={index}
                 variant="ghost"
                 className={`
-                  calendar-day aspect-square p-0 text-sm h-10 w-10
+                  calendar-day aspect-square p-0 text-xs sm:text-sm h-8 w-8 sm:h-10 sm:w-10
                   ${!day ? 'invisible' : ''}
                   ${!isAvailableDay(day) ? 'text-slate-400 cursor-not-allowed bg-slate-50' : 'hover:bg-blue-50 text-blue-600 border border-blue-200'}
                   ${isToday(day) && isAvailableDay(day) ? 'bg-blue-100 font-bold' : ''}
@@ -200,18 +200,18 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
 
       {/* Time Selection */}
       {selectedDate && (
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Horarios Disponibles</h3>
-            <div className="text-sm text-slate-600 mb-4">
+        <Card className="w-full">
+          <CardContent className="p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4">Horarios Disponibles</h3>
+            <div className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4">
               {formatDateDisplay(selectedDate)}
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {availableSlots.length > 0 ? (
                 <div>
-                  <h4 className="text-sm font-medium text-slate-700 mb-2">Horarios disponibles</h4>
-                  <div className="grid grid-cols-2 gap-2">
+                  <h4 className="text-xs sm:text-sm font-medium text-slate-700 mb-2">Horarios disponibles</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                     {availableSlots.map((slot) => (
                       <Button
                         key={slot}
