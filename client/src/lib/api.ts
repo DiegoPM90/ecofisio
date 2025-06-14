@@ -13,7 +13,12 @@ export const appointmentApi = {
 
   // Create new appointment
   createAppointment: async (appointment: InsertAppointment): Promise<Appointment> => {
-    const response = await apiRequest("POST", "/api/appointments", appointment);
+    const response = await fetch("/api/appointments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(appointment),
+    });
+    if (!response.ok) throw new Error("Failed to create appointment");
     return response.json();
   },
 
@@ -29,9 +34,24 @@ export const appointmentApi = {
     return response.json();
   },
 
+  // Cancel appointment by token
+  cancelAppointment: async (token: string): Promise<{ message: string; appointment: Appointment }> => {
+    const response = await fetch(`/api/appointments/cancel/${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error("Failed to cancel appointment");
+    return response.json();
+  },
+
   // Get AI consultation
   getAIConsultation: async (consultation: AIConsultationRequest) => {
-    const response = await apiRequest("POST", "/api/ai-consultation", consultation);
+    const response = await fetch("/api/ai-consultation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(consultation),
+    });
+    if (!response.ok) throw new Error("Failed to get AI consultation");
     return response.json();
   },
 };
