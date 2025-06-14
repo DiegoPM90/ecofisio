@@ -26,23 +26,52 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
 
   const generateAIMutation = useMutation({
     mutationFn: async (data: AIConsultationRequest) => {
-      const response = await apiRequest("POST", "/api/ai-consultation", data);
+      const response = await fetch("/api/ai-consultation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
       return response.json();
     },
     onSuccess: (response) => {
-      if (response.success) {
+      console.log("AI Response received:", response);
+      if (response.success && response.data) {
         setAiResponse(response.data);
+      } else {
+        console.error("AI response format error:", response);
       }
+    },
+    onError: (error) => {
+      console.error("AI consultation error:", error);
     },
   });
 
   const handleGenerateAI = () => {
-    if (!reason) return;
+    if (!reason) {
+      console.log("No reason provided for AI consultation");
+      return;
+    }
     
-    generateAIMutation.mutate({
+    console.log("Generating AI consultation with data:", {
       reason,
       reasonDetail,
       specialty,
+    });
+    
+    // Reset previous response
+    setAiResponse(null);
+    
+    generateAIMutation.mutate({
+      reason,
+      reasonDetail: reasonDetail || "",
+      specialty: specialty || "kinesiologia_general",
     });
   };
 
