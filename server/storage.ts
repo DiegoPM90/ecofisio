@@ -61,10 +61,17 @@ export class MemStorage implements IStorage {
   }
 
   async getAvailableTimeSlots(date: string, specialty: string): Promise<string[]> {
-    const allSlots = [
-      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-      '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
-    ];
+    // Check if the date is a Saturday (only day available for appointments)
+    const appointmentDate = new Date(date);
+    const dayOfWeek = appointmentDate.getDay();
+    
+    // If not Saturday (6), return empty array
+    if (dayOfWeek !== 6) {
+      return [];
+    }
+
+    // Saturday slots only
+    const allSlots = ['10:00', '11:00', '12:00', '13:00'];
 
     const bookedSlots = Array.from(this.appointments.values())
       .filter(appointment => 
@@ -139,10 +146,17 @@ export class MongoStorage implements IStorage {
   }
 
   async getAvailableTimeSlots(date: string, specialty: string): Promise<string[]> {
-    const allSlots = [
-      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-      '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
-    ];
+    // Check if the date is a Saturday (only day available for appointments)
+    const appointmentDate = new Date(date);
+    const dayOfWeek = appointmentDate.getDay();
+    
+    // If not Saturday (6), return empty array
+    if (dayOfWeek !== 6) {
+      return [];
+    }
+
+    // Saturday slots only
+    const allSlots = ['10:00', '11:00', '12:00', '13:00'];
 
     const bookedAppointments = await AppointmentModel.find({
       date,

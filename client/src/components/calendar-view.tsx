@@ -113,8 +113,8 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
   const isAvailableDay = (day: number | null) => {
     if (!day || isPastDate(day)) return false;
     const weekday = getWeekday(day);
-    // 3 = Wednesday, 5 = Friday, 6 = Saturday
-    return weekday === 3 || weekday === 5 || weekday === 6;
+    // 6 = Saturday only
+    return weekday === 6;
   };
 
   const getAvailableSlots = (selectedDateStr: string) => {
@@ -124,10 +124,6 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
     const weekday = getWeekday(selectedDay);
     
     switch (weekday) {
-      case 3: // Wednesday
-        return ['19:30', '20:30'];
-      case 5: // Friday
-        return ['18:30', '19:30'];
       case 6: // Saturday
         return ['10:00', '11:00', '12:00', '13:00'];
       default:
