@@ -5,6 +5,7 @@ import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentSummary from "@/components/appointment-summary";
 import AppointmentsList from "@/components/appointments-list";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 // Logo component inline
 const EcofisioLogo = ({ size = 32 }: { size?: number }) => (
@@ -60,8 +61,13 @@ export default function Home() {
     reasonDetail: "",
   });
 
+  const scrollDirection = useScrollAnimation();
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen bg-slate-50 scroll-animate ${
+      scrollDirection === 'up' ? 'scroll-up' : 
+      scrollDirection === 'down' ? 'scroll-down' : ''
+    }`}>
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,7 +129,10 @@ export default function Home() {
         </section>
 
         {/* Booking Section */}
-        <section id="reservas" className="mb-12">
+        <section id="reservas" className={`mb-12 scroll-animate ${
+          scrollDirection === 'up' ? 'scroll-up' : 
+          scrollDirection === 'down' ? 'scroll-down' : ''
+        }`}>
           <BookingForm 
             onFormDataChange={setFormData}
             formData={formData}
@@ -131,7 +140,10 @@ export default function Home() {
         </section>
 
         {/* Calendar Section */}
-        <section className="mb-12">
+        <section className={`mb-12 scroll-animate ${
+          scrollDirection === 'up' ? 'scroll-up' : 
+          scrollDirection === 'down' ? 'scroll-down' : ''
+        }`}>
           <CalendarView 
             onDateSelect={setSelectedDate}
             onTimeSelect={setSelectedTime}
@@ -139,7 +151,10 @@ export default function Home() {
         </section>
 
         {/* Appointment Summary */}
-        <section className="mb-12">
+        <section className={`mb-12 scroll-animate ${
+          scrollDirection === 'up' ? 'scroll-up' : 
+          scrollDirection === 'down' ? 'scroll-down' : ''
+        }`}>
           <AppointmentSummary
             formData={formData}
             selectedDate={selectedDate}
@@ -148,7 +163,12 @@ export default function Home() {
         </section>
 
         {/* Appointments List */}
-        <AppointmentsList />
+        <section className={`scroll-animate ${
+          scrollDirection === 'up' ? 'scroll-up' : 
+          scrollDirection === 'down' ? 'scroll-down' : ''
+        }`}>
+          <AppointmentsList />
+        </section>
       </main>
 
       {/* Footer */}
