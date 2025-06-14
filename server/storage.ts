@@ -22,8 +22,15 @@ export class MemStorage implements IStorage {
   async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
     const appointment: Appointment = {
       id: this.currentAppointmentId++,
-      ...insertAppointment,
+      patientName: insertAppointment.patientName,
+      email: insertAppointment.email,
+      phone: insertAppointment.phone,
+      specialty: insertAppointment.specialty,
+      reason: insertAppointment.reason,
       reasonDetail: insertAppointment.reasonDetail || null,
+      sessions: insertAppointment.sessions,
+      date: insertAppointment.date,
+      time: insertAppointment.time,
       status: 'pendiente',
       kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       aiRecommendation: null,
