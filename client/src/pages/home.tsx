@@ -70,11 +70,11 @@ export default function Home() {
   const appointmentsRef = useScrollIntoView(0.3);
   
   // Scroll direction for upward animations
-  const scrollDirection = useScrollDirection();
+  const isScrollingUp = useScrollDirection();
 
   return (
     <div className={`min-h-screen bg-slate-50 ${
-      scrollDirection === 'up' ? 'animate-[scrollUpFade_0.8s_ease-out]' : ''
+      isScrollingUp ? 'scroll-up-active' : ''
     }`}>
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards]">
@@ -172,7 +172,7 @@ export default function Home() {
               ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
               : 'opacity-0 -translate-x-32 scale-95'
           } ${
-            scrollDirection === 'up' ? 'animate-[scrollUpSlide_0.6s_ease-out]' : ''
+            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <BookingForm 
@@ -189,7 +189,7 @@ export default function Home() {
               ? 'opacity-100 animate-[scrollSlideInRight_1s_ease-out_forwards]' 
               : 'opacity-0 translate-x-32 scale-95'
           } ${
-            scrollDirection === 'up' ? 'animate-[scrollUpSlide_0.6s_ease-out]' : ''
+            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <CalendarView 
@@ -206,7 +206,7 @@ export default function Home() {
               ? 'opacity-100 animate-[scrollBounceIn_0.5s_ease-out_forwards]' 
               : 'opacity-0 translate-y-16 scale-95'
           } ${
-            scrollDirection === 'up' ? 'animate-[scrollUpFade_0.5s_ease-out]' : ''
+            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <AppointmentSummary
@@ -224,7 +224,7 @@ export default function Home() {
               ? 'opacity-100 animate-[scrollFadeInUp_1s_ease-out_forwards]' 
               : 'opacity-0 translate-y-32 scale-95'
           } ${
-            scrollDirection === 'up' ? 'animate-[scrollUpSlide_0.6s_ease-out]' : ''
+            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <AppointmentsList />

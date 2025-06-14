@@ -35,30 +35,39 @@ export function useScrollIntoView(threshold = 0.1) {
 }
 
 export function useScrollDirection() {
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null);
+  const [isScrollingUp, setIsScrollingUp] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
+    let ticking = false;
+
+    const updateScrollDirection = () => {
       const scrollY = window.pageYOffset;
       
-      if (Math.abs(scrollY - lastScrollY) < 5) {
+      if (Math.abs(scrollY - lastScrollY) < 10) {
+        ticking = false;
         return;
       }
       
-      const direction = scrollY > lastScrollY ? 'down' : 'up';
-      setScrollDirection(direction);
-      setLastScrollY(scrollY > 0 ? scrollY : 0);
+      if (scrollY < lastScrollY && scrollY > 100) {
+        setIsScrollingUp(true);
+        setTimeout(() => setIsScrollingUp(false), 500);
+      }
       
-      // Clear direction after animation
-      setTimeout(() => {
-        setScrollDirection(null);
-      }, 300);
+      setLastScrollY(scrollY > 0 ? scrollY : 0);
+      ticking = false;
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollDirection);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, [lastScrollY]);
 
-  return scrollDirection;
+  return isScrollingUp;
 }

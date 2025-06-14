@@ -151,26 +151,20 @@ html {
   }
 }
 
-@keyframes scrollUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.95);
+@keyframes scrollUpBounce {
+  0% {
+    transform: translateY(0) scale(1);
   }
-  to {
-    opacity: 1;
+  50% {
+    transform: translateY(-5px) scale(1.01);
+  }
+  100% {
     transform: translateY(0) scale(1);
   }
 }
 
-@keyframes scrollUpSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.scroll-up-active {
+  animation: scrollUpBounce 0.4s ease-out;
 }
 
 :root {
