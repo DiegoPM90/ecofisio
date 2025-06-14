@@ -30,7 +30,7 @@ export default function Login() {
       
       // Redirigir según el rol
       if (data.user.role === 'admin') {
-        window.location.href = '/admin';
+        window.location.href = '/sys-management-panel';
       } else {
         window.location.href = '/';
       }
