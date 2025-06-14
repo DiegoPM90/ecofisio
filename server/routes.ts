@@ -1,16 +1,8 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import session from "express-session";
-import { body, validationResult } from "express-validator";
-import bcrypt from "bcryptjs";
 import { storage } from "./storage";
 import { getAIConsultationResponse } from "./openai";
-import { securityLogger } from "./securityLogger";
-import { auditLogger } from "./auditLogger";
-import { accessControlManager } from "./accessControl";
-import { dataRetentionManager } from "./dataRetention";
 import {
   insertAppointmentSchema,
   insertUserSchema,
@@ -24,8 +16,13 @@ import {
   type Appointment,
 } from "@shared/schema";
 
+// Interface para extender Request con session
+interface RequestWithSession extends Request {
+  session: any;
+}
+
 // Middleware para verificar autenticación
-function requireAuth(req: any, res: any, next: any) {
+function requireAuth(req: RequestWithSession, res: Response, next: NextFunction) {
   if (!req.session?.user) {
     return res.status(401).json({ message: "Authentication required" });
   }
@@ -33,7 +30,7 @@ function requireAuth(req: any, res: any, next: any) {
 }
 
 // Middleware para verificar rol de administrador
-function requireAdmin(req: any, res: any, next: any) {
+function requireAdmin(req: RequestWithSession, res: Response, next: NextFunction) {
   if (!req.session?.user || req.session.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
   }
@@ -44,219 +41,213 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Configurar trust proxy para Replit
   app.set('trust proxy', 1);
 
-  // Configuración de seguridad con Helmet
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    }
-  }));
-
-  // Rate limiting para prevenir ataques de fuerza bruta
-  const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // máximo 5 intentos por IP
-    message: { message: "Demasiados intentos de login. Intenta nuevamente en 15 minutos." },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-
-  const adminLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minuto
-    max: 30, // máximo 30 requests por minuto para rutas admin
-    message: { message: "Demasiadas solicitudes. Intenta nuevamente en un minuto." },
-  });
-
-  const generalLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minuto
-    max: 100, // máximo 100 requests por minuto para rutas generales
-    message: { message: "Demasiadas solicitudes. Intenta nuevamente en un minuto." },
-  });
-
-  // Aplicar rate limiting general
-  app.use(generalLimiter);
-
-  // Configurar sesiones con configuración segura
+  // Configuración básica de sesiones (sin store por ahora)
   app.use(session({
-    secret: process.env.SESSION_SECRET || 'ecofisio-session-secret-key-change-in-production',
+    secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // HTTPS en producción
-      httpOnly: true, // Prevenir acceso via JavaScript
-      maxAge: 8 * 60 * 60 * 1000, // 8 horas (más corto que antes)
-      sameSite: 'strict', // Protección CSRF
-    },
-    name: 'sessionId', // Cambiar nombre por defecto
+      secure: false, // Para desarrollo
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 horas
+    }
   }));
 
-  // Validadores para sanitización de entrada
-  const registerValidators = [
-    body('username').isLength({ min: 3, max: 30 }).isAlphanumeric().trim().escape(),
-    body('password').isLength({ min: 6, max: 100 }),
-    body('email').optional().isEmail().normalizeEmail(),
-    body('name').optional().isLength({ max: 100 }).trim().escape(),
-  ];
-
-  const loginValidators = [
-    body('username').isLength({ min: 1, max: 30 }).trim().escape(),
-    body('password').isLength({ min: 1, max: 100 }),
-  ];
-
-  // Rutas de autenticación con rate limiting y validación
-  app.post("/api/auth/register", registerValidators, async (req, res) => {
+  // === RUTAS DE AUTENTICACIÓN ===
+  
+  // Registro de usuario
+  app.post("/api/auth/register", async (req: RequestWithSession, res: Response) => {
     try {
-      // Verificar errores de validación
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
+      const validation = insertUserSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Datos inválidos",
+          errors: validation.error.errors 
+        });
       }
 
-      const validatedData = insertUserSchema.parse(req.body);
+      const { username, password, email, name } = validation.data;
       
       // Verificar si el usuario ya existe
-      const existingUser = await storage.getUserByUsername(validatedData.username);
+      const existingUser = await storage.getUserByUsername(username);
       if (existingUser) {
-        return res.status(400).json({ message: "El usuario ya existe" });
+        return res.status(409).json({ message: "El usuario ya existe" });
       }
 
-      // Hash de la contraseña antes de almacenar
-      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
-      const userData = { ...validatedData, password: hashedPassword };
+      // Crear usuario
+      const user = await storage.createUser({ username, password, email, name });
       
-      const user = await storage.createUser(userData);
-      
-      // No incluir la contraseña en la respuesta
-      const { password, ...userWithoutPassword } = user;
-      res.status(201).json({ message: "Usuario creado exitosamente", user: userWithoutPassword });
-    } catch (error: any) {
-      if (error.name === "ZodError") {
-        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
-      } else {
-        console.error("Error en registro:", error);
-        res.status(500).json({ message: "Error creando usuario" });
-      }
-    }
-  });
+      // Crear sesión
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        name: user.name
+      };
 
-  app.post("/api/auth/login", authLimiter, loginValidators, async (req, res) => {
-    try {
-      // Verificar errores de validación
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
-      }
-
-      const validatedData = loginSchema.parse(req.body);
-      
-      // Buscar usuario
-      const user = await storage.getUserByUsername(validatedData.username);
-      if (!user || !user.isActive) {
-        return res.status(401).json({ message: "Credenciales inválidas" });
-      }
-
-      // Verificar contraseña con bcrypt
-      const isValidPassword = await bcrypt.compare(validatedData.password, user.password || '');
-      if (!isValidPassword) {
-        // Log intento de login fallido
-        securityLogger.logFailedLogin(req.ip || 'unknown', validatedData.username, req.get('User-Agent'));
-        return res.status(401).json({ message: "Credenciales inválidas" });
-      }
-
-      // Log login exitoso en ambos sistemas
-      securityLogger.logSuccessfulLogin(req.ip || 'unknown', user.username, req.get('User-Agent'));
-      auditLogger.logSuccessfulAccess(
-        user.id.toString(),
-        user.role,
-        req.ip || 'unknown',
-        req.get('User-Agent') || 'unknown',
-        req.sessionID
-      );
-
-      // Regenerar sesión para prevenir session fixation
-      req.session.regenerate((err) => {
-        if (err) {
-          console.error("Error regenerando sesión:", err);
-          return res.status(500).json({ message: "Error en login" });
-        }
-
-        // Guardar usuario en sesión
-        (req.session as any).user = { id: user.id, username: user.username, role: user.role };
-        
-        req.session.save((err) => {
-          if (err) {
-            console.error("Error guardando sesión:", err);
-            return res.status(500).json({ message: "Error en login" });
-          }
-
-          const { password, ...userWithoutPassword } = user;
-          res.json({ message: "Login exitoso", user: userWithoutPassword });
-        });
+      res.status(201).json({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        token: "session-based"
       });
-    } catch (error: any) {
-      if (error.name === "ZodError") {
-        res.status(400).json({ message: "Datos inválidos", errors: error.errors });
-      } else {
-        console.error("Error en login:", error);
-        res.status(500).json({ message: "Error en login" });
-      }
+    } catch (error) {
+      console.error("Error en registro:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
     }
   });
 
-  app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Error cerrando sesión" });
+  // Login de usuario
+  app.post("/api/auth/login", async (req: RequestWithSession, res: Response) => {
+    try {
+      const validation = loginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Datos inválidos",
+          errors: validation.error.errors 
+        });
       }
+
+      const { username, password } = validation.data;
+      
+      const user = await storage.authenticateUser(username, password);
+      if (!user) {
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+
+      // Crear sesión
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        name: user.name
+      };
+
+      res.json({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        },
+        token: "session-based"
+      });
+    } catch (error) {
+      console.error("Error en login:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  });
+
+  // Logout
+  app.post("/api/auth/logout", (req: RequestWithSession, res: Response) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: "Error al cerrar sesión" });
+      }
+      res.clearCookie('connect.sid');
       res.json({ message: "Sesión cerrada exitosamente" });
     });
   });
 
-  app.get("/api/auth/me", requireAuth, async (req, res) => {
+  // Obtener usuario actual
+  app.get("/api/auth/me", requireAuth, async (req: RequestWithSession, res: Response) => {
     try {
       const user = await storage.getUser(req.session.user.id);
       if (!user) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
       
-      const { password, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      });
     } catch (error) {
-      res.status(500).json({ message: "Error obteniendo usuario" });
+      console.error("Error obteniendo usuario:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
     }
   });
 
-  // Rutas del panel de administración con rate limiting adicional
-  app.get("/api/admin/appointments", adminLimiter, requireAdmin, async (req, res) => {
+  // === RUTAS DE CITAS ===
+  
+  // Crear cita
+  app.post("/api/appointments", async (req: Request, res: Response) => {
+    try {
+      const validation = insertAppointmentSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Datos inválidos",
+          errors: validation.error.errors 
+        });
+      }
+
+      const appointment = await storage.createAppointment(validation.data);
+      res.status(201).json(appointment);
+    } catch (error) {
+      console.error("Error creando cita:", error);
+      res.status(500).json({ message: "Error al crear la cita" });
+    }
+  });
+
+  // Obtener todas las citas (requiere autenticación)
+  app.get("/api/appointments", requireAuth, async (req: Request, res: Response) => {
     try {
       const appointments = await storage.getAppointments();
       res.json(appointments);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error obteniendo citas:", error);
-      res.status(500).json({ message: "Error fetching appointments" });
+      res.status(500).json({ message: "Error al obtener las citas" });
     }
   });
 
-  app.delete("/api/admin/appointments/:id", adminLimiter, requireAdmin, [
-    body().isEmpty(), // No body esperado
-  ], async (req, res) => {
+  // Obtener horarios disponibles
+  app.get("/api/appointments/available-slots", async (req: Request, res: Response) => {
+    try {
+      const { date, specialty } = req.query;
+      if (!date || !specialty) {
+        return res.status(400).json({ message: "Fecha y especialidad son requeridos" });
+      }
+
+      const availableSlots = await storage.getAvailableTimeSlots(
+        date as string, 
+        specialty as string
+      );
+      res.json(availableSlots);
+    } catch (error) {
+      console.error("Error obteniendo horarios:", error);
+      res.status(500).json({ message: "Error al obtener horarios disponibles" });
+    }
+  });
+
+  // Actualizar cita (solo admin)
+  app.put("/api/appointments/:id", requireAdmin, async (req: RequestWithSession, res: Response) => {
     try {
       const id = parseInt(req.params.id);
+      const updates = req.body;
       
-      // Validar que el ID sea un número válido
-      if (isNaN(id) || id <= 0) {
-        return res.status(400).json({ message: "ID inválido" });
+      const updatedAppointment = await storage.updateAppointment(id, updates);
+      if (!updatedAppointment) {
+        return res.status(404).json({ message: "Cita no encontrada" });
       }
       
+      res.json(updatedAppointment);
+    } catch (error) {
+      console.error("Error actualizando cita:", error);
+      res.status(500).json({ message: "Error al actualizar la cita" });
+    }
+  });
+
+  // Eliminar cita (solo admin)
+  app.delete("/api/appointments/:id", requireAdmin, async (req: RequestWithSession, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
       const deleted = await storage.deleteAppointment(id);
       
       if (!deleted) {
@@ -264,268 +255,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ message: "Cita eliminada exitosamente" });
-    } catch (error: any) {
-      console.error("Error eliminando cita:", error);
-      res.status(500).json({ message: "Error eliminando cita" });
-    }
-  });
-
-  app.get("/api/admin/users", requireAdmin, async (req, res) => {
-    try {
-      // Obtener todos los usuarios sin contraseñas
-      const users: any[] = [];
-      res.json(users);
     } catch (error) {
-      res.status(500).json({ message: "Error obteniendo usuarios" });
+      console.error("Error eliminando cita:", error);
+      res.status(500).json({ message: "Error al eliminar la cita" });
     }
   });
 
-  app.patch("/api/admin/users/:id/role", requireAdmin, async (req, res) => {
+  // === RUTAS ADMIN ===
+  
+  // Obtener todos los usuarios (solo admin)
+  app.get("/api/admin/users", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const users = await storage.getAllUsers();
+      const safeUsers = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        isActive: user.isActive,
+        createdAt: user.createdAt
+      }));
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error obteniendo usuarios:", error);
+      res.status(500).json({ message: "Error al obtener usuarios" });
+    }
+  });
+
+  // Actualizar rol de usuario (solo admin)
+  app.put("/api/admin/users/:id/role", requireAdmin, async (req: RequestWithSession, res: Response) => {
     try {
       const id = parseInt(req.params.id);
       const { role } = req.body;
       
-      if (!role || !["user", "admin"].includes(role)) {
+      if (!["user", "admin"].includes(role)) {
         return res.status(400).json({ message: "Rol inválido" });
       }
       
       const updatedUser = await storage.updateUserRole(id, role);
-      
       if (!updatedUser) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
       
-      const { password, ...userWithoutPassword } = updatedUser;
-      res.json(userWithoutPassword);
-    } catch (error) {
-      res.status(500).json({ message: "Error actualizando usuario" });
-    }
-  });
-
-  // Endpoint para estadísticas de seguridad
-  app.get("/api/admin/security-stats", adminLimiter, requireAdmin, async (req, res) => {
-    try {
-      const user = req.session.user;
-      
-      // Verificar autorización con control de acceso
-      const authResult = accessControlManager.authorizeAccess(
-        user.id.toString(),
-        user.role,
-        'security_logs',
-        'read',
-        {
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.get('User-Agent') || 'unknown',
-          sessionId: req.sessionID,
-          purpose: 'security_monitoring'
-        }
-      );
-
-      if (!authResult.authorized) {
-        return res.status(403).json({ message: authResult.reason });
-      }
-
-      const stats = securityLogger.getSecurityStats();
-      const auditStats = auditLogger.getAuditStatistics();
-      
       res.json({
-        security: stats,
-        audit: auditStats,
-        compliance: {
-          hipaaCompliant: true,
-          iso27001Compliant: true,
-          lastAudit: new Date().toISOString()
-        }
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        isActive: updatedUser.isActive
       });
-    } catch (error: any) {
-      console.error("Error obteniendo estadísticas de seguridad:", error);
-      res.status(500).json({ message: "Error obteniendo estadísticas de seguridad" });
-    }
-  });
-
-  // Endpoint para logs de auditoría HIPAA
-  app.get("/api/admin/audit-logs", adminLimiter, requireAdmin, async (req, res) => {
-    try {
-      const user = req.session.user;
-      
-      const authResult = accessControlManager.authorizeAccess(
-        user.id.toString(),
-        user.role,
-        'audit_logs',
-        'read',
-        {
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.get('User-Agent') || 'unknown',
-          sessionId: req.sessionID,
-          purpose: 'compliance_audit'
-        }
-      );
-
-      if (!authResult.authorized) {
-        return res.status(403).json({ message: authResult.reason });
-      }
-
-      const { userId, action, startDate, endDate, riskLevel, phiAccessed } = req.query;
-      
-      const filters: any = {};
-      if (userId) filters.userId = userId as string;
-      if (action) filters.action = action as string;
-      if (startDate) filters.startDate = new Date(startDate as string);
-      if (endDate) filters.endDate = new Date(endDate as string);
-      if (riskLevel) filters.riskLevel = riskLevel as string;
-      if (phiAccessed !== undefined) filters.phiAccessed = phiAccessed === 'true';
-
-      const auditLogs = auditLogger.getAuditLogs(filters);
-      
-      res.json(auditLogs);
-    } catch (error: any) {
-      console.error("Error obteniendo logs de auditoría:", error);
-      res.status(500).json({ message: "Error obteniendo logs de auditoría" });
-    }
-  });
-
-  // Endpoint para ejecutar purga de datos (retención)
-  app.post("/api/admin/data-retention/purge", adminLimiter, requireAdmin, async (req, res) => {
-    try {
-      const user = req.session.user;
-      
-      const authResult = accessControlManager.authorizeAccess(
-        user.id.toString(),
-        user.role,
-        'data_retention',
-        'delete',
-        {
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.get('User-Agent') || 'unknown',
-          sessionId: req.sessionID,
-          purpose: 'compliance_retention',
-          justification: 'HIPAA data retention compliance'
-        }
-      );
-
-      if (!authResult.authorized) {
-        return res.status(403).json({ message: authResult.reason });
-      }
-
-      const result = await dataRetentionManager.executePurge(
-        user.id.toString(),
-        user.role,
-        req.ip || 'unknown',
-        req.sessionID
-      );
-      
-      res.json(result);
-    } catch (error: any) {
-      console.error("Error ejecutando purga de datos:", error);
-      res.status(500).json({ message: "Error ejecutando purga de datos" });
-    }
-  });
-
-  // Endpoint para reporte de retención
-  app.get("/api/admin/data-retention/report", adminLimiter, requireAdmin, async (req, res) => {
-    try {
-      const user = req.session.user;
-      
-      const authResult = accessControlManager.authorizeAccess(
-        user.id.toString(),
-        user.role,
-        'compliance_reports',
-        'read',
-        {
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.get('User-Agent') || 'unknown',
-          sessionId: req.sessionID,
-          purpose: 'compliance_reporting'
-        }
-      );
-
-      if (!authResult.authorized) {
-        return res.status(403).json({ message: authResult.reason });
-      }
-
-      const report = dataRetentionManager.generateRetentionReport();
-      res.json(report);
-    } catch (error: any) {
-      console.error("Error generando reporte de retención:", error);
-      res.status(500).json({ message: "Error generando reporte de retención" });
-    }
-  });
-
-  // Get all appointments (público)
-  app.get("/api/appointments", async (req, res) => {
-    try {
-      const appointments = await storage.getAppointments();
-      res.json(appointments);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching appointments" });
+      console.error("Error actualizando rol:", error);
+      res.status(500).json({ message: "Error al actualizar rol" });
     }
   });
 
-  // Create new appointment
-  app.post("/api/appointments", async (req, res) => {
+  // === RUTA AI ===
+  
+  // Consulta AI
+  app.post("/api/ai-consultation", async (req: Request, res: Response) => {
     try {
-      const validatedData = insertAppointmentSchema.parse(req.body);
-      const appointment = await storage.createAppointment(validatedData);
-      res.status(201).json(appointment);
-    } catch (error) {
-      if (error.name === "ZodError") {
-        res.status(400).json({ message: "Invalid appointment data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Error creating appointment" });
-      }
-    }
-  });
-
-  // Get available time slots for a date and specialty
-  app.get("/api/appointments/availability", async (req, res) => {
-    try {
-      const { date, specialty } = req.query;
-      
-      if (!date || !specialty) {
-        return res.status(400).json({ message: "Date and specialty are required" });
+      const validation = aiConsultationSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Datos inválidos",
+          errors: validation.error.errors 
+        });
       }
 
-      const availableSlots = await storage.getAvailableTimeSlots(
-        date as string, 
-        specialty as string
-      );
-      res.json({ availableSlots });
+      const response = await getAIConsultationResponse(validation.data);
+      res.json(response);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching availability" });
-    }
-  });
-
-  // Get AI consultation response
-  app.post("/api/ai-consultation", async (req, res) => {
-    try {
-      const validatedData = aiConsultationSchema.parse(req.body);
-      const aiResponse = await getAIConsultationResponse(validatedData);
-      res.json(aiResponse);
-    } catch (error) {
-      if (error.name === "ZodError") {
-        res.status(400).json({ message: "Invalid consultation data", errors: error.errors });
-      } else {
-        console.error("AI consultation error:", error);
-        res.status(500).json({ message: "Error generating AI consultation" });
-      }
-    }
-  });
-
-  // Update appointment (for adding AI recommendation)
-  app.patch("/api/appointments/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      
-      const updatedAppointment = await storage.updateAppointment(id, updates);
-      
-      if (!updatedAppointment) {
-        return res.status(404).json({ message: "Appointment not found" });
-      }
-      
-      res.json(updatedAppointment);
-    } catch (error) {
-      res.status(500).json({ message: "Error updating appointment" });
+      console.error("Error en consulta AI:", error);
+      res.status(500).json({ message: "Error en consulta AI" });
     }
   });
 
