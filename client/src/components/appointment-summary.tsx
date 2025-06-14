@@ -1,10 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarCheck } from "lucide-react";
+import { CalendarCheck, CalendarDays, Clock, User, Phone, Mail, FileText, Activity, CheckCircle, CalendarX, Copy, Info } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { InsertAppointment } from "@shared/schema";
+import { Link } from "wouter";
+import type { InsertAppointment, Appointment } from "@shared/schema";
 
 interface AppointmentSummaryProps {
   formData: {
@@ -23,10 +24,19 @@ interface AppointmentSummaryProps {
 export default function AppointmentSummary({ formData, selectedDate, selectedTime }: AppointmentSummaryProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [bookedAppointment, setBookedAppointment] = useState<Appointment | null>(null);
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: InsertAppointment) => {
-      return await appointmentApi.createAppointment(data);
+      const response = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error(`Error creating appointment: ${response.statusText}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
