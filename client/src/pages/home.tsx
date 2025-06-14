@@ -121,34 +121,34 @@ export default function Home() {
               Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 hover:rotate-1 ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardFlipIn_1s_ease-out_0.6s_forwards]' 
-                  : 'opacity-0 -translate-x-20'
+                  ? 'opacity-100 animate-[cardFadeIn_0.6s_ease-out_0.6s_forwards]' 
+                  : 'opacity-0 translate-y-5'
               }`}>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite]">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Calendar className="text-blue-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Reserva Rápida</h3>
                 <p className="text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 hover:rotate-2 ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardZoomIn_1s_ease-out_0.8s_forwards]' 
-                  : 'opacity-0 translate-y-20'
+                  ? 'opacity-100 animate-[cardSlideUp_0.6s_ease-out_0.8s_forwards]' 
+                  : 'opacity-0 translate-y-5'
               }`}>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_0.5s]">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Bot className="text-green-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Asistente IA</h3>
                 <p className="text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-2xl hover:-translate-y-3 hover:scale-105 hover:-rotate-1 ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-500 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardWaveIn_1s_ease-out_1s_forwards]' 
-                  : 'opacity-0 translate-x-20'
+                  ? 'opacity-100 animate-[cardGentleScale_0.6s_ease-out_1s_forwards]' 
+                  : 'opacity-0 scale-95'
               }`}>
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4 animate-[pulse_2s_ease-in-out_infinite_1s]">
+                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Shield className="text-amber-600 w-6 h-6" />
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2">Datos Seguros</h3>
