@@ -105,16 +105,8 @@ export class MemStorage implements IStorage {
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {
-    const kinesiologists = {
-      'rehabilitacion': 'Dr. Carlos Mendoza',
-      'deportiva': 'Dra. Ana Ruiz',
-      'respiratoria': 'Dr. Luis Fernández',
-      'neurológica': 'Dra. María González',
-      'pediátrica': 'Dr. José Martínez',
-      'geriátrica': 'Dra. Carmen López'
-    };
-    
-    return kinesiologists[specialty as keyof typeof kinesiologists] || 'Dr. Especialista Asignado';
+    // Diego Pizarro Monroy es el kinesiólogo principal para todas las especialidades
+    return 'Diego Pizarro Monroy';
   }
 }
 
