@@ -1,11 +1,31 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { HeartPulse, Calendar, Bot, Shield, Menu, X } from "lucide-react";
 import { Link } from "wouter";
-import BookingForm from "@/components/booking-form";
-import CalendarView from "@/components/calendar-view";
-import AppointmentSummary from "@/components/appointment-summary";
-import AppointmentsList from "@/components/appointments-list";
 import { useScrollIntoView } from "@/hooks/use-scroll-effects";
+import { useSEO } from "@/hooks/use-seo";
+
+// Lazy load heavy components for better initial page load
+const BookingForm = lazy(() => import("@/components/booking-form"));
+const CalendarView = lazy(() => import("@/components/calendar-view"));
+const AppointmentSummary = lazy(() => import("@/components/appointment-summary"));
+const AppointmentsList = lazy(() => import("@/components/appointments-list"));
+
+// Loading skeleton for form components
+const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
+  <div className={`${height} bg-white rounded-xl border border-slate-200 animate-pulse`}>
+    <div className="p-6">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="w-8 h-8 bg-slate-300 rounded-lg"></div>
+        <div className="h-5 bg-slate-300 rounded w-48"></div>
+      </div>
+      <div className="space-y-4">
+        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+        <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+      </div>
+    </div>
+  </div>
+);
 
 
 // Logo component inline
@@ -50,6 +70,15 @@ const EcofisioLogo = ({ size = 32 }: { size?: number }) => (
 );
 
 export default function Home() {
+  // SEO optimization for homepage
+  useSEO({
+    title: 'Ecofisio - Reserva tu Sesión de Kinesiología Online',
+    description: 'Agenda sesiones de kinesiología y fisioterapia con profesionales certificados. Sistema inteligente con IA para orientación personalizada. Reserva fácil y rápida.',
+    keywords: 'kinesiología online, fisioterapia, reserva cita, rehabilitación, masajes terapéuticos, consulta IA, profesionales certificados',
+    ogTitle: 'Ecofisio - Tu Centro de Kinesiología Digital',
+    ogDescription: 'Reserva sesiones de kinesiología con los mejores profesionales. Sistema inteligente y consulta IA incluida.'
+  });
+
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -212,10 +241,12 @@ export default function Home() {
               : 'opacity-0 -translate-x-32 scale-95'
           }`}
         >
-          <BookingForm 
-            onFormDataChange={setFormData}
-            formData={formData}
-          />
+          <Suspense fallback={<ComponentLoader />}>
+            <BookingForm 
+              onFormDataChange={setFormData}
+              formData={formData}
+            />
+          </Suspense>
         </section>
 
         {/* Calendar Section */}
@@ -227,10 +258,12 @@ export default function Home() {
               : 'opacity-0 translate-x-32 scale-95'
           }`}
         >
-          <CalendarView 
-            onDateSelect={setSelectedDate}
-            onTimeSelect={setSelectedTime}
-          />
+          <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
+            <CalendarView 
+              onDateSelect={setSelectedDate}
+              onTimeSelect={setSelectedTime}
+            />
+          </Suspense>
         </section>
 
         {/* Appointment Summary */}
@@ -242,11 +275,13 @@ export default function Home() {
               : 'opacity-0 translate-y-16 scale-95'
           }`}
         >
-          <AppointmentSummary
-            formData={formData}
-            selectedDate={selectedDate}
-            selectedTime={selectedTime}
-          />
+          <Suspense fallback={<ComponentLoader height="h-80" />}>
+            <AppointmentSummary
+              formData={formData}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+            />
+          </Suspense>
         </section>
 
         {/* Appointments List */}

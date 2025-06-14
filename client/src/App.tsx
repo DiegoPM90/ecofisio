@@ -3,19 +3,34 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Home from "@/pages/home";
-import Cancel from "@/pages/cancel";
-import Status from "@/pages/status";
-import NotFound from "@/pages/not-found";
+import { lazy, Suspense } from "react";
+
+// Lazy load pages for better performance
+const Home = lazy(() => import("@/pages/home"));
+const Cancel = lazy(() => import("@/pages/cancel"));
+const Status = lazy(() => import("@/pages/status"));
+const NotFound = lazy(() => import("@/pages/not-found"));
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-slate-600 text-sm">Cargando...</p>
+    </div>
+  </div>
+);
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/cancel" component={Cancel} />
-      <Route path="/status" component={Status} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/cancel" component={Cancel} />
+        <Route path="/status" component={Status} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
