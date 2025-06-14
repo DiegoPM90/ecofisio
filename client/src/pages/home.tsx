@@ -102,7 +102,7 @@ export default function Home() {
                 Reservas
               </a>
               <Link href="/status" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
-                Estado
+                Estado de Citas
               </Link>
             </nav>
           </div>
