@@ -121,9 +121,9 @@ export default function Home() {
               Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardFadeIn_1s_ease-out_0.6s_forwards]' 
+                  ? 'opacity-100 animate-[cardFadeIn_1.5s_ease-out_0.8s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -132,9 +132,9 @@ export default function Home() {
                 <h3 className="font-semibold text-slate-900 mb-2">Reserva Rápida</h3>
                 <p className="text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardSlideUp_1s_ease-out_0.8s_forwards]' 
+                  ? 'opacity-100 animate-[cardSlideUp_1.5s_ease-out_1.2s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -143,9 +143,9 @@ export default function Home() {
                 <h3 className="font-semibold text-slate-900 mb-2">Asistente IA</h3>
                 <p className="text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
               </div>
-              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-700 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+              <div className={`bg-white p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardGentleScale_1s_ease-out_1s_forwards]' 
+                  ? 'opacity-100 animate-[cardGentleScale_1.5s_ease-out_1.6s_forwards]' 
                   : 'opacity-0 scale-90'
               }`}>
                 <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
