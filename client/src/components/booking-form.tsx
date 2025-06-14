@@ -15,9 +15,10 @@ import AIAssistant from "./ai-assistant";
 interface BookingFormProps {
   onFormDataChange: (data: any) => void;
   formData: any;
+  onSubmit?: () => void;
 }
 
-export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
+export default function BookingForm({ onFormDataChange, formData, onSubmit }: BookingFormProps) {
   const form = useForm<InsertAppointment>({
     resolver: zodResolver(insertAppointmentSchema),
     defaultValues: formData,

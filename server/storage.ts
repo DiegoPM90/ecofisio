@@ -29,10 +29,12 @@ export class MemStorage implements IStorage {
       date: insertAppointment.date,
       time: insertAppointment.time,
       specialty: insertAppointment.specialty,
-      kinesiologo: this.getKinesiologistForSpecialty(insertAppointment.specialty),
+      kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       sessions: insertAppointment.sessions || 1,
       reason: insertAppointment.reason,
-      reasonDetail: insertAppointment.reasonDetail,
+      reasonDetail: insertAppointment.reasonDetail || null,
+      status: "confirmed",
+      aiRecommendation: null,
       createdAt: new Date(),
     };
     this.appointments.set(id, appointment);
@@ -77,14 +79,14 @@ export class MemStorage implements IStorage {
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {
-    const kinesiologists = {
+    const kinesiologists: Record<string, string> = {
       "Fisioterapia General": "Dr. María González",
       "Rehabilitación Deportiva": "Dr. Carlos Rodríguez",
       "Terapia Manual": "Dr. Ana Martínez",
       "Fisioterapia Pediátrica": "Dr. Luis Fernández",
       "Fisioterapia Neurológica": "Dr. Carmen López"
     };
-    return kinesiologists[specialty] || "Dr. Staff Ecofisio";
+    return kinesiologists[specialty as keyof typeof kinesiologists] || "Dr. Staff Ecofisio";
   }
 }
 
