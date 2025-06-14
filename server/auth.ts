@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
 import { User } from '@shared/schema';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-dev';
+const JWT_SECRET = process.env.JWT_SECRET || 'ecofisio-dev-secret-key-2024';
 const JWT_EXPIRES_IN = '24h';
 
 export interface AuthRequest extends Request {

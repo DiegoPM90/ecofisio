@@ -247,6 +247,14 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-slate-200 mt-8 pt-8 text-center text-sm text-slate-600">
+            <div className="mb-4">
+              <a 
+                href="/login" 
+                className="text-slate-500 hover:text-blue-600 transition-colors text-xs"
+              >
+                Acceso Administrativo
+              </a>
+            </div>
             <p>&copy; 2025 Ecofisio. Todos los derechos reservados.</p>
           </div>
         </div>
