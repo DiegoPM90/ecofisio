@@ -166,10 +166,15 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
                   <Copy className="h-3 w-3" />
                 </Button>
               </div>
-              <div className="mt-3">
+              <div className="mt-3 flex gap-2">
                 <Link href="/cancel">
                   <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
                     Cancelar Cita
+                  </Button>
+                </Link>
+                <Link href="/status">
+                  <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
+                    Ver Estado
                   </Button>
                 </Link>
               </div>

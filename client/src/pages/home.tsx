@@ -79,13 +79,16 @@ export default function Home() {
               <EcofisioLogo size={32} />
               <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
-            <nav className="hidden md:flex space-x-6">
+            <nav className="hidden md:flex space-x-6 items-center">
               <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
                 Inicio
               </a>
               <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
                 Mis Reservas
               </a>
+              <Link href="/status" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
+                Estado de Cita
+              </Link>
               <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
                 Contacto
               </a>
