@@ -27,7 +27,7 @@ class MFAManager {
 
   // Generar secreto TOTP para un usuario
   generateTOTPSecret(userId: string): { secret: string; qrCodeUrl: string; backupCodes: string[] } {
-    const secret = crypto.randomBytes(20).toString('base32');
+    const secret = crypto.randomBytes(20).toString('hex').toUpperCase();
     const backupCodes = this.generateBackupCodes();
     
     const mfaSecret: MFASecret = {
@@ -239,7 +239,7 @@ class MFAManager {
     timeBuffer.writeUInt32BE(Math.floor(timeStep / 0x100000000), 0);
     timeBuffer.writeUInt32BE(timeStep & 0xffffffff, 4);
 
-    const secretBuffer = Buffer.from(secret, 'base32');
+    const secretBuffer = Buffer.from(secret, 'hex');
     const hmac = crypto.createHmac('sha1', secretBuffer);
     hmac.update(timeBuffer);
     const digest = hmac.digest();
