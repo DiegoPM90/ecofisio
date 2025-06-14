@@ -8,9 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 interface CalendarViewProps {
   onDateSelect?: (date: string) => void;
   onTimeSelect?: (time: string) => void;
+  selectedDate?: string;
+  specialty?: string;
 }
 
-export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarViewProps) {
+export default function CalendarView({ onDateSelect, onTimeSelect, selectedDate: propSelectedDate, specialty }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");

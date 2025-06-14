@@ -19,9 +19,10 @@ interface AppointmentSummaryProps {
   };
   selectedDate?: string;
   selectedTime?: string;
+  onComplete?: () => void;
 }
 
-export default function AppointmentSummary({ formData, selectedDate, selectedTime }: AppointmentSummaryProps) {
+export default function AppointmentSummary({ formData, selectedDate, selectedTime, onComplete }: AppointmentSummaryProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

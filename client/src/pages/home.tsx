@@ -214,7 +214,7 @@ export default function Home() {
                   onDateSelect={handleDateSelect}
                   onTimeSelect={handleTimeSelect}
                   selectedDate={selectedDate}
-                  specialty={formData.specialty}
+                  specialty={(formData as any).specialty}
                 />
               )}
               
