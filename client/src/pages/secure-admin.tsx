@@ -33,7 +33,7 @@ export default function SecureAdminPanel() {
   }, []);
 
   // Query para obtener citas
-  const { data: appointments = [], isLoading, refetch } = useQuery({
+  const { data: appointments = [], isLoading, refetch } = useQuery<Appointment[]>({
     queryKey: ['/api/admin/appointments'],
     enabled: isAuthenticated,
   });
@@ -93,9 +93,9 @@ export default function SecureAdminPanel() {
 
   // Calcular estadísticas
   const totalAppointments = appointments.length;
-  const pendingAppointments = appointments.filter((apt: Appointment) => apt.status === 'pendiente').length;
-  const confirmedAppointments = appointments.filter((apt: Appointment) => apt.status === 'confirmada').length;
-  const cancelledAppointments = appointments.filter((apt: Appointment) => apt.status === 'cancelada').length;
+  const pendingAppointments = appointments.filter(apt => apt.status === 'pendiente').length;
+  const confirmedAppointments = appointments.filter(apt => apt.status === 'confirmada').length;
+  const cancelledAppointments = appointments.filter(apt => apt.status === 'cancelada').length;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -105,7 +105,7 @@ export default function SecureAdminPanel() {
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-slate-900">Panel Administrativo Seguro</h1>
-              <p className="text-sm text-slate-600">Bienvenido, {user?.firstName || 'Administrador'}</p>
+              <p className="text-sm text-slate-600">Bienvenido, {user?.name || 'Administrador'}</p>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-slate-600">🛡️ Acceso Restringido</span>
@@ -224,10 +224,10 @@ export default function SecureAdminPanel() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-slate-900">
-                          {appointment.appointmentDate}
+                          {appointment.date}
                         </div>
                         <div className="text-sm text-slate-500">
-                          {appointment.appointmentTime}
+                          {appointment.time}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
