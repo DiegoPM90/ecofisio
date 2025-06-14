@@ -38,16 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Conectar a MongoDB si está configurado
-  if (process.env.MONGODB_URI) {
-    try {
-      await connectToMongoDB();
-    } catch (error) {
-      console.error('No se pudo conectar a MongoDB, usando almacenamiento en memoria');
-    }
-  } else {
-    console.log('📝 Usando almacenamiento en memoria - Para usar MongoDB, configura MONGODB_URI');
-  }
+  // Usar solo almacenamiento en memoria por ahora
+  console.log('📝 Usando almacenamiento en memoria - Los datos se reinician con cada deployment');
 
   const server = await registerRoutes(app);
 
