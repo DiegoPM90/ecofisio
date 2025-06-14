@@ -1,18 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAppointmentSchema, aiConsultationSchema, insertUserSchema, loginSchema } from "@shared/schema";
+import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
-import session from "express-session";
-import rateLimit from "express-rate-limit";
-import helmet from "helmet";
-import { body, validationResult } from "express-validator";
-import bcrypt from "bcryptjs";
-import { securityLogger } from "./securityLogger";
-import { auditLogger } from "./auditLogger";
-import { accessControlManager } from "./accessControl";
-import { hipaaCompliance } from "./hipaaCompliance";
-import { dataRetentionManager } from "./dataRetention";
 
 // Middleware para verificar autenticación
 function requireAuth(req: any, res: any, next: any) {
