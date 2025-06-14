@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useLogout } from "@/hooks/useAuth";
 import { adminApi } from "@/lib/authApi";
+import ComplianceDashboard from "@/components/compliance-dashboard";
 import { Link } from "wouter";
 import { 
   Calendar, 
@@ -189,9 +190,10 @@ export default function AdminPanel() {
 
         {/* Main Content */}
         <Tabs defaultValue="appointments" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="appointments">Gestión de Citas</TabsTrigger>
             <TabsTrigger value="users">Gestión de Usuarios</TabsTrigger>
+            <TabsTrigger value="compliance">Cumplimiento HIPAA/ISO</TabsTrigger>
           </TabsList>
 
           <TabsContent value="appointments" className="space-y-4">
@@ -338,6 +340,10 @@ export default function AdminPanel() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="compliance" className="space-y-4">
+            <ComplianceDashboard />
           </TabsContent>
         </Tabs>
       </div>

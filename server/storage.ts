@@ -1,5 +1,7 @@
 import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
 import bcrypt from "bcryptjs";
+import { hipaaCompliance } from "./hipaaCompliance";
+import { auditLogger } from "./auditLogger";
 
 export interface IStorage {
   // User authentication methods
