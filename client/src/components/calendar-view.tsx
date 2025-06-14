@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 interface CalendarViewProps {
   onDateSelect?: (date: string) => void;
   onTimeSelect?: (time: string) => void;
-  selectedDate?: string;
-  specialty?: string;
 }
 
-export default function CalendarView({ onDateSelect, onTimeSelect, selectedDate: propSelectedDate, specialty }: CalendarViewProps) {
+export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");

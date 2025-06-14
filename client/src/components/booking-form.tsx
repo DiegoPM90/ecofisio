@@ -1,4 +1,3 @@
-import React from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,10 +14,9 @@ import AIAssistant from "./ai-assistant";
 interface BookingFormProps {
   onFormDataChange: (data: any) => void;
   formData: any;
-  onSubmit?: () => void;
 }
 
-export default function BookingForm({ onFormDataChange, formData, onSubmit }: BookingFormProps) {
+export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
   const form = useForm<InsertAppointment>({
     resolver: zodResolver(insertAppointmentSchema),
     defaultValues: formData,

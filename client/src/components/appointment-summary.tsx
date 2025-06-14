@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarCheck } from "lucide-react";
@@ -19,10 +18,9 @@ interface AppointmentSummaryProps {
   };
   selectedDate?: string;
   selectedTime?: string;
-  onComplete?: () => void;
 }
 
-export default function AppointmentSummary({ formData, selectedDate, selectedTime, onComplete }: AppointmentSummaryProps) {
+export default function AppointmentSummary({ formData, selectedDate, selectedTime }: AppointmentSummaryProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

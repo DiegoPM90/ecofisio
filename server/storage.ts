@@ -1,7 +1,4 @@
 import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
-import bcrypt from "bcryptjs";
-import { hipaaCompliance } from "./hipaaCompliance";
-import { auditLogger } from "./auditLogger";
 
 export interface IStorage {
   // User authentication methods
@@ -12,7 +9,6 @@ export interface IStorage {
   createGoogleUser(googleId: string, email: string, name: string): Promise<User>;
   getUserByGoogleId(googleId: string): Promise<User | undefined>;
   updateUserRole(id: number, role: string): Promise<User | undefined>;
-  getAllUsers(): Promise<User[]>;
   
   // Appointment methods
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
@@ -35,12 +31,11 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentAppointmentId = 1;
     
-    // Crear usuario administrador por defecto con contraseña hasheada
-    const hashedPassword = bcrypt.hashSync("admin123", 12);
+    // Crear usuario administrador por defecto
     const adminUser: User = {
       id: 1,
       username: "admin",
-      password: hashedPassword,
+      password: "admin123",
       email: "admin@ecofisio.com",
       googleId: null,
       name: "Administrador",
@@ -57,25 +52,20 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const userArray = Array.from(this.users.values());
-    for (const user of userArray) {
-      if (user.username === username) {
-        return user;
-      }
-    }
-    return undefined;
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const hashedPassword = await bcrypt.hash(insertUser.password, 12);
     const id = this.currentUserId++;
     const user: User = { 
       id,
       username: insertUser.username,
-      password: hashedPassword,
+      password: insertUser.password || null,
       email: insertUser.email || null,
-      googleId: null,
       name: insertUser.name || null,
+      googleId: null,
       role: "user",
       isActive: true,
       createdAt: new Date(),
@@ -85,11 +75,13 @@ export class MemStorage implements IStorage {
   }
 
   async authenticateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.getUserByUsername(username);
-    if (!user) return null;
-    
-    const isValid = await bcrypt.compare(password, user.password || '');
-    return isValid ? user : null;
+    const userArray = Array.from(this.users.values());
+    for (const user of userArray) {
+      if (user.username === username && user.password === password && user.isActive) {
+        return user;
+      }
+    }
+    return null;
   }
 
   async createGoogleUser(googleId: string, email: string, name: string): Promise<User> {
@@ -129,10 +121,6 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
-  }
-
   async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
     const id = this.currentAppointmentId++;
     const appointment: Appointment = {
@@ -140,14 +128,14 @@ export class MemStorage implements IStorage {
       patientName: insertAppointment.patientName,
       email: insertAppointment.email,
       phone: insertAppointment.phone,
-      date: insertAppointment.date,
-      time: insertAppointment.time,
       specialty: insertAppointment.specialty,
-      kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
-      sessions: insertAppointment.sessions || 1,
       reason: insertAppointment.reason,
       reasonDetail: insertAppointment.reasonDetail || null,
+      sessions: insertAppointment.sessions || 1,
+      date: insertAppointment.date,
+      time: insertAppointment.time,
       status: "confirmed",
+      kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       aiRecommendation: null,
       createdAt: new Date(),
     };
@@ -156,36 +144,50 @@ export class MemStorage implements IStorage {
   }
 
   async getAppointments(): Promise<Appointment[]> {
-    return Array.from(this.appointments.values());
+    return Array.from(this.appointments.values()).sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
   }
 
   async getAppointmentsByDate(date: string): Promise<Appointment[]> {
-    const appointmentsArray = Array.from(this.appointments.values());
-    return appointmentsArray.filter(appointment => appointment.date === date);
+    return Array.from(this.appointments.values())
+      .filter(apt => apt.date === date)
+      .sort((a, b) => a.time.localeCompare(b.time));
   }
 
   async getAvailableTimeSlots(date: string, specialty: string): Promise<string[]> {
-    const allSlots = [
-      "09:00", "10:00", "11:00", "12:00",
-      "14:00", "15:00", "16:00", "17:00", "18:00"
-    ];
+    const selectedDate = new Date(date);
+    const weekday = selectedDate.getDay();
     
-    const bookedAppointments = await this.getAppointmentsByDate(date);
-    const bookedSlots = bookedAppointments
-      .filter(apt => apt.specialty === specialty)
-      .map(apt => apt.time);
+    let availableSlots: string[] = [];
     
-    return allSlots.filter(slot => !bookedSlots.includes(slot));
+    switch (weekday) {
+      case 3: // Wednesday
+        availableSlots = ['19:30', '20:30'];
+        break;
+      case 5: // Friday
+        availableSlots = ['18:30', '19:30'];
+        break;
+      case 6: // Saturday
+        availableSlots = ['10:00', '11:00', '12:00', '13:00'];
+        break;
+      default:
+        return []; // No availability on other days
+    }
+    
+    const bookedSlots = await this.getAppointmentsByDate(date);
+    const bookedTimes = bookedSlots.map(apt => apt.time);
+    
+    return availableSlots.filter(slot => !bookedTimes.includes(slot));
   }
 
   async updateAppointment(id: number, updates: Partial<Appointment>): Promise<Appointment | undefined> {
     const appointment = this.appointments.get(id);
-    if (appointment) {
-      const updatedAppointment = { ...appointment, ...updates };
-      this.appointments.set(id, updatedAppointment);
-      return updatedAppointment;
-    }
-    return undefined;
+    if (!appointment) return undefined;
+    
+    const updatedAppointment = { ...appointment, ...updates };
+    this.appointments.set(id, updatedAppointment);
+    return updatedAppointment;
   }
 
   async deleteAppointment(id: number): Promise<boolean> {
@@ -193,14 +195,12 @@ export class MemStorage implements IStorage {
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {
-    const kinesiologists: Record<string, string> = {
-      "Fisioterapia General": "Dr. María González",
-      "Rehabilitación Deportiva": "Dr. Carlos Rodríguez",
-      "Terapia Manual": "Dr. Ana Martínez",
-      "Fisioterapia Pediátrica": "Dr. Luis Fernández",
-      "Fisioterapia Neurológica": "Dr. Carmen López"
+    const kinesiologists = {
+      "sesiones-kinesiterapia-fisioterapia": "Klgo. Diego Pizarro Monroy",
+      "masaje-descontracturante": "Klgo. Diego Pizarro Monroy",
+      "masaje-relajacion": "Klgo. Diego Pizarro Monroy"
     };
-    return kinesiologists[specialty as keyof typeof kinesiologists] || "Dr. Staff Ecofisio";
+    return kinesiologists[specialty as keyof typeof kinesiologists] || "Klgo. Diego Pizarro Monroy";
   }
 }
 
