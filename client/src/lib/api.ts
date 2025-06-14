@@ -34,6 +34,13 @@ export const appointmentApi = {
     return response.json();
   },
 
+  // Get appointment status by token
+  getAppointmentStatus: async (token: string): Promise<{ appointment: Appointment }> => {
+    const response = await fetch(`/api/appointments/status/${token}`);
+    if (!response.ok) throw new Error("Failed to get appointment status");
+    return response.json();
+  },
+
   // Cancel appointment by token
   cancelAppointment: async (token: string): Promise<{ message: string; appointment: Appointment }> => {
     const response = await fetch(`/api/appointments/cancel/${token}`, {

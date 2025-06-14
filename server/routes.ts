@@ -66,6 +66,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Consultar estado de cita por token
+  app.get("/api/appointments/status/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const appointment = await storage.getAppointmentByToken(token);
+      
+      if (!appointment) {
+        return res.status(404).json({ message: "Cita no encontrada" });
+      }
+
+      res.json({
+        appointment: {
+          id: appointment.id,
+          patientName: appointment.patientName,
+          date: appointment.date,
+          time: appointment.time,
+          specialty: appointment.specialty,
+          sessions: appointment.sessions,
+          status: appointment.status,
+          kinesiologistName: appointment.kinesiologistName,
+          createdAt: appointment.createdAt
+        }
+      });
+    } catch (error) {
+      console.error("Error consultando estado de cita:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  });
+
   // Cancelar cita por token
   app.post("/api/appointments/cancel/:token", async (req, res) => {
     try {
