@@ -26,8 +26,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
 
   const createAppointmentMutation = useMutation({
     mutationFn: async (data: InsertAppointment) => {
-      const response = await apiRequest("POST", "/api/appointments", data);
-      return response.json();
+      return await appointmentApi.createAppointment(data);
     },
     onSuccess: () => {
       toast({

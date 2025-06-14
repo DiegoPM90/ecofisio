@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
+import { notificationService } from "./notifications";
+import * as cron from 'node-cron';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -24,6 +26,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertAppointmentSchema.parse(req.body);
       const appointment = await storage.createAppointment(validatedData);
+      
+      // Enviar notificaciones inmediatamente después de crear la cita
+      try {
+        await notificationService.sendAppointmentConfirmation(appointment);
+      } catch (notificationError) {
+        console.error("Error enviando notificaciones:", notificationError);
+        // No fallar la creación de la cita si falla la notificación
+      }
+      
       res.status(201).json(appointment);
     } catch (error) {
       console.error("Error creando cita:", error);
@@ -55,6 +66,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cancelar cita por token
+  app.post("/api/appointments/cancel/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      const appointment = await storage.getAppointmentByToken(token);
+      
+      if (!appointment) {
+        return res.status(404).json({ message: "Cita no encontrada" });
+      }
+
+      if (appointment.status === 'cancelada') {
+        return res.status(400).json({ message: "La cita ya está cancelada" });
+      }
+
+      const updatedAppointment = await storage.updateAppointment(appointment.id, { 
+        status: 'cancelada' 
+      });
+
+      if (updatedAppointment) {
+        try {
+          await notificationService.sendCancellationNotification(updatedAppointment);
+        } catch (notificationError) {
+          console.error("Error enviando notificación de cancelación:", notificationError);
+        }
+      }
+
+      res.json({ message: "Cita cancelada exitosamente", appointment: updatedAppointment });
+    } catch (error) {
+      console.error("Error cancelando cita:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  });
+
   // === RUTAS DE IA ===
   
   // Consulta de IA
@@ -68,6 +112,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error procesando consulta de IA" });
     }
   });
+
+  // === SISTEMA DE RECORDATORIOS AUTOMATIZADOS ===
+  
+  // Configurar cron job para enviar recordatorios diarios a las 9:00 AM
+  cron.schedule('0 9 * * *', async () => {
+    console.log('Ejecutando tarea de recordatorios automáticos...');
+    try {
+      const appointmentsForReminder = await storage.getAppointmentsForReminder();
+      
+      for (const appointment of appointmentsForReminder) {
+        try {
+          await notificationService.sendAppointmentReminder(appointment);
+          // Marcar como recordatorio enviado
+          await storage.updateAppointment(appointment.id, { reminderSent: true });
+        } catch (reminderError) {
+          console.error(`Error enviando recordatorio para cita ${appointment.id}:`, reminderError);
+        }
+      }
+      
+      console.log(`Recordatorios enviados para ${appointmentsForReminder.length} citas.`);
+    } catch (error) {
+      console.error('Error en el sistema de recordatorios:', error);
+    }
+  });
+
+  console.log('Sistema de recordatorios automáticos configurado correctamente');
 
   const httpServer = createServer(app);
   return httpServer;
