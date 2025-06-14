@@ -192,10 +192,10 @@ export default function Home() {
         {/* Appointment Summary */}
         <section 
           ref={summaryRef.ref}
-          className={`mb-12 transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
+          className={`mb-12 transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-2xl ${
             summaryRef.isVisible 
-              ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
-              : 'opacity-0 translate-y-32 scale-90'
+              ? 'opacity-100 animate-[scrollBounceIn_0.5s_ease-out_forwards]' 
+              : 'opacity-0 translate-y-16 scale-95'
           }`}
         >
           <AppointmentSummary
