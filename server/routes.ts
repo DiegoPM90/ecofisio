@@ -168,6 +168,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === RUTAS DE IA ===
   
+  // Endpoint de diagnóstico para variables de entorno
+  app.get("/api/env-check", (req, res) => {
+    const envCheck = {
+      nodeEnv: process.env.NODE_ENV,
+      hasOpenAI: !!process.env.OPENAI_API_KEY,
+      openAIKeyLength: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0,
+      availableEnvVars: Object.keys(process.env).filter(k => k.includes('OPENAI') || k.includes('API')),
+      timestamp: new Date().toISOString()
+    };
+    res.json(envCheck);
+  });
+  
   // Consulta de IA
   app.post("/api/ai-consultation", async (req, res) => {
     try {
@@ -176,7 +188,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(recommendation);
     } catch (error) {
       console.error("Error en consulta de IA:", error);
-      res.status(500).json({ message: "Error procesando consulta de IA" });
+      res.status(500).json({ 
+        message: "Error procesando consulta de IA",
+        details: error instanceof Error ? error.message : "Error desconocido"
+      });
     }
   });
 

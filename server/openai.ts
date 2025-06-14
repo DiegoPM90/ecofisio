@@ -2,8 +2,16 @@ import OpenAI from "openai";
 import type { AIConsultationRequest } from "@shared/schema";
 
 // Configuración para múltiples proveedores de IA
+const getOpenAIKey = () => {
+  // Intentar múltiples variables de entorno
+  return process.env.OPENAI_API_KEY || 
+         process.env.REPL_OPENAI_API_KEY || 
+         process.env.SECRET_OPENAI_API_KEY ||
+         "default_key";
+};
+
 const openaiClient = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || "default_key"
+  apiKey: getOpenAIKey()
 });
 
 // Cliente para xAI (Grok) - más económico
@@ -14,12 +22,14 @@ const xaiClient = new OpenAI({
 
 // Función para determinar qué proveedor usar
 function getAIProvider() {
+  const apiKey = getOpenAIKey();
   console.log('🔍 Checking AI provider configuration...');
-  console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
+  console.log('API Key available:', apiKey !== "default_key");
   console.log('Environment:', process.env.NODE_ENV);
+  console.log('Available env vars:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
   
   // Usar OpenAI GPT-4o-mini (económico y de alta calidad)
-  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "default_key") {
+  if (apiKey && apiKey !== "default_key") {
     console.log('✅ Using OpenAI provider');
     return { client: openaiClient, model: "gpt-4o-mini", provider: "openai" };
   }
