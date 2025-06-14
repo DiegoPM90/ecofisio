@@ -180,7 +180,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update appointment (for adding AI recommendation)
+  // === RUTAS ADMINISTRATIVAS ===
+
+  // Obtener todas las citas (solo admin)
+  app.get("/api/admin/appointments", authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const appointments = await storage.getAppointments();
+      auditLog("APPOINTMENTS_VIEWED", req.user!.id);
+      res.json(appointments);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error obteniendo citas" });
+    }
+  });
+
+  // Actualizar cita (solo admin)
+  app.patch("/api/admin/appointments/:id", authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const updatedAppointment = await storage.updateAppointment(id, updates);
+      
+      if (!updatedAppointment) {
+        return res.status(404).json({ message: "Cita no encontrada" });
+      }
+      
+      auditLog("APPOINTMENT_UPDATED", req.user!.id, { appointmentId: id, updates });
+      res.json(updatedAppointment);
+    } catch (error: any) {
+      res.status(500).json({ message: "Error actualizando cita" });
+    }
+  });
+
+  // Eliminar cita (solo admin)
+  app.delete("/api/admin/appointments/:id", authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteAppointment(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Cita no encontrada" });
+      }
+      
+      auditLog("APPOINTMENT_DELETED", req.user!.id, { appointmentId: id });
+      res.json({ message: "Cita eliminada exitosamente" });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error eliminando cita" });
+    }
+  });
+
+  // Actualizar rol de usuario (solo admin)
+  app.patch("/api/admin/users/:id/role", authenticateToken, requireRole(['admin']), async (req: AuthRequest, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { role } = req.body;
+      
+      if (!['user', 'admin'].includes(role)) {
+        return res.status(400).json({ message: "Rol inválido" });
+      }
+      
+      const updatedUser = await storage.updateUserRole(id, role);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+      
+      auditLog("USER_ROLE_UPDATED", req.user!.id, { userId: id, newRole: role });
+      res.json({
+        message: "Rol actualizado exitosamente",
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          role: updatedUser.role
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Error actualizando rol" });
+    }
+  });
+
+  // Update appointment (for adding AI recommendation) - mantenemos compatible
   app.patch("/api/appointments/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -193,7 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(updatedAppointment);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Error updating appointment" });
     }
   });
