@@ -1,14 +1,45 @@
 import nodemailer from 'nodemailer';
 import type { Appointment } from '@shared/schema';
 
-// Configuración de nodemailer para Gmail
-const emailTransporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Configuración de nodemailer - múltiples opciones
+const getEmailTransporter = () => {
+  // Opción 1: Gmail con contraseña de aplicación
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    return nodemailer.createTransporter({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
+  
+  // Opción 2: Outlook/Hotmail (más fácil de configurar)
+  if (process.env.OUTLOOK_USER && process.env.OUTLOOK_PASS) {
+    return nodemailer.createTransporter({
+      service: 'hotmail',
+      auth: {
+        user: process.env.OUTLOOK_USER,
+        pass: process.env.OUTLOOK_PASS,
+      },
+    });
+  }
+  
+  // Opción 3: SendGrid (recomendado para aplicaciones)
+  if (process.env.SENDGRID_API_KEY) {
+    return nodemailer.createTransporter({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY,
+      },
+    });
+  }
+  
+  return null;
+};
 
 export class NotificationService {
   
@@ -62,15 +93,23 @@ export class NotificationService {
   // Enviar email de confirmación
   async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
     try {
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+      const transporter = getEmailTransporter();
+      
+      if (!transporter) {
         console.log('⚠️  Configuración de email no disponible');
+        console.log('📧 Para habilitar emails, configura una de estas opciones:');
+        console.log('   - Gmail: EMAIL_USER + EMAIL_PASS');
+        console.log('   - Outlook: OUTLOOK_USER + OUTLOOK_PASS');
+        console.log('   - SendGrid: SENDGRID_API_KEY');
         console.log('📧 Simulando envío de email a:', to);
         console.log('📋 Asunto:', subject);
         return true;
       }
 
-      await emailTransporter.sendMail({
-        from: process.env.EMAIL_USER,
+      const fromEmail = process.env.EMAIL_USER || process.env.OUTLOOK_USER || 'noreply@kinesiologia.com';
+      
+      await transporter.sendMail({
+        from: fromEmail,
         to: to,
         subject: subject,
         html: html,
