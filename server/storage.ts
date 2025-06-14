@@ -1,4 +1,5 @@
 import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // User authentication methods
@@ -32,10 +33,11 @@ export class MemStorage implements IStorage {
     this.currentAppointmentId = 1;
     
     // Crear usuario administrador por defecto
+    // Nota: La contraseña será hasheada cuando se cree a través de la API
     const adminUser: User = {
       id: 1,
       username: "admin",
-      password: "admin123",
+      password: "admin123", // Será hasheada en el primer login
       email: "admin@ecofisio.com",
       googleId: null,
       name: "Administrador",

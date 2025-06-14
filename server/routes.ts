@@ -4,6 +4,11 @@ import { storage } from "./storage";
 import { insertAppointmentSchema, aiConsultationSchema, insertUserSchema, loginSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
 import session from "express-session";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import { body, validationResult } from "express-validator";
+import bcrypt from "bcryptjs";
+import { securityLogger } from "./securityLogger";
 
 // Middleware para verificar autenticación
 function requireAuth(req: any, res: any, next: any) {
@@ -22,20 +27,83 @@ function requireAdmin(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configurar sesiones
-  app.use(session({
-    secret: process.env.SESSION_SECRET || 'ecofisio-session-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: false, // Para desarrollo, cambiar a true en producción
-      maxAge: 24 * 60 * 60 * 1000, // 24 horas
+  // Configuración de seguridad con Helmet
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true
     }
   }));
 
-  // Rutas de autenticación
-  app.post("/api/auth/register", async (req, res) => {
+  // Rate limiting para prevenir ataques de fuerza bruta
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // máximo 5 intentos por IP
+    message: { message: "Demasiados intentos de login. Intenta nuevamente en 15 minutos." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  const adminLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 30, // máximo 30 requests por minuto para rutas admin
+    message: { message: "Demasiadas solicitudes. Intenta nuevamente en un minuto." },
+  });
+
+  const generalLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 100, // máximo 100 requests por minuto para rutas generales
+    message: { message: "Demasiadas solicitudes. Intenta nuevamente en un minuto." },
+  });
+
+  // Aplicar rate limiting general
+  app.use(generalLimiter);
+
+  // Configurar sesiones con configuración segura
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'ecofisio-session-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // HTTPS en producción
+      httpOnly: true, // Prevenir acceso via JavaScript
+      maxAge: 8 * 60 * 60 * 1000, // 8 horas (más corto que antes)
+      sameSite: 'strict', // Protección CSRF
+    },
+    name: 'sessionId', // Cambiar nombre por defecto
+  }));
+
+  // Validadores para sanitización de entrada
+  const registerValidators = [
+    body('username').isLength({ min: 3, max: 30 }).isAlphanumeric().trim().escape(),
+    body('password').isLength({ min: 6, max: 100 }),
+    body('email').optional().isEmail().normalizeEmail(),
+    body('name').optional().isLength({ max: 100 }).trim().escape(),
+  ];
+
+  const loginValidators = [
+    body('username').isLength({ min: 1, max: 30 }).trim().escape(),
+    body('password').isLength({ min: 1, max: 100 }),
+  ];
+
+  // Rutas de autenticación con rate limiting y validación
+  app.post("/api/auth/register", registerValidators, async (req, res) => {
     try {
+      // Verificar errores de validación
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
+      }
+
       const validatedData = insertUserSchema.parse(req.body);
       
       // Verificar si el usuario ya existe
@@ -44,38 +112,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "El usuario ya existe" });
       }
 
-      const user = await storage.createUser(validatedData);
+      // Hash de la contraseña antes de almacenar
+      const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+      const userData = { ...validatedData, password: hashedPassword };
+      
+      const user = await storage.createUser(userData);
       
       // No incluir la contraseña en la respuesta
       const { password, ...userWithoutPassword } = user;
       res.status(201).json({ message: "Usuario creado exitosamente", user: userWithoutPassword });
-    } catch (error) {
+    } catch (error: any) {
       if (error.name === "ZodError") {
         res.status(400).json({ message: "Datos inválidos", errors: error.errors });
       } else {
+        console.error("Error en registro:", error);
         res.status(500).json({ message: "Error creando usuario" });
       }
     }
   });
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", authLimiter, loginValidators, async (req, res) => {
     try {
+      // Verificar errores de validación
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Datos inválidos", errors: errors.array() });
+      }
+
       const validatedData = loginSchema.parse(req.body);
       
-      const user = await storage.authenticateUser(validatedData.username, validatedData.password);
-      if (!user) {
+      // Buscar usuario
+      const user = await storage.getUserByUsername(validatedData.username);
+      if (!user || !user.isActive) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
-      // Guardar usuario en sesión
-      req.session.user = { id: user.id, username: user.username, role: user.role };
-      
-      const { password, ...userWithoutPassword } = user;
-      res.json({ message: "Login exitoso", user: userWithoutPassword });
-    } catch (error) {
+      // Verificar contraseña con bcrypt
+      const isValidPassword = await bcrypt.compare(validatedData.password, user.password || '');
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+
+      // Regenerar sesión para prevenir session fixation
+      req.session.regenerate((err) => {
+        if (err) {
+          console.error("Error regenerando sesión:", err);
+          return res.status(500).json({ message: "Error en login" });
+        }
+
+        // Guardar usuario en sesión
+        (req.session as any).user = { id: user.id, username: user.username, role: user.role };
+        
+        req.session.save((err) => {
+          if (err) {
+            console.error("Error guardando sesión:", err);
+            return res.status(500).json({ message: "Error en login" });
+          }
+
+          const { password, ...userWithoutPassword } = user;
+          res.json({ message: "Login exitoso", user: userWithoutPassword });
+        });
+      });
+    } catch (error: any) {
       if (error.name === "ZodError") {
         res.status(400).json({ message: "Datos inválidos", errors: error.errors });
       } else {
+        console.error("Error en login:", error);
         res.status(500).json({ message: "Error en login" });
       }
     }
@@ -104,19 +206,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Rutas del panel de administración
-  app.get("/api/admin/appointments", requireAdmin, async (req, res) => {
+  // Rutas del panel de administración con rate limiting adicional
+  app.get("/api/admin/appointments", adminLimiter, requireAdmin, async (req, res) => {
     try {
       const appointments = await storage.getAppointments();
       res.json(appointments);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error obteniendo citas:", error);
       res.status(500).json({ message: "Error fetching appointments" });
     }
   });
 
-  app.delete("/api/admin/appointments/:id", requireAdmin, async (req, res) => {
+  app.delete("/api/admin/appointments/:id", adminLimiter, requireAdmin, [
+    body().isEmpty(), // No body esperado
+  ], async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Validar que el ID sea un número válido
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+      
       const deleted = await storage.deleteAppointment(id);
       
       if (!deleted) {
@@ -124,7 +235,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ message: "Cita eliminada exitosamente" });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error eliminando cita:", error);
       res.status(500).json({ message: "Error eliminando cita" });
     }
   });
