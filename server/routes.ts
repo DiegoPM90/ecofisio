@@ -132,11 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
       // Obtener todos los usuarios sin contraseñas
-      const appointments = await storage.getAppointments();
-      const users = Array.from(storage.users?.values() || []).map(user => {
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      });
+      const users: any[] = [];
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: "Error obteniendo usuarios" });

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { authApi } from "@/lib/authApi";
 import { Link, useLocation } from "wouter";
 import { UserPlus, LogIn } from "lucide-react";
 
@@ -27,11 +27,7 @@ export default function Register() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
-      return await apiRequest("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await authApi.register(data);
     },
     onSuccess: () => {
       toast({

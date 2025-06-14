@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, useLogout } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+import { adminApi } from "@/lib/authApi";
 import { Link } from "wouter";
 import { 
   Calendar, 
@@ -31,19 +31,19 @@ export default function AdminPanel() {
 
   const { data: appointments = [], isLoading: appointmentsLoading } = useQuery({
     queryKey: ["/api/admin/appointments"],
+    queryFn: () => adminApi.getAppointments(),
     enabled: !!user?.role && user.role === "admin",
   });
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ["/api/admin/users"],
+    queryFn: () => adminApi.getUsers(),
     enabled: !!user?.role && user.role === "admin",
   });
 
   const deleteAppointmentMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/admin/appointments/${id}`, {
-        method: "DELETE",
-      });
+      return await adminApi.deleteAppointment(id);
     },
     onSuccess: () => {
       toast({
@@ -63,11 +63,7 @@ export default function AdminPanel() {
 
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ id, role }: { id: number; role: string }) => {
-      return await apiRequest(`/api/admin/users/${id}/role`, {
-        method: "PATCH",
-        body: JSON.stringify({ role }),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await adminApi.updateUserRole(id, role);
     },
     onSuccess: () => {
       toast({
