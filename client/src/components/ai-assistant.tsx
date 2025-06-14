@@ -142,11 +142,11 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
             
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleGenerateAI}
               disabled={!reason || generateAIMutation.isPending}
-              className="text-xs text-blue-600 hover:text-blue-700 mt-2 p-0 h-auto font-medium"
+              className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2 border-blue-200"
             >
               <RefreshCw className={`w-3 h-3 mr-1 ${generateAIMutation.isPending ? 'animate-spin' : ''}`} />
               {aiResponse ? 'Actualizar recomendación' : 'Generar recomendación'}
