@@ -8,16 +8,9 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Configurar medidas de seguridad
+  // Configurar medidas de seguridad (CSP deshabilitado en desarrollo)
   app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-      },
-    },
+    contentSecurityPolicy: false,
   }));
 
   // Rate limiting para autenticación
