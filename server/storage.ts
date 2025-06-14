@@ -1,4 +1,5 @@
 import { appointments, type Appointment, type InsertAppointment, type User, type InsertUser } from "@shared/schema";
+import { hashPassword } from './auth';
 
 export interface IStorage {
   // User authentication methods
@@ -31,11 +32,16 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentAppointmentId = 1;
     
-    // Crear usuario administrador por defecto
+    // Crear usuario administrador por defecto con contraseña hasheada
+    this.initializeAdmin();
+  }
+
+  private async initializeAdmin() {
+    const hashedPassword = await hashPassword("admin123");
     const adminUser: User = {
       id: 1,
       username: "admin",
-      password: "admin123",
+      password: hashedPassword,
       email: "admin@ecofisio.com",
       googleId: null,
       name: "Administrador",
@@ -59,10 +65,11 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
+    const hashedPassword = insertUser.password ? await hashPassword(insertUser.password) : null;
     const user: User = { 
       id,
       username: insertUser.username,
-      password: insertUser.password || null,
+      password: hashedPassword,
       email: insertUser.email || null,
       name: insertUser.name || null,
       googleId: null,
@@ -77,8 +84,12 @@ export class MemStorage implements IStorage {
   async authenticateUser(username: string, password: string): Promise<User | null> {
     const userArray = Array.from(this.users.values());
     for (const user of userArray) {
-      if (user.username === username && user.password === password && user.isActive) {
-        return user;
+      if (user.username === username && user.password && user.isActive) {
+        const bcrypt = await import('bcryptjs');
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (isValidPassword) {
+          return user;
+        }
       }
     }
     return null;

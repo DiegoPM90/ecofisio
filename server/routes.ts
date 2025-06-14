@@ -1,11 +1,126 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
+import { insertAppointmentSchema, aiConsultationSchema, insertUserSchema, loginSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
+import { authenticateToken, requireRole, generateToken, auditLog, AuthRequest } from "./auth";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get all appointments
+  // Configurar medidas de seguridad
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+  }));
+
+  // Rate limiting para autenticación
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // máximo 5 intentos por IP
+    message: { message: "Demasiados intentos de login. Intenta nuevamente en 15 minutos." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  // Rate limiting general
+  const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: { message: "Demasiadas solicitudes desde esta IP." },
+  });
+
+  app.use('/api', generalLimiter);
+
+  // === RUTAS DE AUTENTICACIÓN ===
+  
+  // Login
+  app.post("/api/auth/login", authLimiter, async (req, res) => {
+    try {
+      const validatedData = loginSchema.parse(req.body);
+      const user = await storage.authenticateUser(validatedData.username, validatedData.password);
+      
+      if (!user) {
+        auditLog("LOGIN_FAILED", 0, { username: validatedData.username, ip: req.ip });
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+
+      const token = generateToken(user);
+      auditLog("LOGIN_SUCCESS", user.id, { ip: req.ip });
+      
+      res.json({
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Datos de login inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error en el login" });
+      }
+    }
+  });
+
+  // Registro de usuario
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const validatedData = insertUserSchema.parse(req.body);
+      
+      // Verificar si el usuario ya existe
+      const existingUser = await storage.getUserByUsername(validatedData.username);
+      if (existingUser) {
+        return res.status(409).json({ message: "El usuario ya existe" });
+      }
+
+      const user = await storage.createUser(validatedData);
+      auditLog("USER_REGISTERED", user.id, { ip: req.ip });
+      
+      res.status(201).json({
+        message: "Usuario creado exitosamente",
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role
+        }
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        res.status(400).json({ message: "Datos de registro inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error en el registro" });
+      }
+    }
+  });
+
+  // Verificar token y obtener datos de usuario
+  app.get("/api/auth/me", authenticateToken, async (req: AuthRequest, res) => {
+    const user = req.user!;
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
+  });
+
+  // === RUTAS PÚBLICAS ===
+
+  // Get all appointments (público para vista principal)
   app.get("/api/appointments", async (req, res) => {
     try {
       const appointments = await storage.getAppointments();
