@@ -1,20 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { authApi } from "@/lib/authApi";
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/me"],
-    queryFn: async () => {
-      try {
-        return await apiRequest("/api/auth/me");
-      } catch (error: any) {
-        if (error.message?.includes("401")) {
-          return null;
-        }
-        throw error;
-      }
-    },
+    queryFn: () => authApi.getCurrentUser(),
     retry: false,
   });
 
@@ -32,9 +23,7 @@ export function useLogout() {
 
   const logout = async () => {
     try {
-      await apiRequest("/api/auth/logout", {
-        method: "POST",
-      });
+      await authApi.logout();
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
         title: "Sesión cerrada",

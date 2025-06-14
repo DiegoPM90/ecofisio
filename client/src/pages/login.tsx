@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema, type LoginCredentials } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { authApi } from "@/lib/authApi";
 import { Link, useLocation } from "wouter";
 import { LogIn, UserPlus } from "lucide-react";
 
@@ -27,11 +27,7 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginCredentials) => {
-      return await apiRequest("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await authApi.login(data);
     },
     onSuccess: (data) => {
       toast({

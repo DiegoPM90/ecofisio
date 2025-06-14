@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
+import { HeartPulse, Calendar, Bot, Shield, Settings, LogIn, LogOut } from "lucide-react";
 import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { useAuth, useLogout } from "@/hooks/useAuth";
 import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentSummary from "@/components/appointment-summary";
@@ -61,6 +63,8 @@ export default function Home() {
     reason: "",
     reasonDetail: "",
   });
+  const { user, isAuthenticated, isAdmin } = useAuth();
+  const logout = useLogout();
 
   // Scroll animation hooks for each section
   const heroRef = useScrollIntoView(0.2);
@@ -79,17 +83,56 @@ export default function Home() {
               <EcofisioLogo size={32} />
               <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
             </div>
-            <nav className="hidden md:flex space-x-6">
-              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
-                Inicio
-              </a>
-              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Mis Reservas
-              </a>
-              <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
-                Contacto
-              </a>
-            </nav>
+            <div className="flex items-center space-x-4">
+              <nav className="hidden md:flex space-x-6">
+                <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800">
+                  Inicio
+                </a>
+                <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
+                  Mis Reservas
+                </a>
+                <a href="#contacto" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1">
+                  Contacto
+                </a>
+              </nav>
+              
+              {/* Authentication buttons */}
+              <div className="flex items-center space-x-2">
+                {isAuthenticated ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-slate-600 hidden sm:block">
+                      Hola, {user?.name || user?.username}
+                    </span>
+                    {isAdmin && (
+                      <Link href="/admin">
+                        <Button variant="outline" size="sm">
+                          <Settings className="w-4 h-4 mr-1" />
+                          Admin
+                        </Button>
+                      </Link>
+                    )}
+                    <Button variant="outline" size="sm" onClick={logout}>
+                      <LogOut className="w-4 h-4 mr-1" />
+                      Salir
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link href="/login">
+                      <Button variant="outline" size="sm">
+                        <LogIn className="w-4 h-4 mr-1" />
+                        Iniciar Sesión
+                      </Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button size="sm">
+                        Registrarse
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </header>
