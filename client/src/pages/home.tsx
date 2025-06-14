@@ -5,7 +5,7 @@ import BookingForm from "@/components/booking-form";
 import CalendarView from "@/components/calendar-view";
 import AppointmentSummary from "@/components/appointment-summary";
 import AppointmentsList from "@/components/appointments-list";
-import { useScrollIntoView, useScrollDirection } from "@/hooks/use-scroll-effects";
+import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 
 
 // Logo component inline
@@ -68,14 +68,9 @@ export default function Home() {
   const calendarRef = useScrollIntoView(0.3);
   const summaryRef = useScrollIntoView(0.3);
   const appointmentsRef = useScrollIntoView(0.3);
-  
-  // Scroll direction for upward animations
-  const isScrollingUp = useScrollDirection();
 
   return (
-    <div className={`min-h-screen bg-slate-50 ${
-      isScrollingUp ? 'scroll-up-active' : ''
-    }`}>
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -171,8 +166,6 @@ export default function Home() {
             bookingRef.isVisible 
               ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
               : 'opacity-0 -translate-x-32 scale-95'
-          } ${
-            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <BookingForm 
@@ -188,8 +181,6 @@ export default function Home() {
             calendarRef.isVisible 
               ? 'opacity-100 animate-[scrollSlideInRight_1s_ease-out_forwards]' 
               : 'opacity-0 translate-x-32 scale-95'
-          } ${
-            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <CalendarView 
@@ -205,8 +196,6 @@ export default function Home() {
             summaryRef.isVisible 
               ? 'opacity-100 animate-[scrollBounceIn_0.5s_ease-out_forwards]' 
               : 'opacity-0 translate-y-16 scale-95'
-          } ${
-            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <AppointmentSummary
@@ -223,8 +212,6 @@ export default function Home() {
             appointmentsRef.isVisible 
               ? 'opacity-100 animate-[scrollFadeInUp_1s_ease-out_forwards]' 
               : 'opacity-0 translate-y-32 scale-95'
-          } ${
-            isScrollingUp ? 'scroll-up-active' : ''
           }`}
         >
           <AppointmentsList />
