@@ -128,6 +128,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === RUTAS DE ADMINISTRACIÓN ===
+  
+  // Endpoint de administración - Ver todas las citas con estadísticas
+  app.get("/api/admin/appointments", async (req, res) => {
+    try {
+      const appointments = await storage.getAppointments();
+      const stats = {
+        total: appointments.length,
+        confirmadas: appointments.filter(a => a.status === 'pendiente').length,
+        canceladas: appointments.filter(a => a.status === 'cancelada').length,
+        completadas: appointments.filter(a => a.status === 'completada').length,
+      };
+      
+      res.json({
+        stats,
+        appointments: appointments.map(appointment => ({
+          id: appointment.id,
+          paciente: appointment.patientName,
+          email: appointment.email,
+          telefono: appointment.phone,
+          fecha: appointment.date,
+          hora: appointment.time,
+          especialidad: appointment.specialty,
+          estado: appointment.status,
+          kinesiologo: appointment.kinesiologistName,
+          sesiones: appointment.sessions,
+          motivo: appointment.reason,
+          tokenCancelacion: appointment.cancelToken,
+          recordatorioEnviado: appointment.reminderSent,
+          fechaCreacion: appointment.createdAt
+        }))
+      });
+    } catch (error) {
+      console.error("Error obteniendo datos de administración:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  });
+
   // === RUTAS DE IA ===
   
   // Consulta de IA
