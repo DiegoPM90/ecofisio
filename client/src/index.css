@@ -118,6 +118,51 @@ html {
   }
 }
 
+@keyframes cardFlipIn {
+  0% {
+    opacity: 0;
+    transform: rotateY(-90deg) scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: rotateY(-45deg) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+@keyframes cardZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(180deg);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2) rotate(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes cardWaveIn {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) skewX(20deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(-10px) skewX(-10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) skewX(0deg);
+  }
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(222, 84%, 4.9%);
