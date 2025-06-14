@@ -21,8 +21,7 @@ const appointmentSchema = new mongoose.Schema({
   timestamps: true, // Agrega createdAt y updatedAt automáticamente
 });
 
-// Índices para optimizar búsquedas
-appointmentSchema.index({ cancelToken: 1 });
+// Índices para optimizar búsquedas (sin duplicar el índice de cancelToken)
 appointmentSchema.index({ date: 1, specialty: 1 });
 appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ createdAt: -1 });
