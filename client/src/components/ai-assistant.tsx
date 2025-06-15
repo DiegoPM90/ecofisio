@@ -21,8 +21,16 @@ interface AIResponse {
   additionalNotes: string;
 }
 
+interface AIServerResponse {
+  success: boolean;
+  data: AIResponse;
+  consultationsRemaining?: number;
+}
+
 export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssistantProps) {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
+  const [consultationsRemaining, setConsultationsRemaining] = useState<number | null>(null);
+  const [isLimitReached, setIsLimitReached] = useState(false);
 
   const generateAIMutation = useMutation({
     mutationFn: async (data: AIConsultationRequest) => {
@@ -40,20 +48,25 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
       
       return response.json();
     },
-    onSuccess: (response) => {
+    onSuccess: (response: AIServerResponse) => {
       console.log("AI Response received:", response);
       if (response.success && response.data) {
         setAiResponse(response.data);
+        setConsultationsRemaining(response.consultationsRemaining ?? null);
+        setIsLimitReached(false);
       } else {
         console.error("AI response format error:", response);
-        // Mostrar el mensaje de error o datos por defecto
         if (response.data) {
           setAiResponse(response.data);
         }
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("AI consultation error:", error);
+      if (error.message && error.message.includes("429")) {
+        setIsLimitReached(true);
+        setAiResponse(null);
+      }
     },
   });
 
@@ -108,6 +121,14 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </div>
+            ) : isLimitReached ? (
+              <div className="text-sm text-red-600 space-y-3">
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <strong className="text-red-900">Límite de consultas alcanzado</strong>
+                  <p className="mt-1">Has utilizado las 2 consultas gratuitas de IA disponibles.</p>
+                  <p className="mt-1 text-xs">Para más consultas, contacta con soporte.</p>
+                </div>
+              </div>
             ) : aiResponse ? (
               <div className="text-sm text-slate-600 space-y-3">
                 <div>
@@ -131,6 +152,12 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
                   <div>
                     <strong className="text-slate-900">Notas adicionales:</strong>
                     <p className="mt-1">{aiResponse.additionalNotes}</p>
+                  </div>
+                )}
+
+                {consultationsRemaining !== null && (
+                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
+                    <strong>Consultas restantes:</strong> {consultationsRemaining} de 2
                   </div>
                 )}
                 

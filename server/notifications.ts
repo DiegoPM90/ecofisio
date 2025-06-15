@@ -139,7 +139,7 @@ export class NotificationService {
     }
   }
 
-  // Enviar confirmación de cita por WhatsApp y Email
+  // Enviar confirmación de cita solo por WhatsApp
   async sendAppointmentConfirmation(appointment: Appointment): Promise<void> {
     const whatsappMessage = `
 🏥 *ECOFISIO - Confirmación de Cita*
@@ -212,11 +212,8 @@ export class NotificationService {
       </div>
     `;
 
-    // Enviar notificaciones
-    await Promise.all([
-      this.sendWhatsAppNotification(appointment.phone, whatsappMessage),
-      this.sendEmail(appointment.email, `Confirmación de Cita - ECOFISIO`, emailHtml)
-    ]);
+    // Enviar solo notificación por WhatsApp
+    await this.sendWhatsAppNotification(appointment.phone, whatsappMessage);
   }
 
   // Enviar recordatorio de cita
@@ -255,10 +252,8 @@ Su cita de kinesiología es MAÑANA:
       </div>
     `;
 
-    await Promise.all([
-      this.sendWhatsAppNotification(appointment.phone, reminderMessage),
-      this.sendEmail(appointment.email, `Recordatorio: Su cita es mañana - ECOFISIO`, reminderEmailHtml)
-    ]);
+    // Enviar solo recordatorio por WhatsApp
+    await this.sendWhatsAppNotification(appointment.phone, reminderMessage);
   }
 
   // Enviar notificación de cancelación
@@ -297,10 +292,8 @@ Para agendar una nueva cita, visite nuestra web.
       </div>
     `;
 
-    await Promise.all([
-      this.sendWhatsAppNotification(appointment.phone, cancellationMessage),
-      this.sendEmail(appointment.email, `Cita Cancelada - ECOFISIO`, cancellationEmailHtml)
-    ]);
+    // Enviar solo notificación de cancelación por WhatsApp
+    await this.sendWhatsAppNotification(appointment.phone, cancellationMessage);
   }
 
   // Obtener nombre de especialidad
