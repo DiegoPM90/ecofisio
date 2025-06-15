@@ -158,7 +158,7 @@ export class NotificationService {
 💡 *Importante:*
 • Llegue 10 minutos antes
 • Traiga ropa cómoda
-• Token de cancelación: ${appointment.cancelToken}
+• Código de cancelación: ${appointment.cancelToken}
 
 ¡Esperamos verle pronto!
     `.trim();
