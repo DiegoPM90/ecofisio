@@ -105,7 +105,11 @@ export default function Auth() {
               </div>
               
               <button
-                onClick={() => window.location.href = '/api/auth/google'}
+                onClick={() => {
+                  // Verificar si la configuración está funcionando
+                  const testUrl = '/api/auth/google';
+                  window.location.href = testUrl;
+                }}
                 className="mt-4 w-full flex justify-center items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -116,6 +120,11 @@ export default function Auth() {
                 </svg>
                 Continuar con Google
               </button>
+              
+              <div className="mt-3 text-xs text-slate-500 text-center">
+                Si Google OAuth no funciona, usa el registro tradicional arriba.
+                Los cambios en Google Cloud pueden tardar unos minutos.
+              </div>
             </div>
 
             <Card className="mt-6 p-4 bg-blue-50 border-blue-200">
