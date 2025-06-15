@@ -32,19 +32,34 @@ app.use(express.urlencoded({ extended: false }));
 
 // Configurar sesiones
 const MemStore = MemoryStore(session);
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura',
+
+// Configuración de sesiones adaptable a desarrollo y producción
+const sessionConfig = {
+  secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura-kinesio-2024',
   resave: false,
   saveUninitialized: false,
   store: new MemStore({
     checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Siempre false para compatibilidad HTTP/HTTPS
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
-  }
-}));
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    sameSite: 'lax' as const,
+    path: '/'
+  },
+  name: 'ecofisio.session',
+  rolling: true // Renovar cookie en cada request
+};
+
+app.use(session(sessionConfig));
+
+// Middleware de debugging para sesiones
+app.use((req, res, next) => {
+  const sessionId = (req.session as any)?.sessionId;
+  console.log(`🔍 [${req.method}] ${req.path} - Session ID: ${sessionId || 'Sin sesión'}`);
+  next();
+});
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -7,30 +7,37 @@ import { z } from 'zod';
 // Middleware para verificar autenticación
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
+    console.log('🔍 requireAuth - Headers Cookie:', req.headers.cookie ? 'Presente' : 'Ausente');
+    console.log('🔍 requireAuth - Session ID:', (req.session as any)?.sessionId);
+    
     const sessionId = (req.session as any)?.sessionId;
     
     if (!sessionId) {
+      console.log('❌ requireAuth - No hay sessionId en la sesión');
       return res.status(401).json({ error: 'No autenticado' });
     }
 
     const session = await storage.getSession(sessionId);
     if (!session) {
+      console.log('❌ requireAuth - Sesión no encontrada:', sessionId);
       req.session!.destroy((err) => {}); // Limpiar sesión inválida
       return res.status(401).json({ error: 'Sesión inválida' });
     }
 
     const user = await storage.getUserById(session.userId);
     if (!user || !user.isActive) {
+      console.log('❌ requireAuth - Usuario inválido:', session.userId);
       await storage.deleteSession(sessionId);
       req.session!.destroy((err) => {});
       return res.status(401).json({ error: 'Usuario no encontrado o inactivo' });
     }
 
+    console.log('✅ requireAuth - Usuario autenticado:', user.email);
     // Adjuntar usuario a la request
     req.user = user;
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación:', error);
+    console.error('❌ Error en requireAuth:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
@@ -63,6 +70,19 @@ export async function registerUser(req: Request, res: Response) {
     // Crear sesión
     const session = await storage.createSession(user.id);
     (req.session as any).sessionId = session.id;
+
+    // Forzar guardado de sesión
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error guardando sesión en registro:', err);
+          reject(err);
+        } else {
+          console.log('✅ Sesión de registro guardada exitosamente:', session.id);
+          resolve();
+        }
+      });
+    });
 
     // Devolver usuario sin la contraseña
     const { hashedPassword: _, ...userWithoutPassword } = user;
@@ -103,6 +123,19 @@ export async function loginUser(req: Request, res: Response) {
     // Crear nueva sesión
     const session = await storage.createSession(user.id);
     (req.session as any).sessionId = session.id;
+
+    // Forzar guardado de sesión
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error guardando sesión:', err);
+          reject(err);
+        } else {
+          console.log('✅ Sesión guardada exitosamente:', session.id);
+          resolve();
+        }
+      });
+    });
 
     // Devolver usuario sin la contraseña
     const { hashedPassword: _, ...userWithoutPassword } = user;
@@ -147,14 +180,19 @@ export async function logoutUser(req: Request, res: Response) {
 // Función para obtener el usuario actual
 export async function getCurrentUser(req: Request, res: Response) {
   try {
+    console.log('🔍 getCurrentUser - Usuario en request:', req.user ? req.user.email : 'No hay usuario');
+    console.log('🔍 getCurrentUser - Session ID:', (req.session as any)?.sessionId);
+    
     if (!req.user) {
+      console.log('❌ getCurrentUser - No hay usuario en la request');
       return res.status(401).json({ error: 'No autenticado' });
     }
 
     const { hashedPassword: _, ...userWithoutPassword } = req.user;
+    console.log('✅ getCurrentUser - Devolviendo usuario:', userWithoutPassword.email);
     res.json({ user: userWithoutPassword });
   } catch (error) {
-    console.error('Error al obtener usuario actual:', error);
+    console.error('❌ Error al obtener usuario actual:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
