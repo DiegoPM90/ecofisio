@@ -131,13 +131,17 @@ export async function loginUser(req: Request, res: Response) {
 // Función para cerrar sesión
 export async function logoutUser(req: Request, res: Response) {
   try {
-    const sessionId = req.session?.sessionId;
+    const sessionId = (req.session as any)?.sessionId;
     
     if (sessionId) {
       await storage.deleteSession(sessionId);
     }
     
-    req.session = null;
+    req.session!.destroy((err) => {
+      if (err) {
+        console.error('Error al destruir sesión:', err);
+      }
+    });
     res.json({ message: 'Sesión cerrada exitosamente' });
   } catch (error) {
     console.error('Error al cerrar sesión:', error);

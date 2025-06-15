@@ -19,6 +19,31 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // === RUTAS DE AUTENTICACIÓN ===
+  
+  // Registro de usuario
+  app.post("/api/auth/register", registerUser);
+  
+  // Inicio de sesión
+  app.post("/api/auth/login", loginUser);
+  
+  // Cerrar sesión
+  app.post("/api/auth/logout", logoutUser);
+  
+  // Obtener usuario actual
+  app.get("/api/auth/me", requireAuth, getCurrentUser);
+  
+  // Obtener citas del usuario actual
+  app.get("/api/auth/my-appointments", requireAuth, getUserAppointments);
+  
+  // === RUTAS DE ADMINISTRACIÓN ===
+  
+  // Obtener todos los usuarios (solo admin)
+  app.get("/api/admin/users", requireAuth, requireAdmin, getAllUsers);
+  
+  // Actualizar usuario (solo admin)
+  app.put("/api/admin/users/:id", requireAuth, requireAdmin, updateUserById);
+  
   // === RUTAS DE CITAS ===
   
   // Obtener todas las citas
