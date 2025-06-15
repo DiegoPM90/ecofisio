@@ -299,10 +299,11 @@ Para agendar una nueva cita, visite nuestra web.
   // Obtener nombre de especialidad
   private getSpecialtyName(specialty: string): string {
     const specialties: Record<string, string> = {
-      'sports': 'Kinesiología de Rehabilitación',
-      'respiratory': 'Kinesiología Respiratoria',
-      'neurological': 'Kinesiología Neurológica',
-      'traumatological': 'Kinesiología Traumatológica'
+      'rehabilitacion-fisioterapia': 'Rehabilitación y Fisioterapia',
+      'masajes-descontracturantes': 'Masajes Descontracturantes',
+      'masajes-relajantes': 'Masajes Relajantes',
+      'intervencion-adulto-mayor': 'Intervención Kinésica para el Adulto Mayor',
+      'sesiones-kinesiterapia-fisioterapia': 'Sesiones de Kinesiterapia y Fisioterapia'
     };
     return specialties[specialty] || specialty;
   }
