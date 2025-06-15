@@ -46,8 +46,11 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
     onSuccess: (data) => {
       toast({
         title: "Registro exitoso",
-        description: "Tu cuenta ha sido creada exitosamente.",
+        description: `Bienvenido, ${data.user?.name || 'Usuario'}! Tu cuenta ha sido creada.`,
       });
+      // Invalidar queries para actualizar el estado del usuario
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      refreshUser();
       onSuccess?.();
     },
     onError: (error: any) => {
