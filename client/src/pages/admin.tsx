@@ -42,8 +42,8 @@ export default function Admin() {
     queryKey: ["/api/appointments"],
   });
 
-  const users: UserType[] = usersData?.users || [];
-  const appointments: Appointment[] = appointmentsData || [];
+  const users: UserType[] = (usersData as any)?.users || [];
+  const appointments: Appointment[] = (appointmentsData as any) || [];
 
   const getUserInitials = (name: string) => {
     return name
@@ -207,7 +207,7 @@ export default function Admin() {
                                 {user.email}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                Registrado: {formatDate(user.createdAt)}
+                                Registrado: {formatDate(user.createdAt.toString())}
                               </div>
                             </div>
                           </div>

@@ -40,8 +40,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Actualizar el estado del usuario cuando los datos cambien
   useEffect(() => {
-    if (userData?.user) {
-      setUser(userData.user);
+    if (userData && (userData as any).user) {
+      setUser((userData as any).user);
     } else if (error) {
       setUser(null);
     }

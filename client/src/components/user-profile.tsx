@@ -39,7 +39,7 @@ export default function UserProfile() {
     );
   }
 
-  const appointments: Appointment[] = appointmentsData?.appointments || [];
+  const appointments: Appointment[] = (appointmentsData as any)?.appointments || [];
   const userInitials = user.name
     .split(" ")
     .map(name => name.charAt(0))
