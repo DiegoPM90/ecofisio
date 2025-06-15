@@ -33,13 +33,14 @@ export function setupGoogleAuth(app: Express) {
           profileImage: profile.photos?.[0]?.value
         });
       } else {
-        // Crear nuevo usuario
+        // Crear nuevo usuario con Google OAuth (sin hashedPassword)
         user = await storage.createUser({
           name: profile.displayName || "Usuario Google",
           email: profile.emails?.[0]?.value || "",
           googleId: profile.id,
           profileImage: profile.photos?.[0]?.value,
-          role: 'client'
+          role: 'client',
+          hashedPassword: undefined // Explícitamente undefined para usuarios de Google
         });
       }
 

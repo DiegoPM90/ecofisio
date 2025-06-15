@@ -325,7 +325,9 @@ export class MongoStorage implements IStorage {
     const userDoc = new UserModel({
       email: user.email,
       name: user.name,
-      hashedPassword: user.hashedPassword,
+      hashedPassword: user.hashedPassword || undefined,
+      googleId: user.googleId || undefined,
+      profileImage: user.profileImage || undefined,
       role: user.role || 'client',
       isActive: true,
     });

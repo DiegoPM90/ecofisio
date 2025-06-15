@@ -82,8 +82,17 @@ export const insertUserSchema = createInsertSchema(users).pick({
 }).extend({
   email: z.string().email("Email inválido"),
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  hashedPassword: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").optional(),
+  hashedPassword: z.string().optional(),
   googleId: z.string().optional(),
+  profileImage: z.string().optional(),
+  role: z.enum(["client"]).default("client"),
+});
+
+// Esquema específico para usuarios de Google OAuth
+export const googleUserSchema = z.object({
+  email: z.string().email("Email inválido"),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  googleId: z.string().min(1, "Google ID es requerido"),
   profileImage: z.string().optional(),
   role: z.enum(["client"]).default("client"),
 });
