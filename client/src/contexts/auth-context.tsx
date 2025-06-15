@@ -30,7 +30,6 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -45,12 +44,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (userData && (userData as any).user) {
       setUser((userData as any).user);
-      setAuthInitialized(true);
-    } else if (error || (!isLoading && !userData)) {
+    } else if (error) {
       setUser(null);
-      setAuthInitialized(true);
     }
-  }, [userData, error, isLoading]);
+  }, [userData, error]);
 
   // Mutación para login
   const loginMutation = useMutation({
@@ -132,7 +129,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value: AuthContextType = {
     user,
-    isLoading: isLoading || !authInitialized,
+    isLoading,
     isAuthenticated,
     login,
     register,

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
-import { registerUserSchema, loginSchema, type User } from '@shared/schema';
+import { registerUserSchema, loginSchema } from '@shared/schema';
 import { z } from 'zod';
 
 // Middleware para verificar autenticación
@@ -95,10 +95,6 @@ export async function loginUser(req: Request, res: Response) {
     }
 
     // Verificar contraseña
-    if (!user.hashedPassword) {
-      return res.status(401).json({ error: "Usuario registrado con Google, use el login de Google" });
-    }
-    
     const passwordValid = await bcrypt.compare(validatedData.password, user.hashedPassword);
     if (!passwordValid) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
@@ -108,8 +104,8 @@ export async function loginUser(req: Request, res: Response) {
     const session = await storage.createSession(user.id);
     (req.session as any).sessionId = session.id;
 
-    // Devolver usuario sin la contraseña y campos sensibles
-    const { hashedPassword: _, googleId: __, profileImage: ___, ...userWithoutPassword } = user;
+    // Devolver usuario sin la contraseña
+    const { hashedPassword: _, ...userWithoutPassword } = user;
     res.json({ 
       message: 'Inicio de sesión exitoso',
       user: userWithoutPassword 
@@ -151,39 +147,12 @@ export async function logoutUser(req: Request, res: Response) {
 // Función para obtener el usuario actual
 export async function getCurrentUser(req: Request, res: Response) {
   try {
-    console.log("🔍 Verificando autenticación usuario:");
-    console.log("- req.user:", !!req.user);
-    console.log("- req.isAuthenticated():", req.isAuthenticated?.());
-    console.log("- session userId:", (req.session as any)?.userId);
-    console.log("- session userEmail:", (req.session as any)?.userEmail);
-    console.log("- session authenticated:", (req.session as any)?.authenticated);
-    
-    // Verificar autenticación directa por sesión
-    const sessionAuth = (req.session as any)?.authenticated;
-    const sessionEmail = (req.session as any)?.userEmail;
-    
-    if (!sessionAuth || !sessionEmail) {
+    if (!req.user) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    // Obtener usuario completo desde la base de datos
-    const user = await storage.getUserByEmail(sessionEmail);
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
-    }
-    
-    console.log("✅ Usuario autenticado encontrado:", user.email);
-    
-    const userResponse = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    };
-    res.json({ user: userResponse });
+    const { hashedPassword: _, ...userWithoutPassword } = req.user;
+    res.json({ user: userWithoutPassword });
   } catch (error) {
     console.error('Error al obtener usuario actual:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -240,7 +209,7 @@ export async function getUserAppointments(req: Request, res: Response) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    const appointments = await storage.getUserAppointments((req.user as any).id);
+    const appointments = await storage.getUserAppointments(req.user.id);
     res.json({ appointments });
   } catch (error) {
     console.error('Error al obtener citas del usuario:', error);
@@ -252,7 +221,16 @@ export async function getUserAppointments(req: Request, res: Response) {
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: {
+        id: number;
+        email: string;
+        name: string;
+        role: string;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        hashedPassword: string;
+      };
     }
     
     interface Session {

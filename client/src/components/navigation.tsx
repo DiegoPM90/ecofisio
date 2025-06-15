@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -21,39 +21,15 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import type { User as UserType } from "@shared/schema";
 
 export default function Navigation() {
+  const { user, logout, isAuthenticated } = useAuth();
   const [location, setLocation] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
-
-  // Query independiente para verificar autenticación
-  const { data: authData, error } = useQuery({
-    queryKey: ["/api/auth/me"],
-    retry: false,
-    refetchInterval: 30000, // Verificar cada 30 segundos
-  });
-
-  useEffect(() => {
-    if (authData && (authData as any).user) {
-      setUser((authData as any).user);
-    } else {
-      setUser(null);
-    }
-  }, [authData, error]);
-
-  const isAuthenticated = !!user;
 
   const handleLogout = async () => {
-    try {
-      await apiRequest("/api/auth/logout", { method: "POST" });
-      setUser(null);
-      setLocation("/");
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
+    await logout();
+    setLocation("/");
   };
 
   const getUserInitials = (name: string) => {

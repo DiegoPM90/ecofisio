@@ -5,7 +5,6 @@ import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
 import { notificationService } from "./notifications";
 import * as cron from 'node-cron';
-import passport from "passport";
 import { 
   registerUser, 
   loginUser, 
@@ -33,109 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Obtener citas del usuario actual
   app.get("/api/auth/my-appointments", requireAuth, getUserAppointments);
-
-  // === RUTAS DE GOOGLE OAUTH ===
   
-  // Iniciar autenticación con Google
-  app.get("/api/auth/google", 
-    passport.authenticate("google", { scope: ["profile", "email"] })
-  );
-
-  // Callback de Google OAuth con logging completo
-  app.get("/api/auth/google/callback", (req, res, next) => {
-    console.log("=== CALLBACK GOOGLE OAUTH INICIADO ===");
-    console.log("Query params:", req.query);
-    console.log("Session antes de auth:", req.session ? "Existe" : "No existe");
-    
-    passport.authenticate("google", (err: any, user: any, info: any) => {
-      console.log("=== RESULTADO PASSPORT AUTHENTICATE ===");
-      console.log("Error:", err ? err.message : "Ninguno");
-      console.log("Usuario:", user ? { id: user.id, email: user.email } : "No user");
-      console.log("Info:", info);
-      
-      if (err) {
-        console.error("❌ Error en passport authenticate:", err);
-        // Manejar errores específicos de Google OAuth
-        const errorType = err.code === 'invalid_grant' ? 'invalid_code' : 'passport_error';
-        return res.redirect("/auth?error=" + errorType + "&msg=" + encodeURIComponent(err.message || 'unknown'));
-      }
-
-      if (!user) {
-        console.error("❌ No se obtuvo usuario de passport");
-        return res.redirect("/auth?error=no_user_from_passport");
-      }
-
-      // Establecer sesión directamente sin depender de Passport serialization
-      (req.session as any).userId = user.id;
-      (req.session as any).userEmail = user.email;
-      (req.session as any).authenticated = true;
-      
-      console.log("✅ Sesión establecida directamente");
-      console.log("- User ID guardado:", user.id);
-      console.log("- User Email guardado:", user.email);
-      console.log("- session ID:", req.sessionID);
-      
-      // Guardar la sesión
-      req.session.save((saveErr) => {
-        if (saveErr) {
-          console.error("❌ Error guardando sesión:", saveErr);
-          return res.redirect("/auth?error=session_save_error");
-        }
-        
-        console.log("✅ Sesión guardada exitosamente");
-        console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
-        console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
-        res.redirect("/?login=google_success");
-      });
-    })(req, res, next);
-  });
-
-  // Ruta para manejar errores de Google OAuth
-  app.get("/api/auth/google/error", (req, res) => {
-    console.log("❌ Error en autenticación Google:", req.query);
-    res.redirect("/auth?error=google_oauth_error");
-  });
-
-  // Ruta de prueba para simular login exitoso
-  app.get("/api/auth/test-login", async (req, res) => {
-    try {
-      // Simular un usuario de prueba
-      const testUser = await storage.getUserByEmail("test@example.com");
-      if (!testUser) {
-        return res.json({ error: "Usuario de prueba no encontrado" });
-      }
-
-      // Establecer sesión directamente
-      (req.session as any).userId = testUser.id;
-      (req.session as any).userEmail = testUser.email;
-      (req.session as any).authenticated = true;
-      
-      console.log("✅ Sesión de prueba establecida para:", testUser.email);
-      
-      req.session.save((err) => {
-        if (err) {
-          console.error("Error guardando sesión de prueba:", err);
-          return res.json({ error: "Error guardando sesión" });
-        }
-        
-        res.json({ 
-          success: true, 
-          message: "Sesión de prueba establecida",
-          sessionId: req.sessionID 
-        });
-      });
-    } catch (error) {
-      console.error("Error en test-login:", error);
-      res.json({ error: "Error interno" });
-    }
-  });
-
-
-
-
-
-
-
 
   
   // === RUTAS DE CITAS ===

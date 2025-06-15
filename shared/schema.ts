@@ -7,9 +7,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  hashedPassword: text("hashed_password"),
-  googleId: text("google_id").unique(),
-  profileImage: text("profile_image"),
+  hashedPassword: text("hashed_password").notNull(),
   role: text("role").notNull().default("client"), // "client", "admin"
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -76,24 +74,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
   name: true,
   hashedPassword: true,
-  googleId: true,
-  profileImage: true,
   role: true,
 }).extend({
   email: z.string().email("Email inválido"),
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  hashedPassword: z.string().optional(),
-  googleId: z.string().optional(),
-  profileImage: z.string().nullable().optional(),
-  role: z.enum(["client"]).default("client"),
-});
-
-// Esquema específico para usuarios de Google OAuth
-export const googleUserSchema = z.object({
-  email: z.string().email("Email inválido"),
-  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  googleId: z.string().min(1, "Google ID es requerido"),
-  profileImage: z.string().optional(),
+  hashedPassword: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   role: z.enum(["client"]).default("client"),
 });
 

@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
-import RobustNavigation from "@/components/robust-navigation";
 import NetworkStatus from "@/components/network-status";
 
 // Lazy load pages for better performance

@@ -1,24 +1,16 @@
 import mongoose from 'mongoose';
 import { type Appointment, type InsertAppointment, type User, type Session } from "@shared/schema";
 
-// Esquema simplificado sin validaciones problemáticas
+// Esquema de MongoDB para usuarios
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  hashedPassword: { type: String }, // Completamente opcional
-  googleId: { type: String }, // Completamente opcional
-  profileImage: { type: String },
+  hashedPassword: { type: String, required: true },
   role: { type: String, enum: ['client', 'admin'], default: 'client' },
   isActive: { type: Boolean, default: true },
 }, {
   timestamps: true,
-  validateBeforeSave: false, // Desactivar validación automática
-  strict: false // Permitir campos adicionales si es necesario
 });
-
-// Índices únicos sin duplicados
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
 // Esquema de MongoDB para sesiones
 const sessionSchema = new mongoose.Schema({

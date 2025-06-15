@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Calendar, Clock, User, Stethoscope, ArrowLeft, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import RobustNavigation from "@/components/robust-navigation";
+import Navigation from "@/components/navigation";
 import type { Appointment } from "@shared/schema";
 
 // Logo component
@@ -106,7 +106,7 @@ export default function Status() {
   if (foundAppointment) {
     return (
       <div className="min-h-screen bg-slate-50">
-        <RobustNavigation />
+        <Navigation />
 
         <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <Card className="w-full max-w-lg mx-2 shadow-lg">
@@ -215,7 +215,7 @@ export default function Status() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <RobustNavigation />
+      <Navigation />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-lg mx-2 shadow-lg">

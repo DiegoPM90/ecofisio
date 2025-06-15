@@ -1,13 +1,9 @@
-import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import MemoryStore from "memorystore";
-import passport from "passport";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
-import { setupGoogleAuth } from "./google-auth";
-import { sessionDebugMiddleware } from "./session-debug";
 
 const app = express();
 
@@ -34,36 +30,21 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
-// Trust proxy for correct cookie handling in development
-app.set('trust proxy', 1);
-
-// Configurar sesiones con configuración robusta
+// Configurar sesiones
 const MemStore = MemoryStore(session);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura',
-  resave: true,
-  saveUninitialized: true, // Cambiar a true para debugging
+  resave: false,
+  saveUninitialized: false,
   store: new MemStore({
-    checkPeriod: 86400000
+    checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
   }),
   cookie: {
-    secure: false,
-    httpOnly: false, // Cambiar a false para debugging
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax'
-  },
-  name: 'connect.sid' // Usar nombre estándar
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+  }
 }));
-
-// Configurar Passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Middleware de debug para rutas de autenticación
-app.use('/api/auth', sessionDebugMiddleware);
-
-// Configurar Google OAuth
-setupGoogleAuth(app);
 
 app.use((req, res, next) => {
   const start = Date.now();

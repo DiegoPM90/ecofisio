@@ -18,7 +18,7 @@ export interface IStorage {
   // User methods
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserById(id: number | string): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
   getUsers(): Promise<User[]>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   
@@ -145,9 +145,7 @@ export class MemStorage implements IStorage {
       id: this.currentUserId++,
       email: user.email,
       name: user.name,
-      hashedPassword: user.hashedPassword || null,
-      googleId: user.googleId || null,
-      profileImage: user.profileImage || null,
+      hashedPassword: user.hashedPassword,
       role: user.role || 'client',
       isActive: true,
       createdAt: new Date(),
@@ -162,9 +160,8 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.email === email);
   }
 
-  async getUserById(id: number | string): Promise<User | undefined> {
-    const numericId = typeof id === 'string' ? parseInt(id) : id;
-    return this.users.get(numericId);
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
   }
 
   async getUsers(): Promise<User[]> {
@@ -323,79 +320,16 @@ export class MongoStorage implements IStorage {
 
   // User methods
   async createUser(user: InsertUser): Promise<User> {
-    try {
-      console.log("Creando usuario en MongoDB:", user);
-      
-      // Validar que el usuario tenga los datos necesarios
-      if (!user.hashedPassword && !user.googleId) {
-        throw new Error("Usuario debe tener hashedPassword o googleId");
-      }
-      
-      // Preparar datos RAW para MongoDB evitando completamente Mongoose
-      const userData: Record<string, any> = {
-        email: user.email,
-        name: user.name,
-        role: user.role || 'client',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      // Agregar campos de autenticación SOLO si existen
-      if (user.hashedPassword) {
-        userData.hashedPassword = user.hashedPassword;
-      }
-      
-      if (user.googleId) {
-        userData.googleId = user.googleId;
-      }
-      
-      if (user.profileImage) {
-        userData.profileImage = user.profileImage;
-      }
-      
-      console.log("Datos preparados para inserción directa:", userData);
-      
-      // Insertar directamente en la colección sin pasar por Mongoose
-      const db = UserModel.db;
-      const collection = db.collection('users');
-      
-      const result = await collection.insertOne(userData);
-      
-      // Recuperar el documento insertado directamente
-      const insertedDoc = await collection.findOne({ _id: result.insertedId });
-      
-      if (!insertedDoc) {
-        throw new Error("No se pudo recuperar el usuario creado");
-      }
-      
-      console.log("Usuario creado exitosamente con inserción directa:", insertedDoc._id);
-      
-      // Transformar el documento crudo a tipo User usando el helper existente
-      const userObject = {
-        _id: insertedDoc._id,
-        email: insertedDoc.email,
-        name: insertedDoc.name,
-        hashedPassword: insertedDoc.hashedPassword,
-        googleId: insertedDoc.googleId,
-        profileImage: insertedDoc.profileImage,
-        role: insertedDoc.role,
-        isActive: insertedDoc.isActive,
-        createdAt: insertedDoc.createdAt,
-        updatedAt: insertedDoc.updatedAt
-      };
-      
-      return this.transformDocToUser(userObject);
-      
-    } catch (error: any) {
-      console.error("Error creando usuario en MongoDB:", error);
-      
-      if (error.code === 11000) {
-        throw new Error("Ya existe un usuario con este email");
-      }
-      
-      throw new Error(`Error al crear usuario: ${error.message || error}`);
-    }
+    const userDoc = new UserModel({
+      email: user.email,
+      name: user.name,
+      hashedPassword: user.hashedPassword,
+      role: user.role || 'client',
+      isActive: true,
+    });
+
+    const savedDoc = await userDoc.save();
+    return this.transformDocToUser(savedDoc);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -403,21 +337,9 @@ export class MongoStorage implements IStorage {
     return doc ? this.transformDocToUser(doc) : undefined;
   }
 
-  async getUserById(id: number | string): Promise<User | undefined> {
-    console.log("🔍 Buscando usuario por ID:", id, "tipo:", typeof id);
-    try {
-      const doc = await UserModel.findById(id);
-      if (doc) {
-        console.log("✅ Usuario encontrado:", doc.email);
-        return this.transformDocToUser(doc);
-      } else {
-        console.log("❌ Usuario no encontrado con ID:", id);
-        return undefined;
-      }
-    } catch (error: any) {
-      console.error("💥 Error buscando usuario por ID:", error.message);
-      return undefined;
-    }
+  async getUserById(id: number): Promise<User | undefined> {
+    const doc = await UserModel.findById(id);
+    return doc ? this.transformDocToUser(doc) : undefined;
   }
 
   async getUsers(): Promise<User[]> {
@@ -495,9 +417,7 @@ export class MongoStorage implements IStorage {
       id: doc._id.toString(),
       email: doc.email,
       name: doc.name,
-      hashedPassword: doc.hashedPassword || null,
-      googleId: doc.googleId || null,
-      profileImage: doc.profileImage || null,
+      hashedPassword: doc.hashedPassword,
       role: doc.role,
       isActive: doc.isActive,
       createdAt: doc.createdAt || new Date(),
