@@ -6,7 +6,26 @@ import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
 
 const app = express();
-app.use(express.json());
+
+// Middleware de depuración para ver el cuerpo crudo
+app.use('/api/auth/register', (req, res, next) => {
+  console.log('=== MIDDLEWARE DEBUG ===');
+  console.log('Headers:', req.headers);
+  console.log('Content-Type:', req.get('Content-Type'));
+  
+  let body = '';
+  req.on('data', chunk => {
+    body += chunk.toString();
+  });
+  req.on('end', () => {
+    console.log('Cuerpo crudo recibido:', body);
+    req.body = body ? JSON.parse(body) : {};
+    console.log('Cuerpo parseado:', req.body);
+    next();
+  });
+});
+
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
 // Configurar sesiones
