@@ -107,50 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth?error=google_oauth_error");
   });
 
-  // Ruta de prueba robusta para validar MongoDB OAuth
-  app.post("/api/test-robust-oauth", async (req, res) => {
-    try {
-      console.log("=== PRUEBA ROBUSTA OAUTH MONGODB ===");
-      console.log("Datos de entrada:", req.body);
-      
-      // Crear usuario directamente en MongoDB sin validaciones problemáticas
-      const { UserModel } = await import('./mongodb');
-      const db = UserModel.db;
-      const usersCollection = db.collection('users');
-      
-      const userData = {
-        email: req.body.email || "test.robust@gmail.com",
-        name: req.body.name || "Test Robust User",
-        googleId: req.body.googleId || "robust123456",
-        role: "client",
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      console.log("Insertando directamente en colección users:", userData);
-      
-      const result = await usersCollection.insertOne(userData);
-      const insertedUser = await usersCollection.findOne({ _id: result.insertedId });
-      
-      console.log("✅ Usuario OAuth creado exitosamente:", result.insertedId);
-      
-      res.json({
-        success: true,
-        message: "Usuario OAuth creado sin validaciones problemáticas",
-        userId: result.insertedId.toString(),
-        data: insertedUser
-      });
-      
-    } catch (error: any) {
-      console.log("❌ ERROR en prueba robusta:", error.message);
-      res.status(500).json({
-        success: false,
-        error: error.message,
-        message: "Error en creación robusta de usuario OAuth"
-      });
-    }
-  });
+
 
 
 

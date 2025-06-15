@@ -81,8 +81,12 @@ export function setupGoogleAuth(app: Express) {
           const result = await usersCollection.insertOne(userData);
           const insertedUser = await usersCollection.findOne({ _id: result.insertedId });
           
-          // Crear objeto User compatible
-          user = {
+          if (!insertedUser) {
+            throw new Error("No se pudo recuperar el usuario insertado");
+          }
+          
+          // Crear objeto User compatible 
+          const userDoc = {
             id: insertedUser._id.toString(),
             email: insertedUser.email,
             name: insertedUser.name,
@@ -94,15 +98,16 @@ export function setupGoogleAuth(app: Express) {
             createdAt: insertedUser.createdAt.toISOString(),
             updatedAt: insertedUser.updatedAt.toISOString()
           };
+          user = userDoc as any;
           
-          console.log("Usuario OAuth creado exitosamente:", user.id);
+          console.log("Usuario OAuth creado exitosamente:", user!.id);
         } catch (insertError: any) {
           console.error("Error en inserción directa MongoDB:", insertError);
           if (insertError.code === 11000) {
             console.log("Usuario ya existe, obteniendo usuario existente");
             const existingUser = await usersCollection.findOne({ email: email });
             if (existingUser) {
-              user = {
+              const existingUserDoc = {
                 id: existingUser._id.toString(),
                 email: existingUser.email,
                 name: existingUser.name,
@@ -114,6 +119,7 @@ export function setupGoogleAuth(app: Express) {
                 createdAt: existingUser.createdAt.toISOString(),
                 updatedAt: existingUser.updatedAt.toISOString()
               };
+              user = existingUserDoc as any;
             }
           } else {
             throw insertError;
