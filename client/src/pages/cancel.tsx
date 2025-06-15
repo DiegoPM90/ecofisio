@@ -170,15 +170,7 @@ export default function Cancel() {
             </p>
           </div>
 
-          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <div className="flex items-start space-x-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-yellow-700">
-                <p className="font-medium mb-1">Política de Cancelación</p>
-                <p>Las cancelaciones deben realizarse con al menos 24 horas de anticipación para evitar cargos adicionales.</p>
-              </div>
-            </div>
-          </div>
+
 
           <div className="flex space-x-3">
             <Button
