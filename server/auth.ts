@@ -95,6 +95,10 @@ export async function loginUser(req: Request, res: Response) {
     }
 
     // Verificar contraseña
+    if (!user.hashedPassword) {
+      return res.status(401).json({ error: "Usuario registrado con Google, use el login de Google" });
+    }
+    
     const passwordValid = await bcrypt.compare(validatedData.password, user.hashedPassword);
     if (!passwordValid) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
@@ -104,8 +108,8 @@ export async function loginUser(req: Request, res: Response) {
     const session = await storage.createSession(user.id);
     (req.session as any).sessionId = session.id;
 
-    // Devolver usuario sin la contraseña
-    const { hashedPassword: _, ...userWithoutPassword } = user;
+    // Devolver usuario sin la contraseña y campos sensibles
+    const { hashedPassword: _, googleId: __, profileImage: ___, ...userWithoutPassword } = user;
     res.json({ 
       message: 'Inicio de sesión exitoso',
       user: userWithoutPassword 
@@ -151,7 +155,7 @@ export async function getCurrentUser(req: Request, res: Response) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    const { hashedPassword: _, ...userWithoutPassword } = req.user;
+    const { hashedPassword: _, googleId: __, profileImage: ___, ...userWithoutPassword } = req.user;
     res.json({ user: userWithoutPassword });
   } catch (error) {
     console.error('Error al obtener usuario actual:', error);
@@ -221,16 +225,7 @@ export async function getUserAppointments(req: Request, res: Response) {
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        id: number;
-        email: string;
-        name: string;
-        role: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        hashedPassword: string;
-      };
+      user?: User;
     }
     
     interface Session {
