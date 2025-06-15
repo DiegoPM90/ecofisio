@@ -107,40 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth?error=google_oauth_error");
   });
 
-  // Ruta temporal de prueba para validar creación OAuth
-  app.post("/api/test-oauth-validation", async (req, res) => {
-    try {
-      console.log("=== VALIDACIÓN OAUTH DIRECTA ===");
-      console.log("Datos recibidos:", req.body);
-      
-      const testUser = await storage.createUser({
-        email: req.body.email,
-        name: req.body.name,
-        googleId: req.body.googleId,
-        role: req.body.role || 'client'
-      });
-      
-      console.log("✅ VALIDACIÓN OAUTH EXITOSA - Usuario creado:", testUser.id);
-      console.log("=== FIN VALIDACIÓN OAUTH ===");
-      
-      res.status(200).json({ 
-        success: true, 
-        user: testUser,
-        message: "Usuario OAuth creado correctamente"
-      });
-    } catch (error: any) {
-      console.log("❌ ERROR EN VALIDACIÓN OAUTH:");
-      console.log("Mensaje:", error.message);
-      console.log("Stack:", error.stack);
-      console.log("=== FIN ERROR VALIDACIÓN OAUTH ===");
-      
-      res.status(400).json({ 
-        success: false, 
-        error: error.message,
-        details: "Error en creación de usuario OAuth"
-      });
-    }
-  });
+
 
 
 
