@@ -161,14 +161,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
                   </div>
                 )}
                 
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="text-sm">
-                    <p className="font-medium text-amber-800 mb-1">Importante recordar</p>
-                    <p className="text-amber-700">
-                      Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.
-                    </p>
-                  </div>
-                </div>
+
               </div>
             ) : (
               <p className="text-sm text-slate-600">
