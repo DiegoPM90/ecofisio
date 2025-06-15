@@ -1,21 +1,18 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Iniciando proceso de build optimizado para despliegue..."
+echo "🚀 Iniciando proceso de build idéntico al desarrollo..."
 
 # Limpiar directorio de build anterior
 rm -rf dist/
 
 echo "📦 Construyendo frontend..."
-# Build del frontend con configuración optimizada
-npm run build 2>/dev/null || {
-  echo "⚠️ Build con timeout, intentando build simplificado..."
-  npx vite build --mode production --minify false --sourcemap false
-}
+# Build del frontend manteniendo configuración de desarrollo
+npx vite build --config vite.config.prod.ts --mode development
 
 echo "🔧 Construyendo backend..."
-# Build del backend
-npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify=false
+# Build del backend sin minificación ni optimizaciones
+npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --minify=false --sourcemap --keep-names
 
 echo "✅ Build completado exitosamente!"
 echo "📋 Archivos generados:"

@@ -1,29 +1,38 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path from "path";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
+// Configuración de producción idéntica al desarrollo
 export default defineConfig({
   plugins: [react()],
-  root: path.resolve(__dirname, "client"),
+  resolve: {
+    alias: {
+      "@": path.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path.resolve(import.meta.dirname, "shared"),
+      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+    },
+  },
+  root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Sin minificación para mantener código legible como en desarrollo
     minify: false,
-    sourcemap: false,
-    chunkSizeWarningLimit: 2000,
+    // Sin optimizaciones que cambien el comportamiento
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks: undefined,
+        // Mantener nombres originales
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name].js',
+        assetFileNames: '[name].[ext]'
       }
     }
   },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "client/src"),
-      "@shared": path.resolve(__dirname, "shared"),
+  server: {
+    fs: {
+      strict: true,
+      deny: ["**/.*"],
     },
   },
 });
