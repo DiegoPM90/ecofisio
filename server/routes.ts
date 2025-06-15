@@ -9,12 +9,9 @@ import {
   registerUser, 
   loginUser, 
   logoutUser, 
-  getCurrentUser, 
-  getAllUsers, 
-  updateUserById,
+  getCurrentUser,
   getUserAppointments,
-  requireAuth, 
-  requireAdmin 
+  requireAuth
 } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {

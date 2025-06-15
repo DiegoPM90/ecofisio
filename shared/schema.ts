@@ -79,7 +79,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   email: z.string().email("Email inválido"),
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   hashedPassword: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-  role: z.enum(["client", "admin"]).default("client"),
+  role: z.enum(["client"]).default("client"),
 });
 
 export const registerUserSchema = z.object({
