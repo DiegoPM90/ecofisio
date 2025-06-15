@@ -5,6 +5,17 @@ import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
 import { notificationService } from "./notifications";
 import * as cron from 'node-cron';
+import { 
+  registerUser, 
+  loginUser, 
+  logoutUser, 
+  getCurrentUser, 
+  getAllUsers, 
+  updateUserById,
+  getUserAppointments,
+  requireAuth, 
+  requireAdmin 
+} from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   

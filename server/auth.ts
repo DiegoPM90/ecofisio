@@ -7,7 +7,7 @@ import { z } from 'zod';
 // Middleware para verificar autenticación
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    const sessionId = req.session?.sessionId;
+    const sessionId = (req.session as any)?.sessionId;
     
     if (!sessionId) {
       return res.status(401).json({ error: 'No autenticado' });
@@ -15,14 +15,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
     const session = await storage.getSession(sessionId);
     if (!session) {
-      req.session = null; // Limpiar sesión inválida
+      req.session!.destroy((err) => {}); // Limpiar sesión inválida
       return res.status(401).json({ error: 'Sesión inválida' });
     }
 
     const user = await storage.getUserById(session.userId);
     if (!user || !user.isActive) {
       await storage.deleteSession(sessionId);
-      req.session = null;
+      req.session!.destroy((err) => {});
       return res.status(401).json({ error: 'Usuario no encontrado o inactivo' });
     }
 
@@ -67,7 +67,7 @@ export async function registerUser(req: Request, res: Response) {
 
     // Crear sesión
     const session = await storage.createSession(user.id);
-    req.session.sessionId = session.id;
+    (req.session as any).sessionId = session.id;
 
     // Devolver usuario sin la contraseña
     const { hashedPassword: _, ...userWithoutPassword } = user;
@@ -107,7 +107,7 @@ export async function loginUser(req: Request, res: Response) {
 
     // Crear nueva sesión
     const session = await storage.createSession(user.id);
-    req.session.sessionId = session.id;
+    (req.session as any).sessionId = session.id;
 
     // Devolver usuario sin la contraseña
     const { hashedPassword: _, ...userWithoutPassword } = user;
@@ -232,6 +232,10 @@ declare global {
         updatedAt: Date;
         hashedPassword: string;
       };
+    }
+    
+    interface Session {
+      sessionId?: string;
     }
   }
 }
