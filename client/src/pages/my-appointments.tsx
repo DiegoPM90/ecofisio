@@ -260,7 +260,7 @@ export default function MyAppointments() {
         {showNewAppointment ? (
           <>
             {/* Paso 1: Formulario con información del paciente e IA */}
-            {!selectedDate && (
+            {currentStep === "form" && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -271,11 +271,7 @@ export default function MyAppointments() {
                 <CardContent>
                   <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
                     <BookingForm 
-                      formData={{
-                        ...formData,
-                        patientName: user?.name || "",
-                        email: user?.email || "",
-                      }}
+                      formData={formData}
                       onFormDataChange={(data) => {
                         setFormData(data);
                         // Auto-advance to calendar once form is complete
@@ -283,8 +279,8 @@ export default function MyAppointments() {
                             data.specialty && data.reason) {
                           // Small delay to let user see the form is complete
                           setTimeout(() => {
-                            setSelectedDate("pending");
-                          }, 1000);
+                            setCurrentStep("calendar");
+                          }, 1500);
                         }
                       }}
                       showNavigationButton={false}
@@ -295,7 +291,7 @@ export default function MyAppointments() {
             )}
 
             {/* Paso 2: Selección de fecha (después de completar formulario) */}
-            {selectedDate && (
+            {currentStep === "calendar" && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -306,8 +302,18 @@ export default function MyAppointments() {
                 <CardContent>
                   <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
                     <CalendarView 
-                      onDateSelect={setSelectedDate}
-                      onTimeSelect={setSelectedTime}
+                      onDateSelect={(date) => {
+                        setSelectedDate(date);
+                        if (selectedTime) {
+                          setCurrentStep("summary");
+                        }
+                      }}
+                      onTimeSelect={(time) => {
+                        setSelectedTime(time);
+                        if (selectedDate) {
+                          setCurrentStep("summary");
+                        }
+                      }}
                     />
                   </Suspense>
                 </CardContent>
@@ -315,7 +321,7 @@ export default function MyAppointments() {
             )}
 
             {/* Paso 3: Resumen de la cita */}
-            {selectedDate && selectedTime && (
+            {currentStep === "summary" && selectedDate && selectedTime && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -333,6 +339,32 @@ export default function MyAppointments() {
                   </Suspense>
                 </CardContent>
               </Card>
+            )}
+
+            {/* Navigation buttons between steps */}
+            {showNewAppointment && (
+              <div className="flex gap-4 mb-6">
+                {currentStep === "calendar" && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep("form")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Volver al Formulario
+                  </Button>
+                )}
+                {currentStep === "summary" && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setCurrentStep("calendar")}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Cambiar Fecha
+                  </Button>
+                )}
+              </div>
             )}
           </>
         ) : (

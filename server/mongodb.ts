@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   hashedPassword: { type: String, required: true },
   role: { type: String, enum: ['client', 'admin'], default: 'client' },
   isActive: { type: Boolean, default: true },
+  aiConsultationsUsed: { type: Number, default: 0 },
 }, {
   timestamps: true,
 });

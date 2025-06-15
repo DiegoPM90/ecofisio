@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   hashedPassword: text("hashed_password").notNull(),
   role: text("role").notNull().default("client"), // "client", "admin"
   isActive: boolean("is_active").notNull().default(true),
+  aiConsultationsUsed: integer("ai_consultations_used").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

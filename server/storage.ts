@@ -148,6 +148,7 @@ export class MemStorage implements IStorage {
       hashedPassword: user.hashedPassword,
       role: user.role || 'client',
       isActive: true,
+      aiConsultationsUsed: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -422,6 +423,7 @@ export class MongoStorage implements IStorage {
       hashedPassword: doc.hashedPassword,
       role: doc.role,
       isActive: doc.isActive,
+      aiConsultationsUsed: doc.aiConsultationsUsed || 0,
       createdAt: doc.createdAt || new Date(),
       updatedAt: doc.updatedAt || new Date(),
     };

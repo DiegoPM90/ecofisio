@@ -207,12 +207,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(envCheck);
   });
   
-  // Consulta de IA
-  app.post("/api/ai-consultation", async (req, res) => {
+  // Consulta de IA (limitada a 2 consultas por usuario)
+  app.post("/api/ai-consultation", requireAuth, async (req, res) => {
     try {
+      const userId = (req as any).user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario no autenticado" });
+      }
+
+      // Verificar límite de consultas de IA
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+
+      if (user.aiConsultationsUsed >= 2) {
+        return res.status(429).json({ 
+          message: "Límite de consultas de IA alcanzado",
+          details: "Has utilizado las 2 consultas gratuitas disponibles. Para más consultas, contacta con soporte."
+        });
+      }
+
       const validatedData = aiConsultationSchema.parse(req.body);
       const recommendation = await getAIConsultationResponse(validatedData);
-      res.json(recommendation);
+      
+      // Incrementar contador de consultas de IA
+      await storage.updateUser(userId, {
+        aiConsultationsUsed: user.aiConsultationsUsed + 1
+      });
+
+      res.json({
+        ...recommendation,
+        consultationsRemaining: 2 - (user.aiConsultationsUsed + 1)
+      });
     } catch (error) {
       console.error("Error en consulta de IA:", error);
       res.status(500).json({ 
