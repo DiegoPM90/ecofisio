@@ -47,7 +47,7 @@ function getKinesiologyRecommendation(consultation: AIConsultationRequest) {
       additionalNotes: "El dolor de espalda crónico requiere abordaje integral que incluye corrección postural, fortalecimiento muscular y técnicas de movilización articular."
     },
     lesion_deportiva: {
-      recommendation: "Las lesiones deportivas requieren evaluación biomecánica específica del gesto deportivo afectado. La kinesiología deportiva incluye rehabilitación funcional progresiva y estrategias de prevención de recidivas.",
+      recommendation: "Las lesiones deportivas requieren evaluación biomecánica específica del gesto deportivo afectado. La kinesiología de rehabilitación incluye rehabilitación funcional progresiva y estrategias de prevención de recidivas.",
       preparation: "Traer estudios médicos, descripción detallada del mecanismo de lesión, nivel de actividad deportiva y objetivos de retorno al deporte.",
       urgency: "alta", 
       urgencyText: "Evaluación dentro de 1 semana para prevenir complicaciones",

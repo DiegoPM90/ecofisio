@@ -31,7 +31,7 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
 
   const commonReasons = [
     { value: "dolor-muscular", label: "Dolor muscular" },
-    { value: "lesion-deportiva", label: "Lesión deportiva" },
+    { value: "lesion-deportiva", label: "Lesión de rehabilitación" },
     { value: "rehabilitacion-postoperatoria", label: "Rehabilitación post-operatoria" },
     { value: "problemas-respiratorios", label: "Problemas respiratorios" },
     { value: "contracturas", label: "Contracturas" },

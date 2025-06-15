@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 interface RegisterFormProps {
   onSuccess?: () => void;
@@ -22,6 +23,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+  const { refreshUser } = useAuth();
 
   const form = useForm<RegisterUser>({
     resolver: zodResolver(registerUserSchema),

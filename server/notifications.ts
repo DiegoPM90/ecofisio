@@ -306,7 +306,7 @@ Para agendar una nueva cita, visite nuestra web.
   // Obtener nombre de especialidad
   private getSpecialtyName(specialty: string): string {
     const specialties: Record<string, string> = {
-      'sports': 'Kinesiología Deportiva',
+      'sports': 'Kinesiología de Rehabilitación',
       'respiratory': 'Kinesiología Respiratoria',
       'neurological': 'Kinesiología Neurológica',
       'traumatological': 'Kinesiología Traumatológica'

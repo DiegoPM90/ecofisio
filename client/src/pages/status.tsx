@@ -95,7 +95,7 @@ export default function Status() {
 
   const formatSpecialty = (specialty: string) => {
     const specialties: Record<string, string> = {
-      'sports': 'Kinesiología Deportiva',
+      'sports': 'Kinesiología de Rehabilitación',
       'respiratory': 'Kinesiología Respiratoria', 
       'neurological': 'Kinesiología Neurológica',
       'traumatological': 'Kinesiología Traumatológica'
