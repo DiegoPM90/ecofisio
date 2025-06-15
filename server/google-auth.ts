@@ -11,14 +11,22 @@ export function setupGoogleAuth(app: Express) {
     return;
   }
 
+  // Determinar callback URL correcto basado en el entorno
+  const baseUrl = process.env.REPLIT_DOMAINS 
+    ? `https://${process.env.REPLIT_DOMAINS}`
+    : 'http://localhost:5000';
+  
+  const callbackURL = `${baseUrl}/api/auth/google/callback`;
+
   console.log("✅ Google OAuth configurado correctamente");
-  console.log("📍 Callback URL:", `https://${process.env.REPLIT_DOMAINS}/api/auth/google/callback`);
+  console.log("📍 Callback URL:", callbackURL);
+  console.log("🔑 Client ID:", process.env.GOOGLE_CLIENT_ID);
 
   // Configurar estrategia de Google
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `https://${process.env.REPLIT_DOMAINS}/api/auth/google/callback`
+    callbackURL: callbackURL
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

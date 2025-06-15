@@ -55,7 +55,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (err) {
         console.error("❌ Error en passport authenticate:", err);
-        return res.redirect("/auth?error=passport_error&msg=" + encodeURIComponent(err.message || 'unknown'));
+        // Manejar errores específicos de Google OAuth
+        const errorType = err.code === 'invalid_grant' ? 'invalid_code' : 'passport_error';
+        return res.redirect("/auth?error=" + errorType + "&msg=" + encodeURIComponent(err.message || 'unknown'));
       }
 
       if (!user) {
@@ -105,40 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth?error=google_oauth_error");
   });
 
-  // Ruta de prueba para simular callback con datos manuales
-  app.get("/api/test-callback", async (req, res) => {
-    try {
-      console.log("=== PRUEBA DE CALLBACK MANUAL ===");
-      
-      // Simular creación de usuario OAuth
-      const testUser = await storage.createUser({
-        email: "test.oauth@gmail.com",
-        name: "Test OAuth User", 
-        googleId: "test123456789",
-        role: "client"
-      });
-      
-      // Crear sesión
-      const session = await storage.createSession(testUser.id);
-      
-      console.log("Usuario de prueba creado:", testUser.id);
-      console.log("Sesión de prueba creada:", session.id);
-      
-      res.json({ 
-        success: true, 
-        user: testUser, 
-        session: session,
-        message: "Callback simulado exitoso" 
-      });
-    } catch (error: any) {
-      console.error("Error en prueba de callback:", error);
-      res.status(500).json({ 
-        success: false, 
-        error: error.message,
-        message: "Error en callback simulado" 
-      });
-    }
-  });
+
 
 
   
