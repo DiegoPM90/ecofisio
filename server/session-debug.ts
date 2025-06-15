@@ -13,6 +13,10 @@ export function sessionDebugMiddleware(req: Request, res: Response, next: NextFu
   
   if (req.session) {
     console.log("Session data keys:", Object.keys(req.session));
+    console.log("Custom session userId:", (req.session as any).userId);
+    console.log("Custom session userEmail:", (req.session as any).userEmail);
+    console.log("Custom session authenticated:", (req.session as any).authenticated);
+    console.log("Passport session data:", (req.session as any).passport);
   }
   
   console.log("=== END SESSION DEBUG ===");

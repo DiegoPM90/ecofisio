@@ -34,22 +34,25 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
+// Trust proxy for correct cookie handling in development
+app.set('trust proxy', 1);
+
 // Configurar sesiones con configuración robusta
 const MemStore = MemoryStore(session);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura',
-  resave: true, // Cambiar a true para forzar guardado
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true, // Cambiar a true para debugging
   store: new MemStore({
-    checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
+    checkPeriod: 86400000
   }),
   cookie: {
-    secure: false, // false para desarrollo
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    secure: false,
+    httpOnly: false, // Cambiar a false para debugging
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax'
   },
-  name: 'ecofisio.session' // Nombre específico para la cookie
+  name: 'connect.sid' // Usar nombre estándar
 }));
 
 // Configurar Passport middleware

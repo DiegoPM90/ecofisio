@@ -65,30 +65,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect("/auth?error=no_user_from_passport");
       }
 
-      // Login manual con passport
-      req.logIn(user, async (loginErr: any) => {
-        if (loginErr) {
-          console.error("❌ Error en req.logIn:", loginErr);
-          return res.redirect("/auth?error=login_error&msg=" + encodeURIComponent(loginErr.message || 'unknown'));
+      // Establecer sesión directamente sin depender de Passport serialization
+      (req.session as any).userId = user.id;
+      (req.session as any).userEmail = user.email;
+      (req.session as any).authenticated = true;
+      
+      console.log("✅ Sesión establecida directamente");
+      console.log("- User ID guardado:", user.id);
+      console.log("- User Email guardado:", user.email);
+      console.log("- session ID:", req.sessionID);
+      
+      // Guardar la sesión
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("❌ Error guardando sesión:", saveErr);
+          return res.redirect("/auth?error=session_save_error");
         }
-
-        console.log("✅ Usuario logueado con passport exitosamente");
-        console.log("- req.user después del login:", !!req.user);
-        console.log("- req.isAuthenticated():", req.isAuthenticated?.());
-        console.log("- session ID:", req.sessionID);
         
-        // Simplificado: solo guardar la sesión
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("❌ Error guardando sesión:", saveErr);
-            return res.redirect("/auth?error=session_save_error");
-          }
-          
-          console.log("✅ Sesión guardada exitosamente");
-          console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
-          console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
-          res.redirect("/?login=google_success");
-        });
+        console.log("✅ Sesión guardada exitosamente");
+        console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
+        console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
+        res.redirect("/?login=google_success");
       });
     })(req, res, next);
   });

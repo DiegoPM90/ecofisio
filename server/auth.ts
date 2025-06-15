@@ -154,14 +154,24 @@ export async function getCurrentUser(req: Request, res: Response) {
     console.log("🔍 Verificando autenticación usuario:");
     console.log("- req.user:", !!req.user);
     console.log("- req.isAuthenticated():", req.isAuthenticated?.());
-    console.log("- session ID:", (req.session as any)?.id);
-    console.log("- sessionId personalizado:", (req.session as any)?.sessionId);
+    console.log("- session userId:", (req.session as any)?.userId);
+    console.log("- session userEmail:", (req.session as any)?.userEmail);
+    console.log("- session authenticated:", (req.session as any)?.authenticated);
     
-    if (!req.user) {
+    // Verificar autenticación directa por sesión
+    const sessionAuth = (req.session as any)?.authenticated;
+    const sessionEmail = (req.session as any)?.userEmail;
+    
+    if (!sessionAuth || !sessionEmail) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    const user = req.user as any;
+    // Obtener usuario completo desde la base de datos
+    const user = await storage.getUserByEmail(sessionEmail);
+    if (!user) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+    
     console.log("✅ Usuario autenticado encontrado:", user.email);
     
     const userResponse = {
