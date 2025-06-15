@@ -54,6 +54,7 @@ export default function MyAppointments() {
   
   // State for new appointment creation
   const [showNewAppointment, setShowNewAppointment] = useState(false);
+  const [currentStep, setCurrentStep] = useState<"form" | "calendar" | "summary">("form");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -65,6 +66,25 @@ export default function MyAppointments() {
     reason: "",
     reasonDetail: "",
   });
+
+  // Reset flow when starting new appointment
+  const handleNewAppointment = () => {
+    setShowNewAppointment(!showNewAppointment);
+    if (!showNewAppointment) {
+      setCurrentStep("form");
+      setSelectedDate("");
+      setSelectedTime("");
+      setFormData({
+        patientName: user?.name || "",
+        email: user?.email || "",
+        phone: "",
+        specialty: "",
+        sessions: 1,
+        reason: "",
+        reasonDetail: "",
+      });
+    }
+  };
   
   useSEO({
     title: "Mis Citas - EcoFisio Centro",
@@ -220,7 +240,7 @@ export default function MyAppointments() {
         {/* Botón para nueva cita */}
         <div className="mb-6">
           <Button 
-            onClick={() => setShowNewAppointment(!showNewAppointment)}
+            onClick={handleNewAppointment}
             className="w-full sm:w-auto"
           >
             {showNewAppointment ? (

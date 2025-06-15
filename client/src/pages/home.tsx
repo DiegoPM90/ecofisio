@@ -1,12 +1,9 @@
-import { useState, lazy, Suspense } from "react";
-import { HeartPulse, Calendar, Bot, Shield, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
 import { Link } from "wouter";
 import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 import { useSEO } from "@/hooks/use-seo";
 import Navigation from "@/components/navigation";
-
-// Lazy load heavy components for better initial page load
-const BookingForm = lazy(() => import("@/components/booking-form"));
 
 
 // Loading skeleton for form components
@@ -78,18 +75,7 @@ export default function Home() {
     ogDescription: 'Reserva sesiones de kinesiología con los mejores profesionales. Sistema inteligente y consulta IA incluida.'
   });
 
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string>("");
 
-  const [formData, setFormData] = useState({
-    patientName: "",
-    email: "",
-    phone: "",
-    specialty: "",
-    sessions: 1,
-    reason: "",
-    reasonDetail: "",
-  });
 
   // Scroll animation hooks for each section
   const heroRef = useScrollIntoView(0.2);
@@ -164,22 +150,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Booking Section */}
+        {/* Call to Action Section */}
         <section 
           ref={bookingRef.ref}
           id="reservas" 
-          className={`mb-6 sm:mb-12 transition-all duration-1000 ease-out transform sm:hover:scale-105 sm:hover:shadow-2xl ${
+          className={`mb-6 sm:mb-12 transition-all duration-1000 ease-out transform ${
             bookingRef.isVisible 
               ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
               : 'opacity-0 -translate-x-32 scale-95'
           }`}
         >
-          <Suspense fallback={<ComponentLoader />}>
-            <BookingForm 
-              onFormDataChange={setFormData}
-              formData={formData}
-            />
-          </Suspense>
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 sm:p-12 text-white text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              ¿Listo para tu sesión de kinesiología?
+            </h2>
+            <p className="text-blue-100 mb-8 text-lg">
+              Accede a tu cuenta para agendar citas con recomendaciones personalizadas de IA
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/my-appointments">
+                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105">
+                  <Calendar className="inline w-5 h-5 mr-2" />
+                  Agendar Nueva Cita
+                </button>
+              </Link>
+              <Link href="/auth">
+                <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-200">
+                  Iniciar Sesión
+                </button>
+              </Link>
+            </div>
+          </div>
         </section>
 
 
