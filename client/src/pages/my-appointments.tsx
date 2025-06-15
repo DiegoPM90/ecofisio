@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 const CalendarView = lazy(() => import("@/components/calendar-view"));
 const AppointmentSummary = lazy(() => import("@/components/appointment-summary"));
 const BookingForm = lazy(() => import("@/components/booking-form"));
+const AIAssistant = lazy(() => import("@/components/ai-assistant"));
 
 interface Appointment {
   id: string;
@@ -54,7 +55,7 @@ export default function MyAppointments() {
   
   // State for new appointment creation
   const [showNewAppointment, setShowNewAppointment] = useState(false);
-  const [currentStep, setCurrentStep] = useState<"form" | "calendar" | "summary">("form");
+  const [currentStep, setCurrentStep] = useState<"ai" | "form" | "calendar" | "summary">("ai");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [formData, setFormData] = useState({
@@ -71,7 +72,7 @@ export default function MyAppointments() {
   const handleNewAppointment = () => {
     setShowNewAppointment(!showNewAppointment);
     if (!showNewAppointment) {
-      setCurrentStep("form");
+      setCurrentStep("ai");
       setSelectedDate("");
       setSelectedTime("");
       setFormData({
@@ -208,8 +209,19 @@ export default function MyAppointments() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header with back button */}
         <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation('/')}
+              className="mr-3 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Página Principal
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Mis Citas de Kinesiología
           </h1>
@@ -259,7 +271,38 @@ export default function MyAppointments() {
 
         {showNewAppointment ? (
           <>
-            {/* Paso 1: Formulario con información del paciente e IA */}
+            {/* Paso 1: Pregúntale a la IA */}
+            {currentStep === "ai" && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <User className="h-5 w-5 mr-2 text-blue-600" />
+                    Pregúntale a la IA
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
+                    <BookingForm 
+                      formData={formData}
+                      onFormDataChange={(data) => {
+                        setFormData(data);
+                        // Auto-advance to form once AI consultation is complete
+                        if (data.patientName && data.email && data.phone && 
+                            data.specialty && data.reason) {
+                          // Small delay to let user see the form is complete
+                          setTimeout(() => {
+                            setCurrentStep("form");
+                          }, 1500);
+                        }
+                      }}
+                      showNavigationButton={false}
+                    />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Paso 2: Información del Paciente (ahora es después de IA) */}
             {currentStep === "form" && (
               <Card className="mb-6">
                 <CardHeader>
@@ -269,6 +312,17 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentStep("ai")}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      Volver a Consulta IA
+                    </Button>
+                  </div>
                   <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
                     <BookingForm 
                       formData={formData}
@@ -290,7 +344,7 @@ export default function MyAppointments() {
               </Card>
             )}
 
-            {/* Paso 2: Selección de fecha (después de completar formulario) */}
+            {/* Paso 3: Selección de fecha (después de completar formulario) */}
             {currentStep === "calendar" && (
               <Card className="mb-6">
                 <CardHeader>
@@ -300,6 +354,17 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentStep("form")}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      Volver a Información
+                    </Button>
+                  </div>
                   <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
                     <CalendarView 
                       onDateSelect={(date) => {
@@ -320,7 +385,7 @@ export default function MyAppointments() {
               </Card>
             )}
 
-            {/* Paso 3: Resumen de la cita */}
+            {/* Paso 4: Resumen de la cita */}
             {currentStep === "summary" && selectedDate && selectedTime && (
               <Card className="mb-6">
                 <CardHeader>
@@ -330,6 +395,17 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentStep("calendar")}
+                      className="text-gray-600 hover:text-gray-900"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" />
+                      Volver al Calendario
+                    </Button>
+                  </div>
                   <Suspense fallback={<ComponentLoader height="h-80" />}>
                     <AppointmentSummary
                       formData={formData}
