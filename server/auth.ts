@@ -110,13 +110,15 @@ export async function loginUser(req: Request, res: Response) {
 
     // Buscar usuario
     const user = await storage.getUserByEmail(validatedData.email);
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || !user.hashedPassword) {
+      console.log('❌ Login - Usuario no encontrado o inactivo:', validatedData.email);
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
     // Verificar contraseña
     const passwordValid = await bcrypt.compare(validatedData.password, user.hashedPassword);
     if (!passwordValid) {
+      console.log('❌ Login - Contraseña incorrecta para:', validatedData.email);
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
