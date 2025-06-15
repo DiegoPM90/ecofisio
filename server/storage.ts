@@ -1,10 +1,10 @@
-import { type Appointment, type InsertAppointment } from "@shared/schema";
+import { type Appointment, type InsertAppointment, type User, type InsertUser, type Session } from "@shared/schema";
 import { v4 as uuidv4 } from 'uuid';
 import { AppointmentModel } from './mongodb';
 
 export interface IStorage {
   // Appointment methods
-  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
+  createAppointment(appointment: InsertAppointment, userId?: number): Promise<Appointment>;
   getAppointments(): Promise<Appointment[]>;
   getAppointmentsByDate(date: string): Promise<Appointment[]>;
   getAvailableTimeSlots(date: string, specialty: string): Promise<string[]>;
@@ -12,6 +12,20 @@ export interface IStorage {
   deleteAppointment(id: number): Promise<boolean>;
   getAppointmentByToken(token: string): Promise<Appointment | undefined>;
   getAppointmentsForReminder(): Promise<Appointment[]>;
+  getUserAppointments(userId: number): Promise<Appointment[]>;
+  
+  // User methods
+  createUser(user: InsertUser): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  
+  // Session methods
+  createSession(userId: number): Promise<Session>;
+  getSession(sessionId: string): Promise<Session | undefined>;
+  deleteSession(sessionId: string): Promise<boolean>;
+  deleteUserSessions(userId: number): Promise<void>;
 }
 
 // Clase de almacenamiento en memoria (para desarrollo sin base de datos)
@@ -24,9 +38,10 @@ export class MemStorage implements IStorage {
     this.currentAppointmentId = 1;
   }
 
-  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+  async createAppointment(insertAppointment: InsertAppointment, userId?: number): Promise<Appointment> {
     const appointment: Appointment = {
       id: this.currentAppointmentId++,
+      userId: userId || null,
       patientName: insertAppointment.patientName,
       email: insertAppointment.email,
       phone: insertAppointment.phone,

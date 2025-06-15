@@ -2,8 +2,29 @@ import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Tabla de usuarios
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  hashedPassword: text("hashed_password").notNull(),
+  role: text("role").notNull().default("client"), // "client", "admin"
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Tabla de sesiones
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const appointments = pgTable("appointments", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id), // Nueva relación con usuarios
   patientName: text("patient_name").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
@@ -48,8 +69,41 @@ export const aiConsultationSchema = z.object({
   specialty: z.string().optional(),
 });
 
+// Esquemas de autenticación
+export const insertUserSchema = createInsertSchema(users).pick({
+  email: true,
+  name: true,
+  hashedPassword: true,
+  role: true,
+}).extend({
+  email: z.string().email("Email inválido"),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  hashedPassword: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  role: z.enum(["client", "admin"]).default("client"),
+});
+
+export const registerUserSchema = z.object({
+  email: z.string().email("Email inválido"),
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Las contraseñas no coinciden",
+  path: ["confirmPassword"],
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("Email inválido"),
+  password: z.string().min(1, "La contraseña es requerida"),
+});
+
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
 export type AIConsultationRequest = z.infer<typeof aiConsultationSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
+export type LoginUser = z.infer<typeof loginSchema>;
+export type Session = typeof sessions.$inferSelect;
 
 
