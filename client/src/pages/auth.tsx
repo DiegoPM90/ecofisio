@@ -66,6 +66,20 @@ export default function Auth() {
               <p className="text-slate-600">
                 Inicia sesión o crea una nueva cuenta
               </p>
+              
+              {/* Alerta de configuración OAuth */}
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <div className="flex items-center">
+                  <svg className="w-4 h-4 text-amber-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div className="text-left">
+                    <p className="text-amber-800 text-sm font-medium">Google OAuth en configuración</p>
+                    <p className="text-amber-700 text-xs">Usa el registro tradicional mientras actualizamos la configuración</p>
+                  </div>
+                </div>
+              </div>
+
               {errorMessage && (
                 <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-md">
                   <p className="text-red-700 text-sm">{errorMessage}</p>
@@ -106,9 +120,8 @@ export default function Auth() {
               
               <button
                 onClick={() => {
-                  // Verificar si la configuración está funcionando
-                  const testUrl = '/api/auth/google';
-                  window.location.href = testUrl;
+                  // Test Google OAuth endpoint to see if it's working
+                  window.location.href = '/api/auth/google';
                 }}
                 className="mt-4 w-full flex justify-center items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
               >
@@ -122,8 +135,9 @@ export default function Auth() {
               </button>
               
               <div className="mt-3 text-xs text-slate-500 text-center">
-                Si Google OAuth no funciona, usa el registro tradicional arriba.
-                Los cambios en Google Cloud pueden tardar unos minutos.
+                <p className="mb-1">Google OAuth requiere configuración en Google Cloud Console:</p>
+                <p className="font-mono text-xs">URL callback: {window.location.origin}/api/auth/google/callback</p>
+                <p className="mt-1">Los cambios pueden tardar 5-10 minutos en aplicarse.</p>
               </div>
             </div>
 
