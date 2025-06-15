@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { UserRound, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { useLocation } from "wouter";
-import AIAssistant from "./ai-assistant";
 
 interface BookingFormProps {
   onFormDataChange: (data: any) => void;
@@ -222,11 +221,7 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
               )}
             />
 
-            <AIAssistant
-              reason={form.watch("reason")}
-              reasonDetail={form.watch("reasonDetail") ?? undefined}
-              specialty={form.watch("specialty")}
-            />
+
 
             {/* Botón para continuar con la reserva - solo en página principal */}
             {showNavigationButton && (
