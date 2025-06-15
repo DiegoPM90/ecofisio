@@ -55,7 +55,7 @@ export const insertAppointmentSchema = createInsertSchema(appointments).pick({
 }).extend({
   patientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   email: z.string().email("Email inválido"),
-  phone: z.string().min(9, "Teléfono debe tener al menos 9 dígitos"),
+  phone: z.string().min(7, "Teléfono debe tener al menos 7 dígitos"),
   specialty: z.string().min(1, "Debe seleccionar un servicio"),
   reason: z.string().min(1, "Debe especificar un motivo"),
   sessions: z.number().min(1, "Debe seleccionar al menos 1 sesión").max(20, "Máximo 20 sesiones"),
