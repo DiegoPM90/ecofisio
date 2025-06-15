@@ -1,9 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import passport from "passport";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
+import { setupGoogleAuth } from "./google-auth";
 
 const app = express();
 
@@ -45,6 +47,13 @@ app.use(session({
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
   }
 }));
+
+// Configurar Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configurar Google OAuth
+setupGoogleAuth(app);
 
 app.use((req, res, next) => {
   const start = Date.now();
