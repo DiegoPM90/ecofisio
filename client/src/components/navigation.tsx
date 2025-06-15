@@ -154,12 +154,12 @@ export default function Navigation() {
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2"
+              className="inline-flex items-center justify-center p-2 h-10 w-10"
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               ) : (
-                <Menu className="h-6 w-6" />
+                <Menu className="h-5 w-5" />
               )}
             </Button>
           </div>
@@ -172,14 +172,14 @@ export default function Navigation() {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link href="/">
               <button
-                className={`block px-3 py-2 text-base font-medium w-full text-left ${
+                className={`block px-3 py-3 text-base font-medium w-full text-left rounded-md ${
                   isActive("/")
                     ? "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Home className="h-4 w-4 mr-2 inline" />
+                <Home className="h-5 w-5 mr-3 inline" />
                 Inicio
               </button>
             </Link>
@@ -188,14 +188,14 @@ export default function Navigation() {
               <>
                 <Link href="/my-appointments">
                   <button
-                    className={`block px-3 py-2 text-base font-medium w-full text-left ${
+                    className={`block px-3 py-3 text-base font-medium w-full text-left rounded-md ${
                       isActive("/my-appointments")
                         ? "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Calendar className="h-4 w-4 mr-2 inline" />
+                    <Calendar className="h-5 w-5 mr-3 inline" />
                     Mis Citas
                   </button>
                 </Link>
