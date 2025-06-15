@@ -8,7 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { UserRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UserRound, Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
+import { useLocation } from "wouter";
 import AIAssistant from "./ai-assistant";
 
 interface BookingFormProps {
@@ -17,6 +20,9 @@ interface BookingFormProps {
 }
 
 export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
+  const { isAuthenticated } = useAuth();
+  const [location, setLocation] = useLocation();
+  
   const form = useForm<InsertAppointment>({
     resolver: zodResolver(insertAppointmentSchema),
     defaultValues: formData,
@@ -28,6 +34,23 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
   useEffect(() => {
     onFormDataChange(watchedValues);
   }, [watchedValues, onFormDataChange]);
+
+  const isFormComplete = () => {
+    const values = form.getValues();
+    return values.patientName && values.email && values.phone && 
+           values.specialty && values.reason;
+  };
+
+  const handleContinueToBooking = () => {
+    if (!isAuthenticated) {
+      setLocation('/auth');
+      return;
+    }
+    
+    if (isFormComplete()) {
+      setLocation('/my-appointments');
+    }
+  };
 
   const commonReasons = [
     { value: "dolor-muscular", label: "Dolor muscular" },
@@ -203,6 +226,27 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
               reasonDetail={form.watch("reasonDetail") ?? undefined}
               specialty={form.watch("specialty")}
             />
+
+            {/* Botón para continuar con la reserva */}
+            <div className="mt-6 pt-6 border-t border-slate-200">
+              <Button
+                onClick={handleContinueToBooking}
+                disabled={!isFormComplete()}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                size="lg"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                {!isAuthenticated 
+                  ? "Iniciar Sesión para Continuar" 
+                  : "Seleccionar Fecha y Hora"
+                }
+              </Button>
+              {!isFormComplete() && (
+                <p className="text-sm text-slate-500 mt-2 text-center">
+                  Completa todos los campos requeridos para continuar
+                </p>
+              )}
+            </div>
           </div>
         </Form>
       </CardContent>
