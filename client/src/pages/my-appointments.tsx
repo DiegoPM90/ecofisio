@@ -438,7 +438,7 @@ export default function MyAppointments() {
                     <CardHeader>
                       <CardTitle className="flex items-center">
                         <User className="h-5 w-5 mr-2 text-blue-600" />
-                        Cuéntanos sobre tu Consulta
+                        Recibe tu Orientación con IA
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
