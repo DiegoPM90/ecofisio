@@ -6,6 +6,27 @@ import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
 
 const app = express();
+
+// Middleware personalizado para manejar JSON enviado como text/plain
+app.use((req, res, next) => {
+  if (req.headers['content-type'] === 'text/plain;charset=UTF-8') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    req.on('end', () => {
+      try {
+        req.body = JSON.parse(body);
+      } catch (e) {
+        req.body = {};
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
