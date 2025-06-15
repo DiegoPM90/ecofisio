@@ -134,10 +134,10 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
   const availableSlots = getAvailableSlots(selectedDate);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Date Selection Calendar */}
       <Card className="w-full">
-        <CardContent className="p-4 sm:p-6">
+        <CardContent className="p-3 sm:p-4 lg:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
             <h3 className="text-base sm:text-lg font-semibold text-slate-900">Seleccionar Fecha</h3>
             <div className="flex items-center justify-center sm:justify-end space-x-2">
@@ -197,7 +197,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
       {/* Time Selection */}
       {selectedDate && (
         <Card className="w-full">
-          <CardContent className="p-4 sm:p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4">Horarios Disponibles</h3>
             <div className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4">
               {formatDateDisplay(selectedDate)}
@@ -214,7 +214,7 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
                         variant={selectedTime === slot ? "default" : "outline"}
                         size="sm"
                         className={`
-                          time-slot
+                          time-slot h-10 sm:h-11 text-sm sm:text-base
                           ${selectedTime === slot ? 'bg-blue-600 text-white' : 'hover:border-blue-600 hover:bg-blue-50'}
                         `}
                         onClick={() => handleTimeSelect(slot)}

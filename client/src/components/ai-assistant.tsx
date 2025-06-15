@@ -107,13 +107,13 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
 
   return (
     <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-      <CardContent className="p-4">
-        <div className="flex items-start space-x-3">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Bot className="text-white w-4 h-4" />
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex items-start space-x-2 sm:space-x-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Bot className="text-white w-3 h-3 sm:w-4 sm:h-4" />
           </div>
           <div className="flex-1">
-            <h4 className="font-medium text-slate-900 mb-2">Pregúntale a la IA</h4>
+            <h4 className="font-medium text-slate-900 mb-2 text-sm sm:text-base">Pregúntale a la IA</h4>
             
             {generateAIMutation.isPending ? (
               <div className="space-y-2">
@@ -175,15 +175,25 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
               size="sm"
               onClick={handleGenerateAI}
               disabled={!reason || generateAIMutation.isPending || isLimitReached}
-              className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2 border-blue-200"
+              className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2 border-blue-200 h-9 sm:h-10"
             >
-              <RefreshCw className={`w-3 h-3 mr-1 ${generateAIMutation.isPending ? 'animate-spin' : ''}`} />
-              {isLimitReached 
-                ? 'Límite alcanzado' 
-                : aiResponse 
-                  ? 'Actualizar recomendación' 
-                  : 'Generar recomendación'
-              }
+              <RefreshCw className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 ${generateAIMutation.isPending ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">
+                {isLimitReached 
+                  ? 'Límite alcanzado' 
+                  : aiResponse 
+                    ? 'Actualizar recomendación' 
+                    : 'Generar recomendación'
+                }
+              </span>
+              <span className="sm:hidden">
+                {isLimitReached 
+                  ? 'Límite' 
+                  : aiResponse 
+                    ? 'Actualizar' 
+                    : 'Generar'
+                }
+              </span>
             </Button>
           </div>
         </div>
