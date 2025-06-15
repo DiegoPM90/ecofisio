@@ -3,7 +3,7 @@ import { HeartPulse, Calendar, Bot, Shield, Menu, X } from "lucide-react";
 import { Link } from "wouter";
 import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 import { useSEO } from "@/hooks/use-seo";
-import Navigation from "@/components/navigation";
+import RobustNavigation from "@/components/robust-navigation";
 
 // Lazy load heavy components for better initial page load
 const BookingForm = lazy(() => import("@/components/booking-form"));
@@ -102,7 +102,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navigation />
+      <RobustNavigation />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Hero Section */}

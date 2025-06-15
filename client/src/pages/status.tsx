@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Search, Calendar, Clock, User, Stethoscope, ArrowLeft, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-import Navigation from "@/components/navigation";
+import RobustNavigation from "@/components/robust-navigation";
 import type { Appointment } from "@shared/schema";
 
 // Logo component

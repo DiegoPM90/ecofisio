@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,40 +13,62 @@ import {
 import { 
   User, 
   LogOut, 
-  Shield, 
   Calendar,
   Home,
   Menu,
   X
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
-import type { User as UserType } from "@shared/schema";
 
-export default function Navigation() {
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export default function RobustNavigation() {
   const [location, setLocation] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Query independiente para verificar autenticación
-  const { data: authData, error } = useQuery({
-    queryKey: ["/api/auth/me"],
-    retry: false,
-    refetchInterval: 30000, // Verificar cada 30 segundos
-  });
+  // Verificar autenticación de manera robusta
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (authData && (authData as any).user) {
-      setUser((authData as any).user);
-    } else {
-      setUser(null);
-    }
-  }, [authData, error]);
-
-  const isAuthenticated = !!user;
+    checkAuth();
+    // Verificar cada 30 segundos
+    const interval = setInterval(checkAuth, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await apiRequest("/api/auth/logout", { method: "POST" });
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
       setUser(null);
       setLocation("/");
     } catch (error) {
@@ -67,6 +87,8 @@ export default function Navigation() {
   const isActive = (path: string) => {
     return location === path;
   };
+
+  const isAuthenticated = !!user;
 
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
@@ -114,14 +136,27 @@ export default function Navigation() {
                   </button>
                 </Link>
               )}
-
-
             </div>
           </div>
 
           {/* Menú de usuario - Desktop */}
           <div className="hidden md:flex md:items-center md:space-x-4">
-            {isAuthenticated ? (
+            {!isLoading && !isAuthenticated && (
+              <div className="flex items-center space-x-4">
+                <Link href="/auth">
+                  <Button variant="ghost" size="sm">
+                    Iniciar Sesión
+                  </Button>
+                </Link>
+                <Link href="/auth">
+                  <Button size="sm">
+                    Registrarse
+                  </Button>
+                </Link>
+              </div>
+            )}
+
+            {isAuthenticated && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -139,7 +174,6 @@ export default function Navigation() {
                       <p className="text-xs leading-none text-muted-foreground">
                         {user?.email}
                       </p>
-
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -147,7 +181,6 @@ export default function Navigation() {
                     <User className="mr-2 h-4 w-4" />
                     <span>Mi Perfil</span>
                   </DropdownMenuItem>
-
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -155,19 +188,6 @@ export default function Navigation() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link href="/auth">
-                  <Button variant="ghost" size="sm">
-                    Iniciar Sesión
-                  </Button>
-                </Link>
-                <Link href="/auth">
-                  <Button size="sm">
-                    Registrarse
-                  </Button>
-                </Link>
-              </div>
             )}
           </div>
 
@@ -223,8 +243,6 @@ export default function Navigation() {
                   </button>
                 </Link>
 
-
-
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex items-center px-3 mb-3">
                     <Avatar className="h-10 w-10">
@@ -267,7 +285,7 @@ export default function Navigation() {
               </>
             )}
 
-            {!isAuthenticated && (
+            {!isLoading && !isAuthenticated && (
               <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-1">
                 <Link href="/auth">
                   <button
