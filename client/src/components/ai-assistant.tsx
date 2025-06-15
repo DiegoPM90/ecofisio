@@ -113,7 +113,16 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
             <Bot className="text-white w-4 h-4" />
           </div>
           <div className="flex-1">
-            <h4 className="font-medium text-slate-900 mb-2">Asistente de Kinesiología IA</h4>
+            <h4 className="font-medium text-slate-900 mb-2">Pregúntale a la IA</h4>
+            
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="text-sm">
+                <p className="font-medium text-amber-800 mb-1">Importante recordar</p>
+                <p className="text-amber-700">
+                  Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.
+                </p>
+              </div>
+            </div>
             
             {generateAIMutation.isPending ? (
               <div className="space-y-2">
