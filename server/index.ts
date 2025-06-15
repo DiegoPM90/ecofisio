@@ -54,10 +54,12 @@ const sessionConfig = {
 
 app.use(session(sessionConfig));
 
-// Middleware de debugging para sesiones
+// Middleware de logging simplificado para producción
 app.use((req, res, next) => {
-  const sessionId = (req.session as any)?.sessionId;
-  console.log(`🔍 [${req.method}] ${req.path} - Session ID: ${sessionId || 'Sin sesión'}`);
+  if (req.path.startsWith('/api/auth')) {
+    const sessionId = (req.session as any)?.sessionId;
+    console.log(`🔐 [${req.method}] ${req.path} - Session: ${sessionId ? 'Presente' : 'Ausente'}`);
+  }
   next();
 });
 
