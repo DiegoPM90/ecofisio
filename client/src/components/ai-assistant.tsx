@@ -115,15 +115,6 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
           <div className="flex-1">
             <h4 className="font-medium text-slate-900 mb-2">Pregúntale a la IA</h4>
             
-            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="text-sm">
-                <p className="font-medium text-amber-800 mb-1">Importante recordar</p>
-                <p className="text-amber-700">
-                  Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.
-                </p>
-              </div>
-            </div>
-            
             {generateAIMutation.isPending ? (
               <div className="space-y-2">
                 <Skeleton className="h-4 w-full" />
@@ -170,8 +161,13 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
                   </div>
                 )}
                 
-                <div className="mt-3 p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
-                  <strong>Aviso:</strong> Esta es solo orientación inicial. Consulta siempre con un kinesiólogo profesional.
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="text-sm">
+                    <p className="font-medium text-amber-800 mb-1">Importante recordar</p>
+                    <p className="text-amber-700">
+                      Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (
