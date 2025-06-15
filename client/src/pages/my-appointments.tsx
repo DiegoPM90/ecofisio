@@ -353,16 +353,14 @@ export default function MyAppointments() {
                   </CardContent>
                 </Card>
 
-                {/* Show AI consultation if there's content to analyze */}
-                {formData.reasonDetail && formData.reasonDetail.trim().length > 10 && formData.reason && formData.specialty && (
-                  <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
-                    <AIAssistant
-                      reason={formData.reason}
-                      reasonDetail={formData.reasonDetail}
-                      specialty={formData.specialty}
-                    />
-                  </Suspense>
-                )}
+                {/* Show AI consultation - always available */}
+                <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
+                  <AIAssistant
+                    reason={formData.reason || "consulta-general"}
+                    reasonDetail={formData.reasonDetail || ""}
+                    specialty={formData.specialty || "sesiones-kinesiterapia-fisioterapia"}
+                  />
+                </Suspense>
 
                 {/* Basic info form for AI */}
                 <Card className="mb-6">

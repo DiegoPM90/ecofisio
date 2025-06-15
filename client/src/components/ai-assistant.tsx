@@ -125,7 +125,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
               <div className="text-sm text-red-600 space-y-3">
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <strong className="text-red-900">Límite de consultas alcanzado</strong>
-                  <p className="mt-1">Has utilizado las 2 consultas gratuitas de IA disponibles.</p>
+                  <p className="mt-1">Has utilizado tu consulta gratuita de IA disponible.</p>
                   <p className="mt-1 text-xs">Para más consultas, contacta con soporte.</p>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
 
                 {consultationsRemaining !== null && (
                   <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800">
-                    <strong>Consultas restantes:</strong> {consultationsRemaining} de 2
+                    <strong>Consultas restantes:</strong> {consultationsRemaining} de 1
                   </div>
                 )}
                 

@@ -221,10 +221,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      if (user.aiConsultationsUsed >= 2) {
+      if (user.aiConsultationsUsed >= 1) {
         return res.status(429).json({ 
           message: "Límite de consultas de IA alcanzado",
-          details: "Has utilizado las 2 consultas gratuitas disponibles. Para más consultas, contacta con soporte."
+          details: "Has utilizado tu consulta gratuita disponible. Para más consultas, contacta con soporte."
         });
       }
 
@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         ...recommendation,
-        consultationsRemaining: 2 - (user.aiConsultationsUsed + 1)
+        consultationsRemaining: 1 - (user.aiConsultationsUsed + 1)
       });
     } catch (error) {
       console.error("Error en consulta de IA:", error);
