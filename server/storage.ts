@@ -322,18 +322,61 @@ export class MongoStorage implements IStorage {
 
   // User methods
   async createUser(user: InsertUser): Promise<User> {
-    const userDoc = new UserModel({
-      email: user.email,
-      name: user.name,
-      hashedPassword: user.hashedPassword || undefined,
-      googleId: user.googleId || undefined,
-      profileImage: user.profileImage || undefined,
-      role: user.role || 'client',
-      isActive: true,
-    });
-
-    const savedDoc = await userDoc.save();
-    return this.transformDocToUser(savedDoc);
+    try {
+      console.log("Creando usuario en MongoDB:", user);
+      
+      // Validar que el usuario tenga los datos necesarios
+      if (!user.hashedPassword && !user.googleId) {
+        throw new Error("Usuario debe tener hashedPassword o googleId");
+      }
+      
+      // Preparar datos del usuario para MongoDB
+      const userData: any = {
+        email: user.email,
+        name: user.name,
+        role: user.role || 'client',
+        isActive: true
+      };
+      
+      // Agregar campos opcionales solo si están presentes y no son null
+      if (user.hashedPassword) {
+        userData.hashedPassword = user.hashedPassword;
+      }
+      
+      if (user.googleId) {
+        userData.googleId = user.googleId;
+      }
+      
+      if (user.profileImage) {
+        userData.profileImage = user.profileImage;
+      }
+      
+      console.log("Datos preparados para MongoDB:", userData);
+      
+      const userDoc = new UserModel(userData);
+      const savedDoc = await userDoc.save();
+      console.log("Usuario creado exitosamente en MongoDB:", savedDoc._id);
+      
+      return this.transformDocToUser(savedDoc);
+    } catch (error: any) {
+      console.error("Error creando usuario en MongoDB:", error);
+      
+      if (error.code === 11000) {
+        throw new Error("Ya existe un usuario con este email");
+      }
+      
+      if (error.message && error.message.includes('hashedPassword') && error.message.includes('required')) {
+        console.error("Error de validación MongoDB - hashedPassword requerido para usuario OAuth");
+        throw new Error("Error de configuración: Usuario OAuth no requiere contraseña");
+      }
+      
+      if (error.errors && error.errors.hashedPassword) {
+        console.error("Error específico de hashedPassword:", error.errors.hashedPassword);
+        throw new Error("Error de validación de contraseña para usuario OAuth");
+      }
+      
+      throw new Error(`Error al crear usuario: ${error.message || error}`);
+    }
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   hashedPassword: { type: String, required: false }, // Optional for Google OAuth users
-  googleId: { type: String, required: false, unique: true, sparse: true }, // Google OAuth ID
+  googleId: { type: String, required: false, sparse: true }, // Google OAuth ID
   profileImage: { type: String, required: false }, // Profile image URL
   role: { type: String, enum: ['client', 'admin'], default: 'client' },
   isActive: { type: Boolean, default: true },
@@ -16,11 +16,12 @@ const userSchema = new mongoose.Schema({
 
 // Validation: User must have either hashedPassword OR googleId
 userSchema.pre('save', function(next) {
+  // Para usuarios de Google OAuth, googleId es obligatorio
+  // Para usuarios tradicionales, hashedPassword es obligatorio
   if (!this.hashedPassword && !this.googleId) {
-    next(new Error('User must have either hashedPassword or googleId'));
-  } else {
-    next();
+    return next(new Error('User must have either hashedPassword or googleId'));
   }
+  next();
 });
 
 // Esquema de MongoDB para sesiones
