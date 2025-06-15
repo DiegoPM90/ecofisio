@@ -40,8 +40,10 @@ export async function connectToMongoDB() {
     
     // Verificar la conexión
     const db = mongoose.connection.db;
-    const stats = await db.stats();
-    console.log(`📊 Base de datos: ${db.databaseName} - Tamaño: ${(stats.dataSize / 1024 / 1024).toFixed(2)} MB`);
+    if (db) {
+      const stats = await db.stats();
+      console.log(`📊 Base de datos: ${db.databaseName} - Tamaño: ${(stats.dataSize / 1024 / 1024).toFixed(2)} MB`);
+    }
     
   } catch (error) {
     console.error('❌ Error conectando a MongoDB:', error);
