@@ -5,7 +5,7 @@ import LoginForm from "@/components/auth/login-form";
 import RegisterForm from "@/components/auth/register-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import Navigation from "@/components/navigation";
+import RobustNavigation from "@/components/robust-navigation";
 
 export default function Auth() {
   const [, setLocation] = useLocation();
@@ -54,7 +54,7 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navigation />
+      <RobustNavigation />
       
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
