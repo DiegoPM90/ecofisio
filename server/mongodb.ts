@@ -1,8 +1,29 @@
 import mongoose from 'mongoose';
-import { type Appointment, type InsertAppointment } from "@shared/schema";
+import { type Appointment, type InsertAppointment, type User, type Session } from "@shared/schema";
+
+// Esquema de MongoDB para usuarios
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  hashedPassword: { type: String, required: true },
+  role: { type: String, enum: ['client', 'admin'], default: 'client' },
+  isActive: { type: Boolean, default: true },
+}, {
+  timestamps: true,
+});
+
+// Esquema de MongoDB para sesiones
+const sessionSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  expiresAt: { type: Date, required: true },
+}, {
+  timestamps: true,
+});
 
 // Esquema de MongoDB para las citas
 const appointmentSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   patientName: { type: String, required: true },
   email: { type: String, required: true },
   phone: { type: String, required: true },
@@ -26,6 +47,8 @@ appointmentSchema.index({ date: 1, specialty: 1 });
 appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ createdAt: -1 });
 
+export const UserModel = mongoose.model('User', userSchema);
+export const SessionModel = mongoose.model('Session', sessionSchema);
 export const AppointmentModel = mongoose.model('Appointment', appointmentSchema);
 
 // Función para conectar a MongoDB

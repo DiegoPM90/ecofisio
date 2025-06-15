@@ -1,6 +1,7 @@
 import { type Appointment, type InsertAppointment, type User, type InsertUser, type Session } from "@shared/schema";
 import { v4 as uuidv4 } from 'uuid';
-import { AppointmentModel } from './mongodb';
+import { AppointmentModel, UserModel, SessionModel } from './mongodb';
+import bcrypt from 'bcryptjs';
 
 export interface IStorage {
   // Appointment methods
@@ -31,11 +32,17 @@ export interface IStorage {
 // Clase de almacenamiento en memoria (para desarrollo sin base de datos)
 export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment>;
+  private users: Map<number, User>;
+  private sessions: Map<string, Session>;
   private currentAppointmentId: number;
+  private currentUserId: number;
 
   constructor() {
     this.appointments = new Map();
+    this.users = new Map();
+    this.sessions = new Map();
     this.currentAppointmentId = 1;
+    this.currentUserId = 1;
   }
 
   async createAppointment(insertAppointment: InsertAppointment, userId?: number): Promise<Appointment> {
@@ -126,6 +133,90 @@ export class MemStorage implements IStorage {
       appointment.status === 'pendiente' && 
       !appointment.reminderSent
     );
+  }
+
+  async getUserAppointments(userId: number): Promise<Appointment[]> {
+    return Array.from(this.appointments.values()).filter(apt => apt.userId === userId);
+  }
+
+  // User methods
+  async createUser(user: InsertUser): Promise<User> {
+    const newUser: User = {
+      id: this.currentUserId++,
+      email: user.email,
+      name: user.name,
+      hashedPassword: user.hashedPassword,
+      role: user.role || 'client',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    this.users.set(newUser.id, newUser);
+    return newUser;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, ...updates, updatedAt: new Date() };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  // Session methods
+  async createSession(userId: number): Promise<Session> {
+    const sessionId = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 días de expiración
+
+    const session: Session = {
+      id: sessionId,
+      userId,
+      expiresAt,
+      createdAt: new Date(),
+    };
+
+    this.sessions.set(sessionId, session);
+    return session;
+  }
+
+  async getSession(sessionId: string): Promise<Session | undefined> {
+    const session = this.sessions.get(sessionId);
+    if (!session) return undefined;
+    
+    // Verificar si la sesión expiró
+    if (session.expiresAt < new Date()) {
+      this.sessions.delete(sessionId);
+      return undefined;
+    }
+
+    return session;
+  }
+
+  async deleteSession(sessionId: string): Promise<boolean> {
+    return this.sessions.delete(sessionId);
+  }
+
+  async deleteUserSessions(userId: number): Promise<void> {
+    for (const [sessionId, session] of this.sessions.entries()) {
+      if (session.userId === userId) {
+        this.sessions.delete(sessionId);
+      }
+    }
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {
