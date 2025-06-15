@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MapPin, ArrowLeft, Info } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -455,7 +455,6 @@ export default function MyAppointments() {
                       </div>
                     </div>
                   )}
-                  </div>
                 </CardContent>
               </Card>
             )}
@@ -498,12 +497,28 @@ export default function MyAppointments() {
                     <Button
                       onClick={() => setCurrentStep("summary")}
                       disabled={!selectedDate || !selectedTime}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       Ver Resumen de Cita
                       <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
                     </Button>
                   </div>
+                  
+                  {/* Calendar completion feedback */}
+                  {(!selectedDate || !selectedTime) && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-medium mb-1">Selecciona fecha y hora para continuar:</p>
+                          <ul className="space-y-0.5 ml-2 text-xs">
+                            {!selectedDate && <li>• Escoge una fecha disponible</li>}
+                            {!selectedTime && <li>• Selecciona un horario</li>}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
