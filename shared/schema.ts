@@ -84,7 +84,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
   hashedPassword: z.string().optional(),
   googleId: z.string().optional(),
-  profileImage: z.string().optional(),
+  profileImage: z.string().nullable().optional(),
   role: z.enum(["client"]).default("client"),
 });
 

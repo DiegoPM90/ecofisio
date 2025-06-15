@@ -41,64 +41,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     passport.authenticate("google", { scope: ["profile", "email"] })
   );
 
-  // Callback de Google OAuth con manejo robusto de errores
-  app.get("/api/auth/google/callback", (req, res, next) => {
-    passport.authenticate("google", (err: any, user: any, info: any) => {
-      console.log("Google OAuth Callback Debug:", { 
-        error: err ? err.message : null,
-        user: user ? { id: user.id, email: user.email, name: user.name } : null, 
-        info: info,
-        session: req.session ? 'exists' : 'missing'
-      });
-
-      if (err) {
-        console.error("Error de autenticación Google:", err.message || err);
-        return res.redirect("/auth?error=auth_error&details=" + encodeURIComponent(err.message || 'unknown'));
-      }
-
-      if (!user) {
-        console.error("No se obtuvo usuario de Google OAuth");
-        return res.redirect("/auth?error=no_user");
-      }
-
-      // Verificar que el usuario tiene los campos necesarios
-      if (!user.id || !user.email) {
-        console.error("Usuario de Google incompleto:", user);
-        return res.redirect("/auth?error=incomplete_user");
-      }
-
-      // Hacer login manual del usuario con Passport
-      req.logIn(user, async (loginErr: any) => {
-        if (loginErr) {
-          console.error("Error al hacer login con Passport:", loginErr);
-          return res.redirect("/auth?error=login_failed");
+  // Callback de Google OAuth simplificado y robusto
+  app.get("/api/auth/google/callback", 
+    passport.authenticate("google", { 
+      failureRedirect: "/auth?error=google_auth_failed" 
+    }),
+    async (req, res) => {
+      try {
+        console.log("Google OAuth callback exitoso");
+        
+        // Verificar que tenemos usuario autenticado
+        if (!req.user) {
+          console.error("No hay usuario después de autenticación");
+          return res.redirect("/auth?error=no_user_session");
         }
 
-        try {
-          // Crear sesión personalizada
-          const session = await storage.createSession(user.id);
-          (req.session as any).sessionId = session.id;
+        const user = req.user as any;
+        console.log("Usuario autenticado:", { id: user.id, email: user.email });
+
+        // Crear sesión en nuestra base de datos
+        const session = await storage.createSession(user.id);
+        (req.session as any).sessionId = session.id;
+        
+        console.log("Sesión creada exitosamente:", session.id);
+        
+        // Guardar la sesión antes de redirigir
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Error guardando sesión:", saveErr);
+            return res.redirect("/auth?error=session_save_error");
+          }
           
-          // Guardar sesión explícitamente
-          req.session.save((saveErr: any) => {
-            if (saveErr) {
-              console.error("Error guardando sesión:", saveErr);
-              return res.redirect("/auth?error=session_save_failed");
-            }
-            
-            console.log("Login exitoso para usuario:", user.email);
-            console.log("Sesión creada:", session.id);
-            
-            res.redirect("/?auth=google_success");
-          });
-          
-        } catch (sessionError) {
-          console.error("Error creando sesión personalizada:", sessionError);
-          res.redirect("/auth?error=session_creation_failed");
-        }
-      });
-    })(req, res, next);
-  });
+          console.log("Google OAuth completado exitosamente para:", user.email);
+          res.redirect("/?login=google_success");
+        });
+
+      } catch (error: any) {
+        console.error("Error en callback de Google OAuth:", error);
+        const errorMessage = error?.message || String(error) || 'unknown';
+        res.redirect("/auth?error=callback_error&msg=" + encodeURIComponent(errorMessage));
+      }
+    }
+  );
 
   // Ruta para manejar errores de Google OAuth
   app.get("/api/auth/google/error", (req, res) => {

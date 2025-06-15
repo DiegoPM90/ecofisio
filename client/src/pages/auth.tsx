@@ -17,19 +17,32 @@ export default function Auth() {
   useState(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const error = urlParams.get('error');
+    const success = urlParams.get('login');
+    
+    if (success === 'google_success') {
+      setLocation("/");
+      return;
+    }
+    
     if (error) {
+      const details = urlParams.get('details') || urlParams.get('msg');
       switch(error) {
         case 'google_auth_failed':
           setErrorMessage('Error en la autenticación con Google. Inténtalo de nuevo.');
           break;
         case 'session_creation_failed':
-          setErrorMessage('Error al crear la sesión. Contacta al soporte.');
+        case 'session_save_error':
+          setErrorMessage('Error al crear la sesión. Inténtalo de nuevo.');
           break;
-        case 'google_oauth_error':
-          setErrorMessage('Error de configuración OAuth. Contacta al soporte.');
+        case 'no_user_session':
+        case 'no_user':
+          setErrorMessage('No se pudo obtener información del usuario de Google.');
+          break;
+        case 'callback_error':
+          setErrorMessage(`Error en el callback de Google: ${details || 'Desconocido'}`);
           break;
         default:
-          setErrorMessage('Error de autenticación. Inténtalo de nuevo.');
+          setErrorMessage(`Error de autenticación: ${error}`);
       }
     }
   });

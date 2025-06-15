@@ -50,13 +50,17 @@ export function setupGoogleAuth(app: Express) {
       } else {
         console.log("Creando nuevo usuario de Google");
         // Crear nuevo usuario con datos completos
-        const userData = {
+        const userData: any = {
           name: profile.displayName || "Usuario Google",
           email: email,
           googleId: profile.id,
-          profileImage: profile.photos?.[0]?.value || undefined,
-          role: 'client' as const
+          role: 'client'
         };
+        
+        // Solo agregar profileImage si existe
+        if (profile.photos?.[0]?.value) {
+          userData.profileImage = profile.photos[0].value;
+        }
         
         console.log("Datos del usuario a crear:", userData);
         user = await storage.createUser(userData);
