@@ -7,8 +7,6 @@ import Navigation from "@/components/navigation";
 
 // Lazy load heavy components for better initial page load
 const BookingForm = lazy(() => import("@/components/booking-form"));
-const CalendarView = lazy(() => import("@/components/calendar-view"));
-const AppointmentSummary = lazy(() => import("@/components/appointment-summary"));
 
 
 // Loading skeleton for form components
@@ -96,8 +94,6 @@ export default function Home() {
   // Scroll animation hooks for each section
   const heroRef = useScrollIntoView(0.2);
   const bookingRef = useScrollIntoView(0.3);
-  const calendarRef = useScrollIntoView(0.3);
-  const summaryRef = useScrollIntoView(0.3);
 
 
   return (
@@ -186,40 +182,7 @@ export default function Home() {
           </Suspense>
         </section>
 
-        {/* Calendar Section */}
-        <section 
-          ref={calendarRef.ref}
-          className={`mb-6 sm:mb-12 transition-all duration-1000 ease-out transform sm:hover:scale-105 sm:hover:shadow-2xl ${
-            calendarRef.isVisible 
-              ? 'opacity-100 animate-[scrollSlideInRight_1s_ease-out_forwards]' 
-              : 'opacity-0 translate-x-32 scale-95'
-          }`}
-        >
-          <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
-            <CalendarView 
-              onDateSelect={setSelectedDate}
-              onTimeSelect={setSelectedTime}
-            />
-          </Suspense>
-        </section>
 
-        {/* Appointment Summary */}
-        <section 
-          ref={summaryRef.ref}
-          className={`mb-6 sm:mb-12 transition-all duration-500 ease-out transform sm:hover:scale-105 sm:hover:shadow-2xl ${
-            summaryRef.isVisible 
-              ? 'opacity-100 animate-[scrollBounceIn_0.5s_ease-out_forwards]' 
-              : 'opacity-0 translate-y-16 scale-95'
-          }`}
-        >
-          <Suspense fallback={<ComponentLoader height="h-80" />}>
-            <AppointmentSummary
-              formData={formData}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-            />
-          </Suspense>
-        </section>
 
 
       </main>

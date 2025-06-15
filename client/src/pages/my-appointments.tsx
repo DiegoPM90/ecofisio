@@ -3,10 +3,16 @@ import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User, Phone, Mail, MapPin } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MapPin, ArrowLeft } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useState, lazy, Suspense } from "react";
+import { useLocation } from "wouter";
+
+// Lazy load components for calendar and summary
+const CalendarView = lazy(() => import("@/components/calendar-view"));
+const AppointmentSummary = lazy(() => import("@/components/appointment-summary"));
 
 interface Appointment {
   id: string;
@@ -24,8 +30,40 @@ interface Appointment {
   createdAt: string;
 }
 
+// Loading skeleton for components
+const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
+  <div className={`${height} bg-white rounded-xl border border-slate-200 animate-pulse`}>
+    <div className="p-6">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="w-8 h-8 bg-slate-300 rounded-lg"></div>
+        <div className="h-5 bg-slate-300 rounded w-48"></div>
+      </div>
+      <div className="space-y-4">
+        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+        <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function MyAppointments() {
   const { user, isAuthenticated } = useAuth();
+  const [location, setLocation] = useLocation();
+  
+  // State for new appointment creation
+  const [showNewAppointment, setShowNewAppointment] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [formData, setFormData] = useState({
+    patientName: "",
+    email: "",
+    phone: "",
+    specialty: "",
+    sessions: 1,
+    reason: "",
+    reasonDetail: "",
+  });
   
   useSEO({
     title: "Mis Citas - EcoFisio Centro",
@@ -178,25 +216,93 @@ export default function MyAppointments() {
           </CardContent>
         </Card>
 
-        {/* Lista de citas */}
-        {!appointments || (Array.isArray(appointments) && appointments.length === 0) ? (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  No tienes citas programadas
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  Agenda tu primera cita de kinesiología
-                </p>
-                <Button onClick={() => window.location.href = '/'}>
-                  Agendar Cita
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Botón para nueva cita */}
+        <div className="mb-6">
+          <Button 
+            onClick={() => setShowNewAppointment(!showNewAppointment)}
+            className="w-full sm:w-auto"
+          >
+            {showNewAppointment ? (
+              <>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver a Mis Citas
+              </>
+            ) : (
+              <>
+                <Calendar className="h-4 w-4 mr-2" />
+                Agendar Nueva Cita
+              </>
+            )}
+          </Button>
+        </div>
+
+        {showNewAppointment ? (
+          <>
+            {/* Formulario completado - ahora selección de fecha */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+                  Selecciona Fecha y Hora
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
+                  <CalendarView 
+                    onDateSelect={setSelectedDate}
+                    onTimeSelect={setSelectedTime}
+                  />
+                </Suspense>
+              </CardContent>
+            </Card>
+
+            {/* Resumen de la cita */}
+            {selectedDate && selectedTime && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Clock className="h-5 w-5 mr-2 text-green-600" />
+                    Resumen de tu Cita
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Suspense fallback={<ComponentLoader height="h-80" />}>
+                    <AppointmentSummary
+                      formData={{
+                        patientName: user?.name || "",
+                        email: user?.email || "",
+                        phone: "",
+                        specialty: "sesiones-kinesiterapia-fisioterapia",
+                        sessions: 1,
+                        reason: "rehabilitacion",
+                        reasonDetail: ""
+                      }}
+                      selectedDate={selectedDate}
+                      selectedTime={selectedTime}
+                    />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            )}
+          </>
         ) : (
+          <>
+            {/* Lista de citas existentes */}
+            {!appointments || (Array.isArray(appointments) && appointments.length === 0) ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                      No tienes citas programadas
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">
+                      Agenda tu primera cita de kinesiología
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
           <div className="space-y-4">
             {(appointments || []).map((appointment: Appointment) => (
               <Card key={appointment.id} className="hover:shadow-md transition-shadow">
@@ -256,8 +362,10 @@ export default function MyAppointments() {
                   )}
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+            )}
+          </>
         )}
       </div>
     </div>
