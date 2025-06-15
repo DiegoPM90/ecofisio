@@ -366,15 +366,6 @@ export default function MyAppointments() {
                   </CardContent>
                 </Card>
 
-                {/* Show AI consultation - always available */}
-                <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
-                  <AIAssistant
-                    reason={formData.reason || "consulta-general"}
-                    reasonDetail={formData.reasonDetail || ""}
-                    specialty={formData.specialty || "sesiones-kinesiterapia-fisioterapia"}
-                  />
-                </Suspense>
-
                 {/* Personal Information */}
                 <Card className="mb-6">
                   <CardHeader>
@@ -449,13 +440,34 @@ export default function MyAppointments() {
                   </CardContent>
                 </Card>
 
-                {/* Service Classification */}
+                {/* AI Consultation - after personal info */}
                 {formData.patientName && formData.email && formData.phone && formData.age && (
                   <Card className="mb-6">
                     <CardHeader>
                       <CardTitle className="flex items-center">
                         <User className="h-5 w-5 mr-2 text-blue-600" />
                         Cuéntanos sobre tu Consulta
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
+                        <AIAssistant
+                          reason={formData.reason || "consulta-general"}
+                          reasonDetail={formData.reasonDetail || ""}
+                          specialty={formData.specialty || "sesiones-kinesiterapia-fisioterapia"}
+                        />
+                      </Suspense>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Service Classification - after AI */}
+                {formData.patientName && formData.email && formData.phone && formData.age && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-blue-600" />
+                        Tipo de Servicio Requerido
                       </CardTitle>
                       <p className="text-sm text-gray-600 mt-2">
                         Selecciona uno o más servicios que necesitas (puedes elegir varios)
@@ -465,10 +477,10 @@ export default function MyAppointments() {
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 gap-3">
                           {[
-                            { id: 'rehabilitacion-kinesica', label: 'Rehabilitación Kinésica y Fisioterapia' },
+                            { id: 'rehabilitacion-fisioterapia', label: 'Rehabilitación y Fisioterapia' },
                             { id: 'masajes-descontracturantes', label: 'Masajes Descontracturantes' },
                             { id: 'masajes-relajantes', label: 'Masajes Relajantes' },
-                            { id: 'psicomotricidad-adulto-mayor', label: 'Psicomotricidad Adulto Mayor' }
+                            { id: 'intervencion-kinesica-adulto-mayor', label: 'Intervención Kinésica para el Adulto Mayor' }
                           ].map((service) => (
                             <div key={service.id} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
                               <input

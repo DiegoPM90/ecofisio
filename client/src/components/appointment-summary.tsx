@@ -80,10 +80,10 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
     const primaryService = formData.selectedServices[0];
     const servicesDescription = formData.selectedServices.map(service => {
       switch(service) {
-        case 'rehabilitacion-kinesica': return 'Rehabilitación Kinésica y Fisioterapia';
+        case 'rehabilitacion-fisioterapia': return 'Rehabilitación y Fisioterapia';
         case 'masajes-descontracturantes': return 'Masajes Descontracturantes';
         case 'masajes-relajantes': return 'Masajes Relajantes';
-        case 'psicomotricidad-adulto-mayor': return 'Psicomotricidad Adulto Mayor';
+        case 'intervencion-kinesica-adulto-mayor': return 'Intervención Kinésica para el Adulto Mayor';
         default: return service;
       }
     }).join(', ');
@@ -226,10 +226,10 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
                 <ul className="space-y-1">
                   {formData.selectedServices.map(service => (
                     <li key={service} className="text-sm">
-                      {service === 'rehabilitacion-kinesica' && '• Rehabilitación Kinésica y Fisioterapia'}
+                      {service === 'rehabilitacion-fisioterapia' && '• Rehabilitación y Fisioterapia'}
                       {service === 'masajes-descontracturantes' && '• Masajes Descontracturantes'}
                       {service === 'masajes-relajantes' && '• Masajes Relajantes'}
-                      {service === 'psicomotricidad-adulto-mayor' && '• Psicomotricidad Adulto Mayor'}
+                      {service === 'intervencion-kinesica-adulto-mayor' && '• Intervención Kinésica para el Adulto Mayor'}
                     </li>
                   ))}
                 </ul>
