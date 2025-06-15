@@ -219,20 +219,27 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
             <span className="font-medium text-right">{selectedTime || "No seleccionada"}</span>
           </div>
           <div className="flex justify-between items-start">
-            <span className="text-slate-600">Servicio:</span>
-            <span className="font-medium text-right flex-1 ml-2">{getServiceLabel(formData.specialty)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-slate-600">Sesiones:</span>
-            <span className="font-medium text-right">{formData.sessions || 1}</span>
+            <span className="text-slate-600">Servicios:</span>
+            <div className="font-medium text-right flex-1 ml-2">
+              {formData.selectedServices?.length ? (
+                <ul className="space-y-1">
+                  {formData.selectedServices.map(service => (
+                    <li key={service} className="text-sm">
+                      {service === 'rehabilitacion-kinesica' && '• Rehabilitación Kinésica y Fisioterapia'}
+                      {service === 'masajes-descontracturantes' && '• Masajes Descontracturantes'}
+                      {service === 'masajes-relajantes' && '• Masajes Relajantes'}
+                      {service === 'psicomotricidad-adulto-mayor' && '• Psicomotricidad Adulto Mayor'}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                "No seleccionados"
+              )}
+            </div>
           </div>
           <div className="flex justify-between items-start">
-            <span className="text-slate-600">Paciente:</span>
-            <span className="font-medium text-right flex-1 ml-2 break-words">{formData.patientName || "No especificado"}</span>
-          </div>
-          <div className="flex justify-between items-start">
-            <span className="text-slate-600">Email:</span>
-            <span className="font-medium text-right flex-1 ml-2 break-all">{formData.email || "No especificado"}</span>
+            <span className="text-slate-600">Descripción:</span>
+            <span className="font-medium text-right flex-1 ml-2 break-words text-sm">{formData.reasonDetail || "No especificada"}</span>
           </div>
         </div>
 
@@ -249,7 +256,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
         
         {!isComplete && (
           <p className="text-xs text-slate-500 mt-2 text-center">
-            Completa todos los campos del formulario para confirmar tu cita
+            Selecciona al menos un servicio y proporciona una descripción para confirmar tu cita
           </p>
         )}
         
