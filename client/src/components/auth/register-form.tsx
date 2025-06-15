@@ -58,7 +58,16 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   });
 
   const onSubmit = (data: RegisterUser) => {
-    registerMutation.mutate(data);
+    console.log("Datos del formulario:", data);
+    // Asegurar que todos los campos están definidos
+    const cleanData = {
+      name: data.name?.trim() || "",
+      email: data.email?.trim() || "",
+      password: data.password || "",
+      confirmPassword: data.confirmPassword || ""
+    };
+    console.log("Datos limpios:", cleanData);
+    registerMutation.mutate(cleanData);
   };
 
   return (
