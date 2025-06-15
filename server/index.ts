@@ -7,6 +7,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
 import { setupGoogleAuth } from "./google-auth";
+import { sessionDebugMiddleware } from "./session-debug";
 
 const app = express();
 
@@ -33,26 +34,30 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false }));
 
-// Configurar sesiones
+// Configurar sesiones con configuración robusta
 const MemStore = MemoryStore(session);
 app.use(session({
   secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura',
-  resave: false,
+  resave: true, // Cambiar a true para forzar guardado
   saveUninitialized: false,
   store: new MemStore({
     checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
   }),
   cookie: {
-    secure: false, // Cambiar a false para desarrollo
+    secure: false, // false para desarrollo
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-    sameSite: 'lax' // Añadir sameSite para compatibilidad
-  }
+    sameSite: 'lax'
+  },
+  name: 'ecofisio.session' // Nombre específico para la cookie
 }));
 
 // Configurar Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Middleware de debug para rutas de autenticación
+app.use('/api/auth', sessionDebugMiddleware);
 
 // Configurar Google OAuth
 setupGoogleAuth(app);

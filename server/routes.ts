@@ -75,14 +75,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Usuario logueado con passport exitosamente");
         console.log("- req.user después del login:", !!req.user);
         console.log("- req.isAuthenticated():", req.isAuthenticated?.());
+        console.log("- session ID:", req.sessionID);
         
-        // Guardar la sesión antes de redirigir
+        // Simplificado: solo guardar la sesión
         req.session.save((saveErr) => {
           if (saveErr) {
             console.error("❌ Error guardando sesión:", saveErr);
             return res.redirect("/auth?error=session_save_error");
           }
           
+          console.log("✅ Sesión guardada exitosamente");
           console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
           console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
           res.redirect("/?login=google_success");
