@@ -41,53 +41,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     passport.authenticate("google", { scope: ["profile", "email"] })
   );
 
-  // Callback de Google OAuth simplificado y robusto
-  app.get("/api/auth/google/callback", 
-    passport.authenticate("google", { 
-      failureRedirect: "/auth?error=google_auth_failed" 
-    }),
-    async (req, res) => {
-      try {
-        console.log("Google OAuth callback exitoso");
-        
-        // Verificar que tenemos usuario autenticado
-        if (!req.user) {
-          console.error("No hay usuario después de autenticación");
-          return res.redirect("/auth?error=no_user_session");
+  // Callback de Google OAuth con logging completo
+  app.get("/api/auth/google/callback", (req, res, next) => {
+    console.log("=== CALLBACK GOOGLE OAUTH INICIADO ===");
+    console.log("Query params:", req.query);
+    console.log("Session antes de auth:", req.session ? "Existe" : "No existe");
+    
+    passport.authenticate("google", (err: any, user: any, info: any) => {
+      console.log("=== RESULTADO PASSPORT AUTHENTICATE ===");
+      console.log("Error:", err ? err.message : "Ninguno");
+      console.log("Usuario:", user ? { id: user.id, email: user.email } : "No user");
+      console.log("Info:", info);
+      
+      if (err) {
+        console.error("❌ Error en passport authenticate:", err);
+        return res.redirect("/auth?error=passport_error&msg=" + encodeURIComponent(err.message || 'unknown'));
+      }
+
+      if (!user) {
+        console.error("❌ No se obtuvo usuario de passport");
+        return res.redirect("/auth?error=no_user_from_passport");
+      }
+
+      // Login manual con passport
+      req.logIn(user, async (loginErr: any) => {
+        if (loginErr) {
+          console.error("❌ Error en req.logIn:", loginErr);
+          return res.redirect("/auth?error=login_error&msg=" + encodeURIComponent(loginErr.message || 'unknown'));
         }
 
-        const user = req.user as any;
-        console.log("Usuario autenticado:", { id: user.id, email: user.email });
-
-        // Crear sesión en nuestra base de datos
-        const session = await storage.createSession(user.id);
-        (req.session as any).sessionId = session.id;
-        
-        console.log("Sesión creada exitosamente:", session.id);
-        
-        // Guardar la sesión antes de redirigir
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error("Error guardando sesión:", saveErr);
-            return res.redirect("/auth?error=session_save_error");
-          }
+        try {
+          console.log("✅ Usuario logueado con passport, creando sesión personalizada...");
           
-          console.log("Google OAuth completado exitosamente para:", user.email);
-          res.redirect("/?login=google_success");
-        });
+          // Crear sesión en nuestra base de datos
+          const session = await storage.createSession(user.id);
+          (req.session as any).sessionId = session.id;
+          
+          console.log("✅ Sesión creada:", session.id);
+          
+          // Guardar la sesión antes de redirigir
+          req.session.save((saveErr) => {
+            if (saveErr) {
+              console.error("❌ Error guardando sesión:", saveErr);
+              return res.redirect("/auth?error=session_save_error");
+            }
+            
+            console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
+            console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
+            res.redirect("/?login=google_success");
+          });
 
-      } catch (error: any) {
-        console.error("Error en callback de Google OAuth:", error);
-        const errorMessage = error?.message || String(error) || 'unknown';
-        res.redirect("/auth?error=callback_error&msg=" + encodeURIComponent(errorMessage));
-      }
-    }
-  );
+        } catch (error: any) {
+          console.error("❌ Error en creación de sesión:", error);
+          res.redirect("/auth?error=session_creation_error&msg=" + encodeURIComponent(error.message || 'unknown'));
+        }
+      });
+    })(req, res, next);
+  });
 
   // Ruta para manejar errores de Google OAuth
   app.get("/api/auth/google/error", (req, res) => {
     console.log("❌ Error en autenticación Google:", req.query);
     res.redirect("/auth?error=google_oauth_error");
+  });
+
+  // Ruta de prueba para simular callback con datos manuales
+  app.get("/api/test-callback", async (req, res) => {
+    try {
+      console.log("=== PRUEBA DE CALLBACK MANUAL ===");
+      
+      // Simular creación de usuario OAuth
+      const testUser = await storage.createUser({
+        email: "test.oauth@gmail.com",
+        name: "Test OAuth User", 
+        googleId: "test123456789",
+        role: "client"
+      });
+      
+      // Crear sesión
+      const session = await storage.createSession(testUser.id);
+      
+      console.log("Usuario de prueba creado:", testUser.id);
+      console.log("Sesión de prueba creada:", session.id);
+      
+      res.json({ 
+        success: true, 
+        user: testUser, 
+        session: session,
+        message: "Callback simulado exitoso" 
+      });
+    } catch (error: any) {
+      console.error("Error en prueba de callback:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        message: "Error en callback simulado" 
+      });
+    }
   });
 
 
