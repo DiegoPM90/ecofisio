@@ -66,6 +66,10 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
   });
 
   const onSubmit = (data: RegisterUser) => {
+    console.log('=== DATOS EN FRONTEND ===');
+    console.log('Formulario data original:', data);
+    console.log('form.getValues():', form.getValues());
+    
     // Asegurar que todos los campos están definidos
     const cleanData = {
       name: data.name?.trim() || "",
@@ -73,6 +77,7 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       password: data.password || "",
       confirmPassword: data.confirmPassword || ""
     };
+    console.log('Datos limpios a enviar:', cleanData);
     registerMutation.mutate(cleanData);
   };
 

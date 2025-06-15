@@ -46,6 +46,11 @@ export async function requireAdmin(req: Request, res: Response, next: NextFuncti
 // Función para registrar usuario
 export async function registerUser(req: Request, res: Response) {
   try {
+    console.log('=== DATOS RECIBIDOS EN BACKEND ===');
+    console.log('req.body:', req.body);
+    console.log('typeof req.body:', typeof req.body);
+    console.log('Object.keys(req.body):', Object.keys(req.body || {}));
+    
     const validatedData = registerUserSchema.parse(req.body);
 
     // Verificar si el usuario ya existe
