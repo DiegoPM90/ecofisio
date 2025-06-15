@@ -4,7 +4,7 @@ import session from "express-session";
 import MemoryStore from "memorystore";
 import passport from "passport";
 import { registerRoutes } from "./routes";
-import { serveStatic } from "./vite";
+import { serveStaticFiles } from "./static";
 import { connectToMongoDB } from "./mongodb";
 import { setupGoogleAuth } from "./google-auth";
 
@@ -77,7 +77,7 @@ async function startServer() {
     });
 
     // Servir archivos estáticos en producción
-    serveStatic(app);
+    serveStaticFiles(app);
 
     // Configurar puerto para producción (Replit asigna el puerto dinámicamente)
     const port = parseInt(process.env.PORT || "3000", 10);
