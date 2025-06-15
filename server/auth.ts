@@ -155,14 +155,15 @@ export async function getCurrentUser(req: Request, res: Response) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
+    const user = req.user as any;
     const userResponse = {
-      id: req.user.id,
-      email: req.user.email,
-      name: req.user.name,
-      role: req.user.role,
-      isActive: req.user.isActive,
-      createdAt: req.user.createdAt,
-      updatedAt: req.user.updatedAt
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
     };
     res.json({ user: userResponse });
   } catch (error) {
@@ -221,7 +222,7 @@ export async function getUserAppointments(req: Request, res: Response) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    const appointments = await storage.getUserAppointments(req.user.id);
+    const appointments = await storage.getUserAppointments((req.user as any).id);
     res.json({ appointments });
   } catch (error) {
     console.error('Error al obtener citas del usuario:', error);
