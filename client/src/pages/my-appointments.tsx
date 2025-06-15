@@ -305,8 +305,56 @@ export default function MyAppointments() {
             {/* Paso 1: Pregúntale a la IA */}
             {currentStep === "ai" && (
               <div className="space-y-6">
-                {/* Show AI consultation first if reason and specialty are filled */}
-                {formData.reason && formData.specialty && (
+                {/* Client consultation text box */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <User className="h-5 w-5 mr-2 text-blue-600" />
+                      Cuéntanos sobre tu consulta
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Describe brevemente tu lesión o consulta
+                        </label>
+                        <textarea
+                          value={formData.reasonDetail}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value.length <= 400) {
+                              setFormData({...formData, reasonDetail: value});
+                            }
+                          }}
+                          placeholder="Ejemplo: Tengo dolor en la espalda baja desde hace una semana, empeora al estar sentado mucho tiempo..."
+                          className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none"
+                        />
+                        <div className="flex justify-between items-center mt-1">
+                          <p className="text-xs text-gray-500">
+                            Comparte los detalles que consideres importantes para tu evaluación
+                          </p>
+                          <span className={`text-xs ${formData.reasonDetail?.length > 350 ? 'text-orange-600' : 'text-gray-500'}`}>
+                            {formData.reasonDetail?.length || 0}/400
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                          <div className="text-sm text-amber-800">
+                            <p className="font-medium mb-1">Importante recordar</p>
+                            <p>Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Show AI consultation if there's content to analyze */}
+                {formData.reasonDetail && formData.reasonDetail.trim().length > 10 && formData.reason && formData.specialty && (
                   <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
                     <AIAssistant
                       reason={formData.reason}
