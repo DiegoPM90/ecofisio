@@ -314,7 +314,9 @@ export class MongoStorage implements IStorage {
   }
 
   async getUserAppointments(userId: number): Promise<Appointment[]> {
-    const docs = await AppointmentModel.find({ userId }).sort({ createdAt: -1 });
+    // Convertir el ID numérico a string para MongoDB
+    const userIdString = userId.toString();
+    const docs = await AppointmentModel.find({ userId: userIdString }).sort({ createdAt: -1 });
     return docs.map(doc => this.transformDocToAppointment(doc));
   }
 

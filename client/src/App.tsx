@@ -34,7 +34,7 @@ function Router() {
         <Route path="/cancel" component={Cancel} />
         <Route path="/status" component={Status} />
         <Route path="/auth" component={Auth} />
-
+        <Route path="/my-appointments" component={MyAppointments} />
         <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>

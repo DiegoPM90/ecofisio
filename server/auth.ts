@@ -234,7 +234,7 @@ export async function getUserAppointments(req: Request, res: Response) {
     }
 
     const appointments = await storage.getUserAppointments(req.user.id);
-    res.json({ appointments });
+    res.json(appointments);
   } catch (error) {
     console.error('Error al obtener citas del usuario:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
