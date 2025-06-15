@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { User } from "@shared/schema";
 
 interface AuthContextType {
@@ -30,6 +31,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Query para obtener el usuario actual
   const { data: userData, isLoading, error } = useQuery({
@@ -99,6 +101,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     onSuccess: () => {
       setUser(null);
       queryClient.clear();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión correctamente",
+        variant: "default",
+      });
     },
   });
 
