@@ -4,12 +4,15 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense } from "react";
+import { AuthProvider } from "@/contexts/auth-context";
 import NetworkStatus from "@/components/network-status";
 
 // Lazy load pages for better performance
 const Home = lazy(() => import("@/pages/home"));
 const Cancel = lazy(() => import("@/pages/cancel"));
 const Status = lazy(() => import("@/pages/status"));
+const Auth = lazy(() => import("@/pages/auth"));
+const Admin = lazy(() => import("@/pages/admin"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 // Loading component for Suspense fallback
@@ -29,6 +32,8 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/cancel" component={Cancel} />
         <Route path="/status" component={Status} />
+        <Route path="/auth" component={Auth} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -38,11 +43,13 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <NetworkStatus />
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <NetworkStatus />
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
