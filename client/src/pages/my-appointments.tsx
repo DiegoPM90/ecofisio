@@ -375,136 +375,143 @@ export default function MyAppointments() {
                   />
                 </Suspense>
 
-                {/* Service Classification */}
+                {/* Personal Information */}
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <User className="h-5 w-5 mr-2 text-blue-600" />
-                      Clasificación de Servicios
+                      Información Personal Básica
                     </CardTitle>
                     <p className="text-sm text-gray-600 mt-2">
-                      Selecciona uno o más servicios que necesitas (puedes elegir varios)
+                      Completa tus datos personales para continuar
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 gap-3">
-                        {[
-                          { id: 'rehabilitacion-kinesica', label: 'Rehabilitación Kinésica y Fisioterapia' },
-                          { id: 'masajes-descontracturantes', label: 'Masajes Descontracturantes' },
-                          { id: 'masajes-relajantes', label: 'Masajes Relajantes' },
-                          { id: 'psicomotricidad-adulto-mayor', label: 'Psicomotricidad Adulto Mayor' }
-                        ].map((service) => (
-                          <div key={service.id} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
-                            <input
-                              type="checkbox"
-                              id={service.id}
-                              checked={formData.selectedServices?.includes(service.id) || false}
-                              onChange={(e) => {
-                                const currentServices = formData.selectedServices || [];
-                                const newServices = e.target.checked
-                                  ? [...currentServices, service.id]
-                                  : currentServices.filter((s: string) => s !== service.id);
-                                setFormData({...formData, selectedServices: newServices});
-                              }}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <label
-                              htmlFor={service.id}
-                              className="text-sm text-slate-700 cursor-pointer flex-1"
-                            >
-                              {service.label}
-                            </label>
-                          </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nombre Completo *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.patientName}
+                          onChange={(e) => setFormData({...formData, patientName: e.target.value})}
+                          placeholder="Tu nombre completo"
+                          className="w-full p-3 border border-gray-300 rounded-md"
+                          required
+                        />
                       </div>
                       
-                      {formData.selectedServices?.length > 0 && (
-                        <div className="space-y-4">
-                          <h4 className="text-sm font-medium text-gray-700 border-b border-gray-200 pb-2">
-                            Información Personal Básica
-                          </h4>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Nombre Completo *
-                              </label>
-                              <input
-                                type="text"
-                                value={formData.patientName}
-                                onChange={(e) => setFormData({...formData, patientName: e.target.value})}
-                                placeholder="Tu nombre completo"
-                                className="w-full p-3 border border-gray-300 rounded-md"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Edad *
-                              </label>
-                              <input
-                                type="number"
-                                value={formData.age || ''}
-                                onChange={(e) => setFormData({...formData, age: parseInt(e.target.value) || undefined})}
-                                placeholder="Tu edad"
-                                className="w-full p-3 border border-gray-300 rounded-md"
-                                min="1"
-                                max="120"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Teléfono *
-                              </label>
-                              <input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                placeholder="Tu número de teléfono"
-                                className="w-full p-3 border border-gray-300 rounded-md"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email *
-                              </label>
-                              <input
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                placeholder="Tu correo electrónico"
-                                className="w-full p-3 border border-gray-300 rounded-md"
-                                required
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {formData.selectedServices?.length > 0 && (
-                        <Button
-                          onClick={() => setCurrentStep("calendar")}
-                          disabled={!formData.patientName || !formData.email || !formData.phone || !formData.age}
-                          className="w-full"
-                        >
-                          Continuar al Calendario
-                        </Button>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Edad *
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.age || ''}
+                          onChange={(e) => setFormData({...formData, age: parseInt(e.target.value) || undefined})}
+                          placeholder="Tu edad"
+                          className="w-full p-3 border border-gray-300 rounded-md"
+                          min="1"
+                          max="120"
+                          required
+                        />
+                      </div>
                       
-                      {formData.selectedServices?.length > 0 && (!formData.patientName || !formData.email || !formData.phone || !formData.age) && (
-                        <p className="text-xs text-amber-600 mt-2 text-center">
-                          Completa toda la información personal para continuar
-                        </p>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Teléfono *
+                        </label>
+                        <input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          placeholder="Tu número de teléfono"
+                          className="w-full p-3 border border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email *
+                        </label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          placeholder="Tu correo electrónico"
+                          className="w-full p-3 border border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Service Classification */}
+                {formData.patientName && formData.email && formData.phone && formData.age && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <User className="h-5 w-5 mr-2 text-blue-600" />
+                        Cuéntanos sobre tu Consulta
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Selecciona uno o más servicios que necesitas (puedes elegir varios)
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { id: 'rehabilitacion-kinesica', label: 'Rehabilitación Kinésica y Fisioterapia' },
+                            { id: 'masajes-descontracturantes', label: 'Masajes Descontracturantes' },
+                            { id: 'masajes-relajantes', label: 'Masajes Relajantes' },
+                            { id: 'psicomotricidad-adulto-mayor', label: 'Psicomotricidad Adulto Mayor' }
+                          ].map((service) => (
+                            <div key={service.id} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
+                              <input
+                                type="checkbox"
+                                id={service.id}
+                                checked={formData.selectedServices?.includes(service.id) || false}
+                                onChange={(e) => {
+                                  const currentServices = formData.selectedServices || [];
+                                  const newServices = e.target.checked
+                                    ? [...currentServices, service.id]
+                                    : currentServices.filter((s: string) => s !== service.id);
+                                  setFormData({...formData, selectedServices: newServices});
+                                }}
+                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                              <label
+                                htmlFor={service.id}
+                                className="text-sm text-slate-700 cursor-pointer flex-1"
+                              >
+                                {service.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+
+                        {formData.selectedServices?.length > 0 && (
+                          <Button
+                            onClick={() => setCurrentStep("calendar")}
+                            className="w-full"
+                          >
+                            Continuar al Calendario
+                          </Button>
+                        )}
+                        
+                        {formData.selectedServices?.length === 0 && (
+                          <p className="text-xs text-amber-600 mt-2 text-center">
+                            Selecciona al menos un servicio para continuar
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
 
