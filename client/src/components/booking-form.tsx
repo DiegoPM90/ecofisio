@@ -38,7 +38,7 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
   const isFormComplete = () => {
     const values = form.getValues();
     return values.patientName && values.email && values.phone && 
-           values.specialty && values.reason;
+           values.specialty;
   };
 
   const handleContinueToBooking = () => {
@@ -172,54 +172,7 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="reason"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Motivo de la Consulta *</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="grid grid-cols-1 md:grid-cols-2 gap-3"
-                    >
-                      {commonReasons.map((reason) => (
-                        <div key={reason.value} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg">
-                          <RadioGroupItem value={reason.value} id={reason.value} />
-                          <label
-                            htmlFor={reason.value}
-                            className="text-sm text-slate-700 cursor-pointer flex-1"
-                          >
-                            {reason.label}
-                          </label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="reasonDetail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe brevemente tus síntomas o motivo de consulta..."
-                      className="resize-none"
-                      rows={3}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
 
 

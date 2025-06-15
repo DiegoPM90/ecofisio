@@ -475,7 +475,7 @@ export default function MyAppointments() {
                     
                     <Button
                       onClick={() => setCurrentStep("calendar")}
-                      disabled={!formData.patientName || !formData.email || !formData.phone || !formData.specialty || !formData.reason}
+                      disabled={!formData.patientName || !formData.email || !formData.phone || !formData.specialty}
                       className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       Continuar al Calendario
@@ -484,7 +484,7 @@ export default function MyAppointments() {
                   </div>
                   
                   {/* Form completion feedback */}
-                  {(!formData.patientName || !formData.email || !formData.phone || !formData.specialty || !formData.reason) && (
+                  {(!formData.patientName || !formData.email || !formData.phone || !formData.specialty) && (
                     <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                       <div className="flex items-start gap-2">
                         <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -495,7 +495,7 @@ export default function MyAppointments() {
                             {!formData.email && <li>• Correo electrónico</li>}
                             {!formData.phone && <li>• Número de teléfono</li>}
                             {!formData.specialty && <li>• Especialidad</li>}
-                            {!formData.reason && <li>• Motivo de la consulta</li>}
+
                           </ul>
                         </div>
                       </div>
