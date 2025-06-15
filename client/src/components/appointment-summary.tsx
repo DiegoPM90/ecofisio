@@ -167,11 +167,18 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
                 </Button>
               </div>
               <div className="mt-3 flex gap-2">
-                <Link href="/cancel">
-                  <Button variant="outline" size="sm" className="text-orange-700 border-orange-300 hover:bg-orange-100">
-                    Cancelar Cita
-                  </Button>
-                </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-orange-700 border-orange-300 hover:bg-orange-100"
+                  onClick={() => {
+                    // Store the cancellation code for easy access on cancel page
+                    localStorage.setItem('pendingCancelCode', bookedAppointment.cancelToken);
+                    window.location.href = '/cancel';
+                  }}
+                >
+                  Cancelar Cita
+                </Button>
                 <Link href="/status">
                   <Button variant="outline" size="sm" className="text-blue-700 border-blue-300 hover:bg-blue-100">
                     Ver Estado

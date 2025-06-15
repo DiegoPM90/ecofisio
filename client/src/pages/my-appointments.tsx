@@ -305,7 +305,18 @@ export default function MyAppointments() {
             {/* Paso 1: Pregúntale a la IA */}
             {currentStep === "ai" && (
               <div className="space-y-6">
-                {/* First show a simple form for basic info needed for AI */}
+                {/* Show AI consultation first if reason and specialty are filled */}
+                {formData.reason && formData.specialty && (
+                  <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
+                    <AIAssistant
+                      reason={formData.reason}
+                      reasonDetail={formData.reasonDetail}
+                      specialty={formData.specialty}
+                    />
+                  </Suspense>
+                )}
+
+                {/* Basic info form for AI */}
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center">
@@ -380,17 +391,6 @@ export default function MyAppointments() {
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Show AI consultation if reason and specialty are filled */}
-                {formData.reason && formData.specialty && (
-                  <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
-                    <AIAssistant
-                      reason={formData.reason}
-                      reasonDetail={formData.reasonDetail}
-                      specialty={formData.specialty}
-                    />
-                  </Suspense>
-                )}
               </div>
             )}
 

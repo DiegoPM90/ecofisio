@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { appointmentApi } from "@/lib/api";
@@ -11,10 +11,26 @@ import { CalendarX, CheckCircle, AlertTriangle, ArrowLeft } from "lucide-react";
 import type { Appointment } from "@shared/schema";
 
 export default function Cancel() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [cancellationToken, setCancellationToken] = useState("");
   const [cancelledAppointment, setCancelledAppointment] = useState<Appointment | null>(null);
+
+  // Check if there's a cancellation code in the URL or localStorage
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = urlParams.get('code');
+    const codeFromStorage = localStorage.getItem('pendingCancelCode');
+    
+    if (codeFromUrl) {
+      setCancellationToken(codeFromUrl);
+      // Clear the URL parameter but keep the code visible
+      window.history.replaceState({}, '', '/cancel');
+    } else if (codeFromStorage) {
+      setCancellationToken(codeFromStorage);
+      localStorage.removeItem('pendingCancelCode');
+    }
+  }, []);
 
   const cancelAppointmentMutation = useMutation({
     mutationFn: async (token: string) => {
@@ -117,21 +133,40 @@ export default function Cancel() {
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Highlight when code is pre-filled */}
+          {cancellationToken && (
+            <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <p className="text-sm text-green-800 font-medium">
+                  Código de cancelación cargado automáticamente
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="cancellationToken" className="text-sm font-medium text-gray-700">
               Código de Cancelación
             </Label>
-            <Input
-              id="cancellationToken"
-              type="text"
-              placeholder="Ingresa tu código de cancelación"
-              value={cancellationToken}
-              onChange={(e) => setCancellationToken(e.target.value)}
-              className="w-full"
-              disabled={cancelAppointmentMutation.isPending}
-            />
+            <div className="relative">
+              <Input
+                id="cancellationToken"
+                type="text"
+                placeholder="Ingresa tu código de cancelación"
+                value={cancellationToken}
+                onChange={(e) => setCancellationToken(e.target.value)}
+                className={`w-full font-mono text-sm ${cancellationToken ? 'bg-blue-50 border-blue-300' : ''}`}
+                disabled={cancelAppointmentMutation.isPending}
+              />
+              {cancellationToken && (
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+              )}
+            </div>
             <p className="text-xs text-gray-500">
-              Este código fue enviado por WhatsApp y correo cuando confirmaste tu cita
+              Este código fue enviado por WhatsApp cuando confirmaste tu cita
             </p>
           </div>
 
