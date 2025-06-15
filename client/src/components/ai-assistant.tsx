@@ -176,11 +176,16 @@ export default function AIAssistant({ reason, reasonDetail, specialty }: AIAssis
               variant="outline"
               size="sm"
               onClick={handleGenerateAI}
-              disabled={!reason || generateAIMutation.isPending}
+              disabled={!reason || generateAIMutation.isPending || isLimitReached}
               className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 mt-2 border-blue-200"
             >
               <RefreshCw className={`w-3 h-3 mr-1 ${generateAIMutation.isPending ? 'animate-spin' : ''}`} />
-              {aiResponse ? 'Actualizar recomendación' : 'Generar recomendación'}
+              {isLimitReached 
+                ? 'Límite alcanzado' 
+                : aiResponse 
+                  ? 'Actualizar recomendación' 
+                  : 'Generar recomendación'
+              }
             </Button>
           </div>
         </div>
