@@ -36,13 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Obtener citas del usuario actual
   app.get("/api/auth/my-appointments", requireAuth, getUserAppointments);
   
-  // === RUTAS DE ADMINISTRACIÓN ===
-  
-  // Obtener todos los usuarios (solo admin)
-  app.get("/api/admin/users", requireAuth, requireAdmin, getAllUsers);
-  
-  // Actualizar usuario (solo admin)
-  app.put("/api/admin/users/:id", requireAuth, requireAdmin, updateUserById);
+
   
   // === RUTAS DE CITAS ===
   

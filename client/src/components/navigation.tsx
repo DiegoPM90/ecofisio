@@ -91,20 +91,7 @@ export default function Navigation() {
                 </Link>
               )}
 
-              {user?.role === "admin" && (
-                <Link href="/admin">
-                  <button
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 ${
-                      isActive("/admin")
-                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-white"
-                    }`}
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Administración
-                  </button>
-                </Link>
-              )}
+
             </div>
           </div>
 
@@ -128,12 +115,7 @@ export default function Navigation() {
                       <p className="text-xs leading-none text-muted-foreground">
                         {user?.email}
                       </p>
-                      {user?.role === "admin" && (
-                        <Badge variant="secondary" className="w-fit mt-1">
-                          <Shield className="h-3 w-3 mr-1" />
-                          Administrador
-                        </Badge>
-                      )}
+
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -141,12 +123,7 @@ export default function Navigation() {
                     <User className="mr-2 h-4 w-4" />
                     <span>Mi Perfil</span>
                   </DropdownMenuItem>
-                  {user?.role === "admin" && (
-                    <DropdownMenuItem onClick={() => setLocation("/admin")}>
-                      <Shield className="mr-2 h-4 w-4" />
-                      <span>Panel Admin</span>
-                    </DropdownMenuItem>
-                  )}
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -222,21 +199,7 @@ export default function Navigation() {
                   </button>
                 </Link>
 
-                {user?.role === "admin" && (
-                  <Link href="/admin">
-                    <button
-                      className={`block px-3 py-2 text-base font-medium w-full text-left ${
-                        isActive("/admin")
-                          ? "text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
-                      }`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Shield className="h-4 w-4 mr-2 inline" />
-                      Administración
-                    </button>
-                  </Link>
-                )}
+
 
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex items-center px-3 mb-3">

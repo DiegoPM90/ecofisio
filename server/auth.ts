@@ -36,12 +36,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 }
 
 // Middleware para verificar rol de administrador
-export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Acceso denegado. Se requiere rol de administrador' });
-  }
-  next();
-}
+
 
 // Función para registrar usuario
 export async function registerUser(req: Request, res: Response) {

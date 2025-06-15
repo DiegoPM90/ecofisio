@@ -12,7 +12,7 @@ const Home = lazy(() => import("@/pages/home"));
 const Cancel = lazy(() => import("@/pages/cancel"));
 const Status = lazy(() => import("@/pages/status"));
 const Auth = lazy(() => import("@/pages/auth"));
-const Admin = lazy(() => import("@/pages/admin"));
+
 const Profile = lazy(() => import("@/pages/profile"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -34,7 +34,7 @@ function Router() {
         <Route path="/cancel" component={Cancel} />
         <Route path="/status" component={Status} />
         <Route path="/auth" component={Auth} />
-        <Route path="/admin" component={Admin} />
+
         <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
