@@ -31,7 +31,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/me", requireAuth, getCurrentUser);
   
   // Obtener citas del usuario actual
-  app.get("/api/auth/my-appointments", requireAuth, getUserAppointments);
+  app.get("/api/user/appointments", requireAuth, getUserAppointments);
   
 
   

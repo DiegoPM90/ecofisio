@@ -12,7 +12,7 @@ const Home = lazy(() => import("@/pages/home"));
 const Cancel = lazy(() => import("@/pages/cancel"));
 const Status = lazy(() => import("@/pages/status"));
 const Auth = lazy(() => import("@/pages/auth"));
-
+const MyAppointments = lazy(() => import("@/pages/my-appointments"));
 const Profile = lazy(() => import("@/pages/profile"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
