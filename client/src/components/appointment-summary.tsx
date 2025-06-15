@@ -90,7 +90,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
     createAppointmentMutation.mutate({
       patientName: "Cliente",
       email: "cliente@kinesiologia.com",
-      phone: "",
+      phone: "1234567890",
       date: selectedDate,
       time: selectedTime,
       specialty: primaryService,

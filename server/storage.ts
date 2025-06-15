@@ -51,7 +51,7 @@ export class MemStorage implements IStorage {
       userId: userId || null,
       patientName: insertAppointment.patientName,
       email: insertAppointment.email,
-      phone: insertAppointment.phone,
+      phone: insertAppointment.phone || "",
       specialty: insertAppointment.specialty,
       reason: insertAppointment.reason,
       reasonDetail: insertAppointment.reasonDetail || null,
@@ -235,6 +235,7 @@ export class MongoStorage implements IStorage {
   async createAppointment(insertAppointment: InsertAppointment, userId?: number): Promise<Appointment> {
     const appointmentDoc = new AppointmentModel({
       ...insertAppointment,
+      phone: insertAppointment.phone || "",
       userId: userId || null,
       status: 'pendiente',
       kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),

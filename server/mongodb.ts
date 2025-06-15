@@ -27,7 +27,7 @@ const appointmentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   patientName: { type: String, required: true },
   email: { type: String, required: true },
-  phone: { type: String, required: true },
+  phone: { type: String, required: false, default: "" },
   specialty: { type: String, required: true },
   reason: { type: String, required: true },
   reasonDetail: { type: String, default: null },
