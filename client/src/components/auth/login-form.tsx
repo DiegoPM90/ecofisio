@@ -55,7 +55,12 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
   });
 
   const onSubmit = (data: LoginUser) => {
-    loginMutation.mutate(data);
+    // Asegurar que todos los campos están definidos
+    const cleanData = {
+      email: data.email?.trim() || "",
+      password: data.password || ""
+    };
+    loginMutation.mutate(cleanData);
   };
 
   return (
