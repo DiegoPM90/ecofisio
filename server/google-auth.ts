@@ -34,7 +34,6 @@ export function setupGoogleAuth(app: Express) {
         user = await storage.createUser({
           name: profile.displayName || "Usuario Google",
           email: profile.emails?.[0]?.value || "",
-          hashedPassword: null, // No se necesita password para Google
           googleId: profile.id,
           profileImage: profile.photos?.[0]?.value
         });
@@ -43,7 +42,7 @@ export function setupGoogleAuth(app: Express) {
       return done(null, user);
     } catch (error) {
       console.error("Error en autenticación Google:", error);
-      return done(error, null);
+      return done(error, undefined);
     }
   }));
 
