@@ -43,9 +43,10 @@ app.use(session({
     checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Cambiar a false para desarrollo
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+    sameSite: 'lax' // Añadir sameSite para compatibilidad
   }
 }));
 

@@ -18,7 +18,7 @@ export interface IStorage {
   // User methods
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserById(id: number): Promise<User | undefined>;
+  getUserById(id: number | string): Promise<User | undefined>;
   getUsers(): Promise<User[]>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
   
@@ -402,9 +402,21 @@ export class MongoStorage implements IStorage {
     return doc ? this.transformDocToUser(doc) : undefined;
   }
 
-  async getUserById(id: number): Promise<User | undefined> {
-    const doc = await UserModel.findById(id);
-    return doc ? this.transformDocToUser(doc) : undefined;
+  async getUserById(id: number | string): Promise<User | undefined> {
+    console.log("🔍 Buscando usuario por ID:", id, "tipo:", typeof id);
+    try {
+      const doc = await UserModel.findById(id);
+      if (doc) {
+        console.log("✅ Usuario encontrado:", doc.email);
+        return this.transformDocToUser(doc);
+      } else {
+        console.log("❌ Usuario no encontrado con ID:", id);
+        return undefined;
+      }
+    } catch (error: any) {
+      console.error("💥 Error buscando usuario por ID:", error.message);
+      return undefined;
+    }
   }
 
   async getUsers(): Promise<User[]> {
