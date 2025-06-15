@@ -212,11 +212,16 @@ export class MemStorage implements IStorage {
   }
 
   async deleteUserSessions(userId: number): Promise<void> {
-    for (const [sessionId, session] of this.sessions.entries()) {
+    const sessionsToDelete: string[] = [];
+    this.sessions.forEach((session, sessionId) => {
       if (session.userId === userId) {
-        this.sessions.delete(sessionId);
+        sessionsToDelete.push(sessionId);
       }
-    }
+    });
+    
+    sessionsToDelete.forEach(sessionId => {
+      this.sessions.delete(sessionId);
+    });
   }
 
   private getKinesiologistForSpecialty(specialty: string): string {
@@ -226,9 +231,10 @@ export class MemStorage implements IStorage {
 
 // Clase de almacenamiento MongoDB (para producción)
 export class MongoStorage implements IStorage {
-  async createAppointment(insertAppointment: InsertAppointment): Promise<Appointment> {
+  async createAppointment(insertAppointment: InsertAppointment, userId?: number): Promise<Appointment> {
     const appointmentDoc = new AppointmentModel({
       ...insertAppointment,
+      userId: userId || null,
       status: 'pendiente',
       kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
       aiRecommendation: null,
@@ -307,9 +313,87 @@ export class MongoStorage implements IStorage {
     return 'Diego Pizarro Monroy';
   }
 
+  async getUserAppointments(userId: number): Promise<Appointment[]> {
+    const docs = await AppointmentModel.find({ userId }).sort({ createdAt: -1 });
+    return docs.map(doc => this.transformDocToAppointment(doc));
+  }
+
+  // User methods
+  async createUser(user: InsertUser): Promise<User> {
+    const userDoc = new UserModel({
+      email: user.email,
+      name: user.name,
+      hashedPassword: user.hashedPassword,
+      role: user.role || 'client',
+      isActive: true,
+    });
+
+    const savedDoc = await userDoc.save();
+    return this.transformDocToUser(savedDoc);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const doc = await UserModel.findOne({ email });
+    return doc ? this.transformDocToUser(doc) : undefined;
+  }
+
+  async getUserById(id: number): Promise<User | undefined> {
+    const doc = await UserModel.findById(id);
+    return doc ? this.transformDocToUser(doc) : undefined;
+  }
+
+  async getUsers(): Promise<User[]> {
+    const docs = await UserModel.find({}).sort({ createdAt: -1 });
+    return docs.map(doc => this.transformDocToUser(doc));
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const doc = await UserModel.findByIdAndUpdate(id, updates, { new: true });
+    return doc ? this.transformDocToUser(doc) : undefined;
+  }
+
+  // Session methods
+  async createSession(userId: number): Promise<Session> {
+    const sessionId = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 días de expiración
+
+    const sessionDoc = new SessionModel({
+      _id: sessionId,
+      userId,
+      expiresAt,
+    });
+
+    const savedDoc = await sessionDoc.save();
+    return this.transformDocToSession(savedDoc);
+  }
+
+  async getSession(sessionId: string): Promise<Session | undefined> {
+    const doc = await SessionModel.findById(sessionId);
+    if (!doc) return undefined;
+    
+    // Verificar si la sesión expiró
+    if (doc.expiresAt < new Date()) {
+      await SessionModel.findByIdAndDelete(sessionId);
+      return undefined;
+    }
+
+    return this.transformDocToSession(doc);
+  }
+
+  async deleteSession(sessionId: string): Promise<boolean> {
+    const result = await SessionModel.findByIdAndDelete(sessionId);
+    return !!result;
+  }
+
+  async deleteUserSessions(userId: number): Promise<void> {
+    await SessionModel.deleteMany({ userId });
+  }
+
   private transformDocToAppointment(doc: any): Appointment {
     return {
       id: doc._id.toString(),
+      userId: doc.userId || null,
       patientName: doc.patientName,
       email: doc.email,
       phone: doc.phone,
@@ -324,6 +408,28 @@ export class MongoStorage implements IStorage {
       aiRecommendation: doc.aiRecommendation,
       cancelToken: doc.cancelToken,
       reminderSent: doc.reminderSent,
+      createdAt: doc.createdAt || new Date(),
+    };
+  }
+
+  private transformDocToUser(doc: any): User {
+    return {
+      id: doc._id.toString(),
+      email: doc.email,
+      name: doc.name,
+      hashedPassword: doc.hashedPassword,
+      role: doc.role,
+      isActive: doc.isActive,
+      createdAt: doc.createdAt || new Date(),
+      updatedAt: doc.updatedAt || new Date(),
+    };
+  }
+
+  private transformDocToSession(doc: any): Session {
+    return {
+      id: doc._id,
+      userId: doc.userId.toString(),
+      expiresAt: doc.expiresAt,
       createdAt: doc.createdAt || new Date(),
     };
   }
