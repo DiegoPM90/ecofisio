@@ -96,6 +96,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth?error=google_oauth_error");
   });
 
+  // Ruta de prueba para simular login exitoso
+  app.get("/api/auth/test-login", async (req, res) => {
+    try {
+      // Simular un usuario de prueba
+      const testUser = await storage.getUserByEmail("test@example.com");
+      if (!testUser) {
+        return res.json({ error: "Usuario de prueba no encontrado" });
+      }
+
+      // Establecer sesión directamente
+      (req.session as any).userId = testUser.id;
+      (req.session as any).userEmail = testUser.email;
+      (req.session as any).authenticated = true;
+      
+      console.log("✅ Sesión de prueba establecida para:", testUser.email);
+      
+      req.session.save((err) => {
+        if (err) {
+          console.error("Error guardando sesión de prueba:", err);
+          return res.json({ error: "Error guardando sesión" });
+        }
+        
+        res.json({ 
+          success: true, 
+          message: "Sesión de prueba establecida",
+          sessionId: req.sessionID 
+        });
+      });
+    } catch (error) {
+      console.error("Error en test-login:", error);
+      res.json({ error: "Error interno" });
+    }
+  });
+
 
 
 
