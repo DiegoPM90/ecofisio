@@ -49,6 +49,17 @@ const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
   </div>
 );
 
+interface FormData {
+  patientName: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  sessions: number;
+  reason: string;
+  reasonDetail: string;
+  selectedServices: string[];
+}
+
 export default function MyAppointments() {
   const { user, isAuthenticated } = useAuth();
   const [location, setLocation] = useLocation();
@@ -58,7 +69,7 @@ export default function MyAppointments() {
   const [currentStep, setCurrentStep] = useState<"ai" | "form" | "calendar" | "summary">("ai");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     patientName: "",
     email: "",
     phone: "",
@@ -66,6 +77,7 @@ export default function MyAppointments() {
     sessions: 1,
     reason: "",
     reasonDetail: "",
+    selectedServices: [],
   });
 
   // Reset flow when starting new appointment
@@ -83,6 +95,7 @@ export default function MyAppointments() {
         sessions: 1,
         reason: "",
         reasonDetail: "",
+        selectedServices: [],
       });
     }
   };
@@ -362,37 +375,51 @@ export default function MyAppointments() {
                   />
                 </Suspense>
 
-                {/* Basic info form for AI */}
+                {/* Service Classification */}
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <User className="h-5 w-5 mr-2 text-blue-600" />
-                      Información Básica
+                      Clasificación de Servicios
                     </CardTitle>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Selecciona uno o más servicios que necesitas (puedes elegir varios)
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Motivo de la consulta
-                        </label>
-                        <select
-                          value={formData.reason}
-                          onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Selecciona un motivo</option>
-                          <option value="dolor-muscular">Dolor Muscular</option>
-                          <option value="lesion-deportiva">Lesión Deportiva</option>
-                          <option value="rehabilitacion">Rehabilitación</option>
-                          <option value="dolor-articular">Dolor Articular</option>
-                          <option value="postura-corporal">Problemas de Postura</option>
-                          <option value="movilidad">Problemas de Movilidad</option>
-                          <option value="otro">Otro</option>
-                        </select>
+                      <div className="grid grid-cols-1 gap-3">
+                        {[
+                          { id: 'rehabilitacion-kinesica', label: 'Rehabilitación Kinésica y Fisioterapia' },
+                          { id: 'masajes-descontracturantes', label: 'Masajes Descontracturantes' },
+                          { id: 'masajes-relajantes', label: 'Masajes Relajantes' },
+                          { id: 'psicomotricidad-adulto-mayor', label: 'Psicomotricidad Adulto Mayor' }
+                        ].map((service) => (
+                          <div key={service.id} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
+                            <input
+                              type="checkbox"
+                              id={service.id}
+                              checked={formData.selectedServices?.includes(service.id) || false}
+                              onChange={(e) => {
+                                const currentServices = formData.selectedServices || [];
+                                const newServices = e.target.checked
+                                  ? [...currentServices, service.id]
+                                  : currentServices.filter(s => s !== service.id);
+                                setFormData({...formData, selectedServices: newServices});
+                              }}
+                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <label
+                              htmlFor={service.id}
+                              className="text-sm text-slate-700 cursor-pointer flex-1"
+                            >
+                              {service.label}
+                            </label>
+                          </div>
+                        ))}
                       </div>
                       
-                      {formData.reason && (
+                      {formData.selectedServices?.length > 0 && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Describe tu situación específica
@@ -400,38 +427,22 @@ export default function MyAppointments() {
                           <textarea
                             value={formData.reasonDetail}
                             onChange={(e) => setFormData({...formData, reasonDetail: e.target.value})}
-                            placeholder="Explica con más detalle tu molestia o lesión..."
-                            className="w-full p-2 border border-gray-300 rounded-md h-20"
+                            placeholder="Explica con más detalle tu molestia, necesidad o lo que esperas del tratamiento..."
+                            className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none"
+                            maxLength={400}
                           />
+                          <div className="text-xs text-gray-500 mt-1">
+                            {formData.reasonDetail?.length || 0}/400 caracteres
+                          </div>
                         </div>
                       )}
 
-                      {formData.reason && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Especialidad preferida
-                          </label>
-                          <select
-                            value={formData.specialty}
-                            onChange={(e) => setFormData({...formData, specialty: e.target.value})}
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                          >
-                            <option value="">Selecciona una especialidad</option>
-                            <option value="sesiones-kinesiterapia-fisioterapia">Kinesiología General</option>
-                            <option value="kinesiterapia-respiratoria">Kinesiterapia Respiratoria</option>
-                            <option value="estimulacion-temprana">Estimulación Temprana</option>
-                            <option value="kinesiterapia-neurologia">Kinesiterapia Neurológica</option>
-                            <option value="kinesiterapia-traumatologia">Kinesiterapia Traumatológica</option>
-                          </select>
-                        </div>
-                      )}
-
-                      {formData.reason && formData.specialty && (
+                      {formData.selectedServices?.length > 0 && (
                         <Button
-                          onClick={() => setCurrentStep("form")}
+                          onClick={() => setCurrentStep("calendar")}
                           className="w-full"
                         >
-                          Continuar con Información Completa
+                          Continuar al Calendario
                         </Button>
                       )}
                     </div>
@@ -440,70 +451,7 @@ export default function MyAppointments() {
               </div>
             )}
 
-            {/* Paso 2: Información del Paciente (ahora es después de IA) */}
-            {currentStep === "form" && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2 text-blue-600" />
-                    Información del Paciente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
 
-                  <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
-                    <BookingForm 
-                      formData={formData}
-                      onFormDataChange={(data) => {
-                        setFormData(data);
-                        // No auto-advance - let user control navigation
-                      }}
-                      showNavigationButton={false}
-                    />
-                  </Suspense>
-                  
-                  {/* Navigation controls for form step */}
-                  <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
-                    <Button
-                      variant="outline"
-                      onClick={() => setCurrentStep("ai")}
-                      className="text-gray-600 hover:text-gray-900"
-                    >
-                      <ArrowLeft className="h-4 w-4 mr-1" />
-                      Volver a Consulta IA
-                    </Button>
-                    
-                    <Button
-                      onClick={() => setCurrentStep("calendar")}
-                      disabled={!formData.patientName || !formData.email || !formData.phone || !formData.specialty}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      Continuar al Calendario
-                      <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
-                    </Button>
-                  </div>
-                  
-                  {/* Form completion feedback */}
-                  {(!formData.patientName || !formData.email || !formData.phone || !formData.specialty) && (
-                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                        <div className="text-sm text-amber-800">
-                          <p className="font-medium mb-1">Completa la información requerida:</p>
-                          <ul className="space-y-0.5 ml-2 text-xs">
-                            {!formData.patientName && <li>• Nombre completo</li>}
-                            {!formData.email && <li>• Correo electrónico</li>}
-                            {!formData.phone && <li>• Número de teléfono</li>}
-                            {!formData.specialty && <li>• Especialidad</li>}
-
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             {/* Paso 3: Selección de fecha (después de completar formulario) */}
             {currentStep === "calendar" && (
