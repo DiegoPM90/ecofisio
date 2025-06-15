@@ -9,7 +9,7 @@ import Navigation from "@/components/navigation";
 const BookingForm = lazy(() => import("@/components/booking-form"));
 const CalendarView = lazy(() => import("@/components/calendar-view"));
 const AppointmentSummary = lazy(() => import("@/components/appointment-summary"));
-const AppointmentsList = lazy(() => import("@/components/appointments-list"));
+
 
 // Loading skeleton for form components
 const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
@@ -98,7 +98,7 @@ export default function Home() {
   const bookingRef = useScrollIntoView(0.3);
   const calendarRef = useScrollIntoView(0.3);
   const summaryRef = useScrollIntoView(0.3);
-  const appointmentsRef = useScrollIntoView(0.3);
+
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -221,17 +221,7 @@ export default function Home() {
           </Suspense>
         </section>
 
-        {/* Appointments List */}
-        <section 
-          ref={appointmentsRef.ref}
-          className={`transition-all duration-1000 ease-out transform hover:scale-105 hover:shadow-2xl ${
-            appointmentsRef.isVisible 
-              ? 'opacity-100 animate-[scrollFadeInUp_1s_ease-out_forwards]' 
-              : 'opacity-0 translate-y-32 scale-95'
-          }`}
-        >
-          <AppointmentsList />
-        </section>
+
       </main>
 
       {/* Footer */}
