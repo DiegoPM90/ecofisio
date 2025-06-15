@@ -115,9 +115,9 @@ export default function MyAppointments() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-3 sm:p-4">
+        <Card className="w-full max-w-sm sm:max-w-md">
+          <CardContent className="pt-6 px-4 sm:px-6">
             <div className="text-center">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -223,25 +223,26 @@ export default function MyAppointments() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
         {/* Header with back button */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex items-center mb-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setLocation('/')}
-              className="mr-3 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+              className="mr-2 sm:mr-3 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 h-9 sm:h-10 text-sm"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
-              Página Principal
+              <span className="hidden sm:inline">Página Principal</span>
+              <span className="sm:hidden">Inicio</span>
             </Button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Mis Citas de Kinesiología
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Gestiona y revisa todas tus citas programadas
           </p>
         </div>
@@ -269,7 +270,7 @@ export default function MyAppointments() {
         <div className="mb-6">
           <Button 
             onClick={handleNewAppointment}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto h-11 sm:h-12 text-sm sm:text-base"
           >
             {showNewAppointment ? (
               <>
@@ -288,18 +289,18 @@ export default function MyAppointments() {
         {showNewAppointment ? (
           <>
             {/* Progress indicator */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-900">Progreso de tu cita</span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm sm:text-base font-medium text-gray-900">Progreso de tu cita</span>
+                <span className="text-xs sm:text-sm text-gray-500">
                   {currentStep === "ai" && "Paso 1 de 3"}
                   {currentStep === "calendar" && "Paso 2 de 3"}
                   {currentStep === "summary" && "Paso 3 de 3"}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-blue-600 h-2 sm:h-3 rounded-full transition-all duration-300"
                   style={{
                     width: 
                       currentStep === "ai" ? "33%" :
@@ -308,7 +309,7 @@ export default function MyAppointments() {
                   }}
                 ></div>
               </div>
-              <div className="flex justify-between mt-2 text-xs text-gray-500">
+              <div className="flex justify-between mt-2 text-xs sm:text-sm text-gray-500">
                 <span className={currentStep === "ai" ? "font-medium text-blue-600" : ""}>Servicios</span>
                 <span className={currentStep === "calendar" ? "font-medium text-blue-600" : ""}>Calendario</span>
                 <span className={currentStep === "summary" ? "font-medium text-blue-600" : ""}>Resumen</span>
@@ -370,8 +371,8 @@ export default function MyAppointments() {
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Nombre Completo *
                         </label>
@@ -380,7 +381,7 @@ export default function MyAppointments() {
                           value={formData.patientName}
                           onChange={(e) => setFormData({...formData, patientName: e.target.value})}
                           placeholder="Tu nombre completo"
-                          className="w-full p-3 border border-gray-300 rounded-md"
+                          className="w-full p-3 border border-gray-300 rounded-md text-base"
                           required
                         />
                       </div>
@@ -394,7 +395,7 @@ export default function MyAppointments() {
                           value={formData.age || ''}
                           onChange={(e) => setFormData({...formData, age: parseInt(e.target.value) || undefined})}
                           placeholder="Tu edad"
-                          className="w-full p-3 border border-gray-300 rounded-md"
+                          className="w-full p-3 border border-gray-300 rounded-md text-base"
                           min="1"
                           max="120"
                           required
@@ -410,12 +411,12 @@ export default function MyAppointments() {
                           value={formData.phone}
                           onChange={(e) => setFormData({...formData, phone: e.target.value})}
                           placeholder="Tu número de teléfono"
-                          className="w-full p-3 border border-gray-300 rounded-md"
+                          className="w-full p-3 border border-gray-300 rounded-md text-base"
                           required
                         />
                       </div>
                       
-                      <div>
+                      <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Email *
                         </label>
@@ -424,7 +425,7 @@ export default function MyAppointments() {
                           value={formData.email}
                           onChange={(e) => setFormData({...formData, email: e.target.value})}
                           placeholder="Tu correo electrónico"
-                          className="w-full p-3 border border-gray-300 rounded-md"
+                          className="w-full p-3 border border-gray-300 rounded-md text-base"
                           required
                         />
                       </div>
