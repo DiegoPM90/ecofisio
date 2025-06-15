@@ -11,11 +11,14 @@ export function setupGoogleAuth(app: Express) {
     return;
   }
 
+  console.log("✅ Google OAuth configurado correctamente");
+  console.log("📍 Callback URL:", `https://${process.env.REPLIT_DOMAINS}/api/auth/google/callback`);
+
   // Configurar estrategia de Google
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `https://${process.env.REPLIT_DOMAINS || 'localhost:5000'}/api/auth/google/callback`
+    callbackURL: `https://${process.env.REPLIT_DOMAINS}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

@@ -11,6 +11,28 @@ export default function Auth() {
   const [, setLocation] = useLocation();
   const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Verificar errores de Google OAuth en la URL
+  useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    if (error) {
+      switch(error) {
+        case 'google_auth_failed':
+          setErrorMessage('Error en la autenticación con Google. Inténtalo de nuevo.');
+          break;
+        case 'session_creation_failed':
+          setErrorMessage('Error al crear la sesión. Contacta al soporte.');
+          break;
+        case 'google_oauth_error':
+          setErrorMessage('Error de configuración OAuth. Contacta al soporte.');
+          break;
+        default:
+          setErrorMessage('Error de autenticación. Inténtalo de nuevo.');
+      }
+    }
+  });
 
   // Redirigir si ya está autenticado
   if (isAuthenticated) {
@@ -44,6 +66,11 @@ export default function Auth() {
               <p className="text-slate-600">
                 Inicia sesión o crea una nueva cuenta
               </p>
+              {errorMessage && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-md">
+                  <p className="text-red-700 text-sm">{errorMessage}</p>
+                </div>
+              )}
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

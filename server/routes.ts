@@ -43,16 +43,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Callback de Google OAuth
   app.get("/api/auth/google/callback",
-    passport.authenticate("google", { failureRedirect: "/auth" }),
+    passport.authenticate("google", { 
+      failureRedirect: "/auth?error=google_auth_failed",
+      failureMessage: true 
+    }),
     async (req, res) => {
-      // Crear sesión después de autenticación exitosa
-      if (req.user) {
-        const session = await storage.createSession((req.user as any).id);
-        (req.session as any).sessionId = session.id;
+      try {
+        console.log("✅ Google OAuth callback exitoso");
+        // Crear sesión después de autenticación exitosa
+        if (req.user) {
+          const session = await storage.createSession((req.user as any).id);
+          (req.session as any).sessionId = session.id;
+          console.log("✅ Sesión creada para usuario:", (req.user as any).email);
+        }
+        res.redirect("/?google_login=success");
+      } catch (error) {
+        console.error("❌ Error en callback de Google:", error);
+        res.redirect("/auth?error=session_creation_failed");
       }
-      res.redirect("/");
     }
   );
+
+  // Ruta para manejar errores de Google OAuth
+  app.get("/api/auth/google/error", (req, res) => {
+    console.log("❌ Error en autenticación Google:", req.query);
+    res.redirect("/auth?error=google_oauth_error");
+  });
   
   // === RUTAS DE CITAS ===
   
