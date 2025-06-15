@@ -41,28 +41,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     passport.authenticate("google", { scope: ["profile", "email"] })
   );
 
-  // Callback de Google OAuth
-  app.get("/api/auth/google/callback",
-    passport.authenticate("google", { 
-      failureRedirect: "/auth?error=google_auth_failed",
-      failureMessage: true 
-    }),
-    async (req, res) => {
-      try {
-        console.log("✅ Google OAuth callback exitoso");
-        // Crear sesión después de autenticación exitosa
-        if (req.user) {
-          const session = await storage.createSession((req.user as any).id);
-          (req.session as any).sessionId = session.id;
-          console.log("✅ Sesión creada para usuario:", (req.user as any).email);
-        }
-        res.redirect("/?google_login=success");
-      } catch (error) {
-        console.error("❌ Error en callback de Google:", error);
-        res.redirect("/auth?error=session_creation_failed");
+  // Callback de Google OAuth con manejo robusto de errores
+  app.get("/api/auth/google/callback", (req, res, next) => {
+    passport.authenticate("google", (err: any, user: any, info: any) => {
+      console.log("Google OAuth Callback Debug:", { 
+        error: err ? err.message : null,
+        user: user ? { id: user.id, email: user.email, name: user.name } : null, 
+        info: info,
+        session: req.session ? 'exists' : 'missing'
+      });
+
+      if (err) {
+        console.error("Error de autenticación Google:", err.message || err);
+        return res.redirect("/auth?error=auth_error&details=" + encodeURIComponent(err.message || 'unknown'));
       }
-    }
-  );
+
+      if (!user) {
+        console.error("No se obtuvo usuario de Google OAuth");
+        return res.redirect("/auth?error=no_user");
+      }
+
+      // Verificar que el usuario tiene los campos necesarios
+      if (!user.id || !user.email) {
+        console.error("Usuario de Google incompleto:", user);
+        return res.redirect("/auth?error=incomplete_user");
+      }
+
+      // Hacer login manual del usuario con Passport
+      req.logIn(user, async (loginErr: any) => {
+        if (loginErr) {
+          console.error("Error al hacer login con Passport:", loginErr);
+          return res.redirect("/auth?error=login_failed");
+        }
+
+        try {
+          // Crear sesión personalizada
+          const session = await storage.createSession(user.id);
+          (req.session as any).sessionId = session.id;
+          
+          // Guardar sesión explícitamente
+          req.session.save((saveErr: any) => {
+            if (saveErr) {
+              console.error("Error guardando sesión:", saveErr);
+              return res.redirect("/auth?error=session_save_failed");
+            }
+            
+            console.log("Login exitoso para usuario:", user.email);
+            console.log("Sesión creada:", session.id);
+            
+            res.redirect("/?auth=google_success");
+          });
+          
+        } catch (sessionError) {
+          console.error("Error creando sesión personalizada:", sessionError);
+          res.redirect("/auth?error=session_creation_failed");
+        }
+      });
+    })(req, res, next);
+  });
 
   // Ruta para manejar errores de Google OAuth
   app.get("/api/auth/google/error", (req, res) => {

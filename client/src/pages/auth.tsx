@@ -85,6 +85,13 @@ export default function Auth() {
                   <p className="text-red-700 text-sm">{errorMessage}</p>
                 </div>
               )}
+
+              {/* Debug info para Google OAuth */}
+              <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md text-xs text-gray-600">
+                <p><strong>Debug Info:</strong></p>
+                <p>URL actual: {window.location.href}</p>
+                <p>Parámetros: {window.location.search}</p>
+              </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

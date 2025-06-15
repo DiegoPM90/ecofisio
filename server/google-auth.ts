@@ -22,31 +22,56 @@ export function setupGoogleAuth(app: Express) {
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      // Buscar usuario existente por email
-      let user = await storage.getUserByEmail(profile.emails?.[0]?.value || "");
-      
-      if (user) {
-        // Usuario existe, actualizar información de Google
-        user = await storage.updateUser(user.id, {
-          name: profile.displayName || user.name,
-          googleId: profile.id,
-          profileImage: profile.photos?.[0]?.value
-        });
-      } else {
-        // Crear nuevo usuario con Google OAuth (sin hashedPassword)
-        user = await storage.createUser({
-          name: profile.displayName || "Usuario Google",
-          email: profile.emails?.[0]?.value || "",
-          googleId: profile.id,
-          profileImage: profile.photos?.[0]?.value,
-          role: 'client',
-          hashedPassword: undefined // Explícitamente undefined para usuarios de Google
-        });
+      console.log("Procesando perfil de Google:", {
+        id: profile.id,
+        email: profile.emails?.[0]?.value,
+        name: profile.displayName
+      });
+
+      const email = profile.emails?.[0]?.value;
+      if (!email) {
+        console.error("Google profile no tiene email");
+        return done(new Error("No se pudo obtener email de Google"), undefined);
       }
 
+      // Buscar usuario existente por email
+      let user = await storage.getUserByEmail(email);
+      
+      if (user) {
+        console.log("Usuario existente encontrado:", user.email);
+        // Usuario existe, actualizar información de Google si no la tiene
+        if (!user.googleId) {
+          user = await storage.updateUser(user.id, {
+            googleId: profile.id,
+            profileImage: profile.photos?.[0]?.value
+          });
+          console.log("Usuario actualizado con datos de Google");
+        }
+      } else {
+        console.log("Creando nuevo usuario de Google");
+        // Crear nuevo usuario con datos completos
+        const userData = {
+          name: profile.displayName || "Usuario Google",
+          email: email,
+          googleId: profile.id,
+          profileImage: profile.photos?.[0]?.value || undefined,
+          role: 'client' as const
+        };
+        
+        console.log("Datos del usuario a crear:", userData);
+        user = await storage.createUser(userData);
+        console.log("Usuario creado exitosamente:", user.id);
+      }
+
+      if (!user) {
+        console.error("No se pudo crear o encontrar usuario");
+        return done(new Error("Error al procesar usuario"), undefined);
+      }
+
+      console.log("Autenticación Google exitosa para:", user.email);
       return done(null, user);
     } catch (error) {
-      console.error("Error en autenticación Google:", error);
+      console.error("Error completo en autenticación Google:", error);
       return done(error, undefined);
     }
   }));
@@ -65,16 +90,5 @@ export function setupGoogleAuth(app: Express) {
     }
   });
 
-  // Rutas de Google OAuth
-  app.get('/api/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
-
-  app.get('/api/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/auth?error=google' }),
-    (req, res) => {
-      // Autenticación exitosa, redirigir al inicio
-      res.redirect('/');
-    }
-  );
+  // Las rutas se manejan en routes.ts para evitar duplicación
 }
