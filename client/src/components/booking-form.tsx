@@ -17,9 +17,10 @@ import AIAssistant from "./ai-assistant";
 interface BookingFormProps {
   onFormDataChange: (data: any) => void;
   formData: any;
+  showNavigationButton?: boolean;
 }
 
-export default function BookingForm({ onFormDataChange, formData }: BookingFormProps) {
+export default function BookingForm({ onFormDataChange, formData, showNavigationButton = true }: BookingFormProps) {
   const { isAuthenticated } = useAuth();
   const [location, setLocation] = useLocation();
   
@@ -227,26 +228,42 @@ export default function BookingForm({ onFormDataChange, formData }: BookingFormP
               specialty={form.watch("specialty")}
             />
 
-            {/* Botón para continuar con la reserva */}
-            <div className="mt-6 pt-6 border-t border-slate-200">
-              <Button
-                onClick={handleContinueToBooking}
-                disabled={!isFormComplete()}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                size="lg"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                {!isAuthenticated 
-                  ? "Iniciar Sesión para Continuar" 
-                  : "Seleccionar Fecha y Hora"
-                }
-              </Button>
-              {!isFormComplete() && (
-                <p className="text-sm text-slate-500 mt-2 text-center">
-                  Completa todos los campos requeridos para continuar
-                </p>
-              )}
-            </div>
+            {/* Botón para continuar con la reserva - solo en página principal */}
+            {showNavigationButton && (
+              <div className="mt-6 pt-6 border-t border-slate-200">
+                <Button
+                  onClick={handleContinueToBooking}
+                  disabled={!isFormComplete()}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  size="lg"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {!isAuthenticated 
+                    ? "Iniciar Sesión para Continuar" 
+                    : "Seleccionar Fecha y Hora"
+                  }
+                </Button>
+                {!isFormComplete() && (
+                  <p className="text-sm text-slate-500 mt-2 text-center">
+                    Completa todos los campos requeridos para continuar
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Estado de progreso cuando está en Mis Citas */}
+            {!showNavigationButton && isFormComplete() && (
+              <div className="mt-6 pt-6 border-t border-slate-200">
+                <div className="text-center">
+                  <div className="inline-flex items-center px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-3"></div>
+                    <span className="text-sm text-green-700 dark:text-green-300">
+                      Formulario completado - Continuando a selección de fecha...
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Form>
       </CardContent>
