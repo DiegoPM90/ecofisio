@@ -353,15 +353,7 @@ export default function MyAppointments() {
                         </div>
                       </div>
 
-                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                        <div className="flex items-start gap-2">
-                          <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                          <div className="text-sm text-amber-800">
-                            <p className="font-medium mb-1">Importante recordar</p>
-                            <p>Esta orientación de IA es solo informativa. Siempre es necesario consultar con un kinesiólogo profesional para un diagnóstico y tratamiento adecuado.</p>
-                          </div>
-                        </div>
-                      </div>
+
                     </div>
                   </CardContent>
                 </Card>
