@@ -1,28 +1,44 @@
 import mongoose from 'mongoose';
 import { type Appointment, type InsertAppointment, type User, type Session } from "@shared/schema";
 
-// Esquema de MongoDB para usuarios
+// Esquema de MongoDB para usuarios con validación condicional
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  hashedPassword: { type: String, required: false }, // Optional for Google OAuth users
-  googleId: { type: String, required: false, sparse: true }, // Google OAuth ID
-  profileImage: { type: String, required: false }, // Profile image URL
+  hashedPassword: { 
+    type: String, 
+    required: function() {
+      // Solo requerido si NO hay googleId
+      return !this.googleId;
+    }
+  },
+  googleId: { 
+    type: String, 
+    sparse: true,
+    required: function() {
+      // Solo requerido si NO hay hashedPassword
+      return !this.hashedPassword;
+    }
+  },
+  profileImage: { type: String },
   role: { type: String, enum: ['client', 'admin'], default: 'client' },
   isActive: { type: Boolean, default: true },
 }, {
   timestamps: true,
 });
 
-// Validation: User must have either hashedPassword OR googleId
+// Validación personalizada para asegurar que existe al menos un método de autenticación
 userSchema.pre('save', function(next) {
-  // Para usuarios de Google OAuth, googleId es obligatorio
-  // Para usuarios tradicionales, hashedPassword es obligatorio
   if (!this.hashedPassword && !this.googleId) {
-    return next(new Error('User must have either hashedPassword or googleId'));
+    const error = new Error('User must have either hashedPassword or googleId');
+    return next(error);
   }
   next();
 });
+
+// Índices para optimización
+userSchema.index({ email: 1 });
+userSchema.index({ googleId: 1 }, { sparse: true });
 
 // Esquema de MongoDB para sesiones
 const sessionSchema = new mongoose.Schema({
