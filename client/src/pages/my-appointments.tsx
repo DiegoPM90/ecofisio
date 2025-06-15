@@ -271,6 +271,37 @@ export default function MyAppointments() {
 
         {showNewAppointment ? (
           <>
+            {/* Progress indicator */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-900">Progreso de tu cita</span>
+                <span className="text-sm text-gray-500">
+                  {currentStep === "ai" && "Paso 1 de 4"}
+                  {currentStep === "form" && "Paso 2 de 4"}
+                  {currentStep === "calendar" && "Paso 3 de 4"}
+                  {currentStep === "summary" && "Paso 4 de 4"}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: 
+                      currentStep === "ai" ? "25%" :
+                      currentStep === "form" ? "50%" :
+                      currentStep === "calendar" ? "75%" :
+                      currentStep === "summary" ? "100%" : "0%"
+                  }}
+                ></div>
+              </div>
+              <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <span className={currentStep === "ai" ? "font-medium text-blue-600" : ""}>Consulta IA</span>
+                <span className={currentStep === "form" ? "font-medium text-blue-600" : ""}>Información</span>
+                <span className={currentStep === "calendar" ? "font-medium text-blue-600" : ""}>Calendario</span>
+                <span className={currentStep === "summary" ? "font-medium text-blue-600" : ""}>Resumen</span>
+              </div>
+            </div>
+
             {/* Paso 1: Pregúntale a la IA */}
             {currentStep === "ai" && (
               <div className="space-y-6">
@@ -373,34 +404,58 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-4">
+
+                  <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
+                    <BookingForm 
+                      formData={formData}
+                      onFormDataChange={(data) => {
+                        setFormData(data);
+                        // No auto-advance - let user control navigation
+                      }}
+                      showNavigationButton={false}
+                    />
+                  </Suspense>
+                  
+                  {/* Navigation controls for form step */}
+                  <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => setCurrentStep("ai")}
                       className="text-gray-600 hover:text-gray-900"
                     >
                       <ArrowLeft className="h-4 w-4 mr-1" />
                       Volver a Consulta IA
                     </Button>
+                    
+                    <Button
+                      onClick={() => setCurrentStep("calendar")}
+                      disabled={!formData.patientName || !formData.email || !formData.phone || !formData.specialty || !formData.reason}
+                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      Continuar al Calendario
+                      <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
+                    </Button>
                   </div>
-                  <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
-                    <BookingForm 
-                      formData={formData}
-                      onFormDataChange={(data) => {
-                        setFormData(data);
-                        // Auto-advance to calendar once form is complete
-                        if (data.patientName && data.email && data.phone && 
-                            data.specialty && data.reason) {
-                          // Small delay to let user see the form is complete
-                          setTimeout(() => {
-                            setCurrentStep("calendar");
-                          }, 1500);
-                        }
-                      }}
-                      showNavigationButton={false}
-                    />
-                  </Suspense>
+                  
+                  {/* Form completion feedback */}
+                  {(!formData.patientName || !formData.email || !formData.phone || !formData.specialty || !formData.reason) && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-medium mb-1">Completa la información requerida:</p>
+                          <ul className="space-y-0.5 ml-2 text-xs">
+                            {!formData.patientName && <li>• Nombre completo</li>}
+                            {!formData.email && <li>• Correo electrónico</li>}
+                            {!formData.phone && <li>• Número de teléfono</li>}
+                            {!formData.specialty && <li>• Especialidad</li>}
+                            {!formData.reason && <li>• Motivo de la consulta</li>}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -415,33 +470,40 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-4">
+
+                  <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
+                    <CalendarView 
+                      onDateSelect={(date) => {
+                        setSelectedDate(date);
+                        // No auto-advance - let user control navigation
+                      }}
+                      onTimeSelect={(time) => {
+                        setSelectedTime(time);
+                        // No auto-advance - let user control navigation
+                      }}
+                    />
+                  </Suspense>
+                  
+                  {/* Navigation controls for calendar step */}
+                  <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => setCurrentStep("form")}
                       className="text-gray-600 hover:text-gray-900"
                     >
                       <ArrowLeft className="h-4 w-4 mr-1" />
                       Volver a Información
                     </Button>
+                    
+                    <Button
+                      onClick={() => setCurrentStep("summary")}
+                      disabled={!selectedDate || !selectedTime}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Ver Resumen de Cita
+                      <ArrowLeft className="h-4 w-4 ml-1 rotate-180" />
+                    </Button>
                   </div>
-                  <Suspense fallback={<ComponentLoader height="h-[500px]" />}>
-                    <CalendarView 
-                      onDateSelect={(date) => {
-                        setSelectedDate(date);
-                        if (selectedTime) {
-                          setCurrentStep("summary");
-                        }
-                      }}
-                      onTimeSelect={(time) => {
-                        setSelectedTime(time);
-                        if (selectedDate) {
-                          setCurrentStep("summary");
-                        }
-                      }}
-                    />
-                  </Suspense>
                 </CardContent>
               </Card>
             )}
@@ -456,10 +518,10 @@ export default function MyAppointments() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* Navigation control for summary step */}
                   <div className="mb-4">
                     <Button
                       variant="outline"
-                      size="sm"
                       onClick={() => setCurrentStep("calendar")}
                       className="text-gray-600 hover:text-gray-900"
                     >
@@ -467,6 +529,7 @@ export default function MyAppointments() {
                       Volver al Calendario
                     </Button>
                   </div>
+
                   <Suspense fallback={<ComponentLoader height="h-80" />}>
                     <AppointmentSummary
                       formData={formData}
@@ -478,31 +541,7 @@ export default function MyAppointments() {
               </Card>
             )}
 
-            {/* Navigation buttons between steps */}
-            {showNewAppointment && (
-              <div className="flex gap-4 mb-6">
-                {currentStep === "calendar" && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep("form")}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Volver al Formulario
-                  </Button>
-                )}
-                {currentStep === "summary" && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCurrentStep("calendar")}
-                    className="flex-1 sm:flex-none"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Cambiar Fecha
-                  </Button>
-                )}
-              </div>
-            )}
+
           </>
         ) : (
           <>
