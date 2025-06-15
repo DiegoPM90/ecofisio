@@ -3,6 +3,7 @@ import { HeartPulse, Calendar, Bot, Shield, Menu, X } from "lucide-react";
 import { Link } from "wouter";
 import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 import { useSEO } from "@/hooks/use-seo";
+import Navigation from "@/components/navigation";
 
 // Lazy load heavy components for better initial page load
 const BookingForm = lazy(() => import("@/components/booking-form"));
@@ -81,7 +82,7 @@ export default function Home() {
 
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     patientName: "",
     email: "",
@@ -101,71 +102,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 opacity-0 animate-[slideInLeft_0.8s_ease-out_forwards] sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center space-x-2 sm:space-x-3 transition-all duration-300 hover:scale-110">
-              <EcofisioLogo size={28} />
-              <h1 className="text-lg sm:text-xl font-semibold text-slate-900">Ecofisio</h1>
-            </div>
-            
-            {/* Mobile menu button */}
-            <button 
-              className="md:hidden p-2 rounded-md text-slate-600 hover:text-blue-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-            
-            {/* Desktop navigation */}
-            <nav className="hidden md:flex space-x-4 lg:space-x-6 items-center">
-              <a href="#inicio" className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1 transition-all duration-300 hover:scale-110 hover:text-blue-800 text-sm lg:text-base">
-                Inicio
-              </a>
-              <a href="#reservas" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
-                Reservas
-              </a>
-              <Link href="/status" className="text-slate-600 hover:text-blue-600 transition-all duration-300 hover:scale-110 hover:-translate-y-1 text-sm lg:text-base">
-                Estado de Citas
-              </Link>
-            </nav>
-          </div>
-        </div>
-        
-        {/* Mobile navigation menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-slate-200 shadow-lg">
-            <nav className="px-3 py-4 space-y-3">
-              <a 
-                href="#inicio" 
-                className="block px-3 py-2 text-blue-600 font-medium bg-blue-50 rounded-md text-sm"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Inicio
-              </a>
-              <a 
-                href="#reservas" 
-                className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Reservas
-              </a>
-              <Link 
-                href="/status" 
-                className="block px-3 py-2 text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-md text-sm transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Estado de Cita
-              </Link>
-            </nav>
-          </div>
-        )}
-      </header>
+      <Navigation />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Hero Section */}
