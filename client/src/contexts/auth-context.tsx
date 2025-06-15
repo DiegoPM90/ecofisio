@@ -44,7 +44,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (userData && (userData as any).user) {
       setUser((userData as any).user);
-    } else if (error) {
+    } else if (error || !userData) {
       setUser(null);
     }
   }, [userData, error]);
