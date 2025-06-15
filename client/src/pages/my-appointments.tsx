@@ -289,10 +289,9 @@ export default function MyAppointments() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-900">Progreso de tu cita</span>
                 <span className="text-sm text-gray-500">
-                  {currentStep === "ai" && "Paso 1 de 4"}
-                  {currentStep === "form" && "Paso 2 de 4"}
-                  {currentStep === "calendar" && "Paso 3 de 4"}
-                  {currentStep === "summary" && "Paso 4 de 4"}
+                  {currentStep === "ai" && "Paso 1 de 3"}
+                  {currentStep === "calendar" && "Paso 2 de 3"}
+                  {currentStep === "summary" && "Paso 3 de 3"}
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -300,16 +299,14 @@ export default function MyAppointments() {
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{
                     width: 
-                      currentStep === "ai" ? "25%" :
-                      currentStep === "form" ? "50%" :
-                      currentStep === "calendar" ? "75%" :
+                      currentStep === "ai" ? "33%" :
+                      currentStep === "calendar" ? "66%" :
                       currentStep === "summary" ? "100%" : "0%"
                   }}
                 ></div>
               </div>
               <div className="flex justify-between mt-2 text-xs text-gray-500">
-                <span className={currentStep === "ai" ? "font-medium text-blue-600" : ""}>Consulta IA</span>
-                <span className={currentStep === "form" ? "font-medium text-blue-600" : ""}>Información</span>
+                <span className={currentStep === "ai" ? "font-medium text-blue-600" : ""}>Servicios</span>
                 <span className={currentStep === "calendar" ? "font-medium text-blue-600" : ""}>Calendario</span>
                 <span className={currentStep === "summary" ? "font-medium text-blue-600" : ""}>Resumen</span>
               </div>
@@ -404,7 +401,7 @@ export default function MyAppointments() {
                                 const currentServices = formData.selectedServices || [];
                                 const newServices = e.target.checked
                                   ? [...currentServices, service.id]
-                                  : currentServices.filter(s => s !== service.id);
+                                  : currentServices.filter((s: string) => s !== service.id);
                                 setFormData({...formData, selectedServices: newServices});
                               }}
                               className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
@@ -481,11 +478,11 @@ export default function MyAppointments() {
                   <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
                     <Button
                       variant="outline"
-                      onClick={() => setCurrentStep("form")}
+                      onClick={() => setCurrentStep("ai")}
                       className="text-gray-600 hover:text-gray-900"
                     >
                       <ArrowLeft className="h-4 w-4 mr-1" />
-                      Volver a Información
+                      Volver a Servicios
                     </Button>
                     
                     <Button

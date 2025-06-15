@@ -16,6 +16,7 @@ interface AppointmentSummaryProps {
     sessions?: number;
     reason?: string;
     reasonDetail?: string;
+    selectedServices?: string[];
   };
   selectedDate?: string;
   selectedTime?: string;
@@ -65,29 +66,41 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
   };
 
   const handleConfirmAppointment = () => {
-    if (!selectedDate || !selectedTime || !formData.patientName || !formData.email || !formData.specialty || !formData.reason) {
+    if (!selectedDate || !selectedTime || !formData.selectedServices?.length || !formData.reasonDetail) {
       toast({
         title: "Información incompleta",
-        description: "Por favor completa todos los campos requeridos.",
+        description: "Por favor completa la selección de servicios y descripción.",
         variant: "destructive",
       });
       return;
     }
 
+    // Use the first selected service as the primary specialty for booking
+    const primaryService = formData.selectedServices[0];
+    const servicesDescription = formData.selectedServices.map(service => {
+      switch(service) {
+        case 'rehabilitacion-kinesica': return 'Rehabilitación Kinésica y Fisioterapia';
+        case 'masajes-descontracturantes': return 'Masajes Descontracturantes';
+        case 'masajes-relajantes': return 'Masajes Relajantes';
+        case 'psicomotricidad-adulto-mayor': return 'Psicomotricidad Adulto Mayor';
+        default: return service;
+      }
+    }).join(', ');
+
     createAppointmentMutation.mutate({
-      patientName: formData.patientName,
-      email: formData.email,
-      phone: formData.phone || "",
+      patientName: "Cliente",
+      email: "cliente@kinesiologia.com",
+      phone: "",
       date: selectedDate,
       time: selectedTime,
-      specialty: formData.specialty,
+      specialty: primaryService,
       sessions: formData.sessions || 1,
-      reason: formData.reason,
+      reason: servicesDescription,
       reasonDetail: formData.reasonDetail || "",
     });
   };
 
-  const isComplete = selectedDate && selectedTime && formData.patientName && formData.email && formData.specialty && formData.reason;
+  const isComplete = selectedDate && selectedTime && formData.selectedServices?.length && formData.reasonDetail;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
