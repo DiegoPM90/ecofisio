@@ -35,7 +35,8 @@ export function setupGoogleAuth(app: Express) {
           name: profile.displayName || "Usuario Google",
           email: profile.emails?.[0]?.value || "",
           googleId: profile.id,
-          profileImage: profile.photos?.[0]?.value
+          profileImage: profile.photos?.[0]?.value,
+          role: 'client'
         });
       }
 

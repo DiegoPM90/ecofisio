@@ -5,6 +5,7 @@ import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
 import { notificationService } from "./notifications";
 import * as cron from 'node-cron';
+import passport from "passport";
 import { 
   registerUser, 
   loginUser, 
@@ -32,8 +33,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Obtener citas del usuario actual
   app.get("/api/auth/my-appointments", requireAuth, getUserAppointments);
-  
 
+  // === RUTAS DE GOOGLE OAUTH ===
+  
+  // Iniciar autenticación con Google
+  app.get("/api/auth/google", 
+    passport.authenticate("google", { scope: ["profile", "email"] })
+  );
+
+  // Callback de Google OAuth
+  app.get("/api/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/auth" }),
+    async (req, res) => {
+      // Crear sesión después de autenticación exitosa
+      if (req.user) {
+        const session = await storage.createSession((req.user as any).id);
+        (req.session as any).sessionId = session.id;
+      }
+      res.redirect("/");
+    }
+  );
   
   // === RUTAS DE CITAS ===
   

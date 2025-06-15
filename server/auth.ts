@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
-import { registerUserSchema, loginSchema } from '@shared/schema';
+import { registerUserSchema, loginSchema, type User } from '@shared/schema';
 import { z } from 'zod';
 
 // Middleware para verificar autenticación
@@ -155,8 +155,16 @@ export async function getCurrentUser(req: Request, res: Response) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
-    const { hashedPassword: _, googleId: __, profileImage: ___, ...userWithoutPassword } = req.user;
-    res.json({ user: userWithoutPassword });
+    const userResponse = {
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name,
+      role: req.user.role,
+      isActive: req.user.isActive,
+      createdAt: req.user.createdAt,
+      updatedAt: req.user.updatedAt
+    };
+    res.json({ user: userResponse });
   } catch (error) {
     console.error('Error al obtener usuario actual:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
