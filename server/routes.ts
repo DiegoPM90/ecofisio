@@ -72,31 +72,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.redirect("/auth?error=login_error&msg=" + encodeURIComponent(loginErr.message || 'unknown'));
         }
 
-        try {
-          console.log("✅ Usuario logueado con passport, creando sesión personalizada...");
+        console.log("✅ Usuario logueado con passport exitosamente");
+        console.log("- req.user después del login:", !!req.user);
+        console.log("- req.isAuthenticated():", req.isAuthenticated?.());
+        
+        // Guardar la sesión antes de redirigir
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("❌ Error guardando sesión:", saveErr);
+            return res.redirect("/auth?error=session_save_error");
+          }
           
-          // Crear sesión en nuestra base de datos
-          const session = await storage.createSession(user.id);
-          (req.session as any).sessionId = session.id;
-          
-          console.log("✅ Sesión creada:", session.id);
-          
-          // Guardar la sesión antes de redirigir
-          req.session.save((saveErr) => {
-            if (saveErr) {
-              console.error("❌ Error guardando sesión:", saveErr);
-              return res.redirect("/auth?error=session_save_error");
-            }
-            
-            console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
-            console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
-            res.redirect("/?login=google_success");
-          });
-
-        } catch (error: any) {
-          console.error("❌ Error en creación de sesión:", error);
-          res.redirect("/auth?error=session_creation_error&msg=" + encodeURIComponent(error.message || 'unknown'));
-        }
+          console.log("🎉 Google OAuth COMPLETADO exitosamente para:", user.email);
+          console.log("=== FIN CALLBACK GOOGLE OAUTH ===");
+          res.redirect("/?login=google_success");
+        });
       });
     })(req, res, next);
   });

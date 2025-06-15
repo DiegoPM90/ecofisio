@@ -151,11 +151,19 @@ export async function logoutUser(req: Request, res: Response) {
 // Función para obtener el usuario actual
 export async function getCurrentUser(req: Request, res: Response) {
   try {
+    console.log("🔍 Verificando autenticación usuario:");
+    console.log("- req.user:", !!req.user);
+    console.log("- req.isAuthenticated():", req.isAuthenticated?.());
+    console.log("- session ID:", (req.session as any)?.id);
+    console.log("- sessionId personalizado:", (req.session as any)?.sessionId);
+    
     if (!req.user) {
       return res.status(401).json({ error: 'No autenticado' });
     }
 
     const user = req.user as any;
+    console.log("✅ Usuario autenticado encontrado:", user.email);
+    
     const userResponse = {
       id: user.id,
       email: user.email,

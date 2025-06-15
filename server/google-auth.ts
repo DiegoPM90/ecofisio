@@ -144,23 +144,18 @@ export function setupGoogleAuth(app: Express) {
     }
   }));
 
-  // Serialización de usuario
+  // Serialización de usuario - guardar todo el objeto para evitar problemas de ID
   passport.serializeUser((user: any, done) => {
-    console.log("🔄 Serializando usuario:", user.id);
-    done(null, user.id);
+    console.log("🔄 Serializando usuario completo:", user.email);
+    done(null, JSON.stringify(user));
   });
 
-  passport.deserializeUser(async (id: string, done) => {
+  passport.deserializeUser(async (serializedUser: string, done) => {
     try {
-      console.log("🔄 Deserializando usuario con ID:", id);
-      const user = await storage.getUserById(id);
-      if (user) {
-        console.log("✅ Usuario deserializado exitosamente:", user.email);
-        done(null, user);
-      } else {
-        console.log("❌ Usuario no encontrado durante deserialización");
-        done(null, false);
-      }
+      console.log("🔄 Deserializando usuario desde JSON");
+      const user = JSON.parse(serializedUser);
+      console.log("✅ Usuario deserializado exitosamente:", user.email);
+      done(null, user);
     } catch (error) {
       console.error("💥 Error en deserialización:", error);
       done(error, null);
