@@ -49,16 +49,23 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       onSuccess?.();
     },
     onError: (error: any) => {
+      let errorMessage = "Ocurrió un error inesperado";
+      
+      if (error.message === "El email ya está registrado") {
+        errorMessage = "Este email ya tiene una cuenta. Intenta iniciar sesión.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error al registrarse",
-        description: error.message || "Ocurrió un error inesperado",
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: RegisterUser) => {
-    console.log("Datos del formulario:", data);
     // Asegurar que todos los campos están definidos
     const cleanData = {
       name: data.name?.trim() || "",
@@ -66,7 +73,6 @@ export default function RegisterForm({ onSuccess, onSwitchToLogin }: RegisterFor
       password: data.password || "",
       confirmPassword: data.confirmPassword || ""
     };
-    console.log("Datos limpios:", cleanData);
     registerMutation.mutate(cleanData);
   };
 
