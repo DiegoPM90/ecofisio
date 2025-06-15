@@ -273,33 +273,94 @@ export default function MyAppointments() {
           <>
             {/* Paso 1: Pregúntale a la IA */}
             {currentStep === "ai" && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2 text-blue-600" />
-                    Pregúntale a la IA
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Suspense fallback={<ComponentLoader height="h-[600px]" />}>
-                    <BookingForm 
-                      formData={formData}
-                      onFormDataChange={(data) => {
-                        setFormData(data);
-                        // Auto-advance to form once AI consultation is complete
-                        if (data.patientName && data.email && data.phone && 
-                            data.specialty && data.reason) {
-                          // Small delay to let user see the form is complete
-                          setTimeout(() => {
-                            setCurrentStep("form");
-                          }, 1500);
-                        }
-                      }}
-                      showNavigationButton={false}
+              <div className="space-y-6">
+                {/* First show a simple form for basic info needed for AI */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <User className="h-5 w-5 mr-2 text-blue-600" />
+                      Información Básica
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Motivo de la consulta
+                        </label>
+                        <select
+                          value={formData.reason}
+                          onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Selecciona un motivo</option>
+                          <option value="dolor-muscular">Dolor Muscular</option>
+                          <option value="lesion-deportiva">Lesión Deportiva</option>
+                          <option value="rehabilitacion">Rehabilitación</option>
+                          <option value="dolor-articular">Dolor Articular</option>
+                          <option value="postura-corporal">Problemas de Postura</option>
+                          <option value="movilidad">Problemas de Movilidad</option>
+                          <option value="otro">Otro</option>
+                        </select>
+                      </div>
+                      
+                      {formData.reason && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Describe tu situación específica
+                          </label>
+                          <textarea
+                            value={formData.reasonDetail}
+                            onChange={(e) => setFormData({...formData, reasonDetail: e.target.value})}
+                            placeholder="Explica con más detalle tu molestia o lesión..."
+                            className="w-full p-2 border border-gray-300 rounded-md h-20"
+                          />
+                        </div>
+                      )}
+
+                      {formData.reason && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Especialidad preferida
+                          </label>
+                          <select
+                            value={formData.specialty}
+                            onChange={(e) => setFormData({...formData, specialty: e.target.value})}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Selecciona una especialidad</option>
+                            <option value="sesiones-kinesiterapia-fisioterapia">Kinesiología General</option>
+                            <option value="kinesiterapia-respiratoria">Kinesiterapia Respiratoria</option>
+                            <option value="estimulacion-temprana">Estimulación Temprana</option>
+                            <option value="kinesiterapia-neurologia">Kinesiterapia Neurológica</option>
+                            <option value="kinesiterapia-traumatologia">Kinesiterapia Traumatológica</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {formData.reason && formData.specialty && (
+                        <Button
+                          onClick={() => setCurrentStep("form")}
+                          className="w-full"
+                        >
+                          Continuar con Información Completa
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Show AI consultation if reason and specialty are filled */}
+                {formData.reason && formData.specialty && (
+                  <Suspense fallback={<ComponentLoader height="h-[400px]" />}>
+                    <AIAssistant
+                      reason={formData.reason}
+                      reasonDetail={formData.reasonDetail}
+                      specialty={formData.specialty}
                     />
                   </Suspense>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             )}
 
             {/* Paso 2: Información del Paciente (ahora es después de IA) */}

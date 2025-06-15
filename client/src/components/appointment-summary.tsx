@@ -42,7 +42,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
       setBookedAppointment(data);
       toast({
         title: "¡Cita confirmada!",
-        description: "Tu sesión de kinesiología ha sido reservada exitosamente. Recibirás notificaciones por WhatsApp y correo.",
+        description: "Tu sesión de kinesiología ha sido reservada exitosamente. Los códigos se han enviado automáticamente a tu WhatsApp.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
     },
@@ -232,6 +232,21 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
             Completa todos los campos del formulario para confirmar tu cita
           </p>
         )}
+        
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-green-800">
+              <p className="font-medium mb-1">Notificación automática por WhatsApp</p>
+              <p>Al confirmar tu cita, recibirás automáticamente por WhatsApp:</p>
+              <ul className="mt-1 space-y-0.5 ml-2">
+                <li>• Código de confirmación de tu cita</li>
+                <li>• Código de cancelación (por si necesitas cancelar)</li>
+                <li>• Detalles completos de tu sesión</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
