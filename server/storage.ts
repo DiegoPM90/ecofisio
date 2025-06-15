@@ -330,51 +330,67 @@ export class MongoStorage implements IStorage {
         throw new Error("Usuario debe tener hashedPassword o googleId");
       }
       
-      // Preparar datos limpios para MongoDB - solo campos definidos
+      // Preparar datos RAW para MongoDB evitando completamente Mongoose
       const userData: Record<string, any> = {
         email: user.email,
         name: user.name,
         role: user.role || 'client',
-        isActive: true
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
-      // Agregar campos opcionales SOLO si tienen valor
-      if (user.hashedPassword && user.hashedPassword.trim()) {
+      // Agregar campos de autenticación SOLO si existen
+      if (user.hashedPassword) {
         userData.hashedPassword = user.hashedPassword;
       }
       
-      if (user.googleId && user.googleId.trim()) {
+      if (user.googleId) {
         userData.googleId = user.googleId;
       }
       
-      if (user.profileImage && user.profileImage.trim()) {
+      if (user.profileImage) {
         userData.profileImage = user.profileImage;
       }
       
-      console.log("Datos limpios para MongoDB:", userData);
+      console.log("Datos preparados para inserción directa:", userData);
       
-      // Crear documento directamente con insertOne para evitar middleware problemático
-      const result = await UserModel.collection.insertOne(userData);
+      // Insertar directamente en la colección sin pasar por Mongoose
+      const db = UserModel.db;
+      const collection = db.collection('users');
       
-      // Obtener el documento creado
-      const savedDoc = await UserModel.findById(result.insertedId);
-      if (!savedDoc) {
+      const result = await collection.insertOne(userData);
+      
+      // Recuperar el documento insertado directamente
+      const insertedDoc = await collection.findOne({ _id: result.insertedId });
+      
+      if (!insertedDoc) {
         throw new Error("No se pudo recuperar el usuario creado");
       }
       
-      console.log("Usuario creado exitosamente en MongoDB:", savedDoc._id);
-      return this.transformDocToUser(savedDoc);
+      console.log("Usuario creado exitosamente con inserción directa:", insertedDoc._id);
+      
+      // Transformar el documento crudo a tipo User usando el helper existente
+      const userObject = {
+        _id: insertedDoc._id,
+        email: insertedDoc.email,
+        name: insertedDoc.name,
+        hashedPassword: insertedDoc.hashedPassword,
+        googleId: insertedDoc.googleId,
+        profileImage: insertedDoc.profileImage,
+        role: insertedDoc.role,
+        isActive: insertedDoc.isActive,
+        createdAt: insertedDoc.createdAt,
+        updatedAt: insertedDoc.updatedAt
+      };
+      
+      return this.transformDocToUser(userObject);
       
     } catch (error: any) {
       console.error("Error creando usuario en MongoDB:", error);
       
       if (error.code === 11000) {
         throw new Error("Ya existe un usuario con este email");
-      }
-      
-      // Manejar errores específicos de validación
-      if (error.message && error.message.includes('hashedPassword')) {
-        throw new Error("Error de validación de contraseña para usuario OAuth");
       }
       
       throw new Error(`Error al crear usuario: ${error.message || error}`);

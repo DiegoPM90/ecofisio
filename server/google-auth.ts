@@ -57,23 +57,68 @@ export function setupGoogleAuth(app: Express) {
           console.log("Usuario actualizado con datos de Google");
         }
       } else {
-        console.log("Creando nuevo usuario de Google");
-        // Crear nuevo usuario con datos completos
-        const userData: any = {
-          name: profile.displayName || "Usuario Google",
+        console.log("Creando nuevo usuario de Google con inserción directa");
+        
+        // Importar MongoDB directamente para evitar validaciones problemáticas
+        const { UserModel } = await import('./mongodb');
+        const db = UserModel.db;
+        const usersCollection = db.collection('users');
+        
+        const userData = {
           email: email,
+          name: profile.displayName || "Usuario Google",
           googleId: profile.id,
-          role: 'client'
+          profileImage: profile.photos?.[0]?.value || null,
+          role: 'client',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
         };
         
-        // Solo agregar profileImage si existe
-        if (profile.photos?.[0]?.value) {
-          userData.profileImage = profile.photos[0].value;
-        }
+        console.log("Insertando usuario OAuth directamente:", userData);
         
-        console.log("Datos del usuario a crear:", userData);
-        user = await storage.createUser(userData);
-        console.log("Usuario creado exitosamente:", user.id);
+        try {
+          const result = await usersCollection.insertOne(userData);
+          const insertedUser = await usersCollection.findOne({ _id: result.insertedId });
+          
+          // Crear objeto User compatible
+          user = {
+            id: insertedUser._id.toString(),
+            email: insertedUser.email,
+            name: insertedUser.name,
+            hashedPassword: null,
+            googleId: insertedUser.googleId,
+            profileImage: insertedUser.profileImage,
+            role: insertedUser.role,
+            isActive: insertedUser.isActive,
+            createdAt: insertedUser.createdAt.toISOString(),
+            updatedAt: insertedUser.updatedAt.toISOString()
+          };
+          
+          console.log("Usuario OAuth creado exitosamente:", user.id);
+        } catch (insertError: any) {
+          console.error("Error en inserción directa MongoDB:", insertError);
+          if (insertError.code === 11000) {
+            console.log("Usuario ya existe, obteniendo usuario existente");
+            const existingUser = await usersCollection.findOne({ email: email });
+            if (existingUser) {
+              user = {
+                id: existingUser._id.toString(),
+                email: existingUser.email,
+                name: existingUser.name,
+                hashedPassword: existingUser.hashedPassword || null,
+                googleId: existingUser.googleId || profile.id,
+                profileImage: existingUser.profileImage,
+                role: existingUser.role,
+                isActive: existingUser.isActive,
+                createdAt: existingUser.createdAt.toISOString(),
+                updatedAt: existingUser.updatedAt.toISOString()
+              };
+            }
+          } else {
+            throw insertError;
+          }
+        }
       }
 
       if (!user) {
