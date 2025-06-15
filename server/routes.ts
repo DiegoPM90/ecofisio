@@ -90,23 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/auth?error=google_oauth_error");
   });
 
-  // Ruta de prueba para validar creación de usuarios Google OAuth
-  app.post("/api/test-google-user", async (req, res) => {
-    try {
-      console.log("Probando creación de usuario Google OAuth:", req.body);
-      const testUser = await storage.createUser({
-        email: req.body.email,
-        name: req.body.name,
-        googleId: req.body.googleId,
-        role: req.body.role || 'client'
-      });
-      console.log("✅ Usuario Google OAuth creado exitosamente:", testUser.id);
-      res.json({ success: true, user: testUser });
-    } catch (error: any) {
-      console.error("❌ Error creando usuario Google OAuth:", error.message);
-      res.status(400).json({ success: false, error: error.message });
-    }
-  });
+
   
   // === RUTAS DE CITAS ===
   
