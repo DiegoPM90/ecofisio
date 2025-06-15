@@ -59,6 +59,55 @@ const getEmailTransporter = () => {
 
 export class NotificationService {
   
+  // Verificar configuración de WhatsApp
+  isWhatsAppConfigured(): boolean {
+    return !!(process.env.WHATSAPP_ACCESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
+  }
+
+  // Obtener estado de configuración para debugging
+  getWhatsAppConfigStatus(): string {
+    const hasToken = !!process.env.WHATSAPP_ACCESS_TOKEN;
+    const hasPhoneId = !!process.env.WHATSAPP_PHONE_NUMBER_ID;
+    
+    if (hasToken && hasPhoneId) {
+      return '✅ WhatsApp Business API configurado correctamente';
+    } else if (!hasToken && !hasPhoneId) {
+      return '❌ Faltan WHATSAPP_ACCESS_TOKEN y WHATSAPP_PHONE_NUMBER_ID';
+    } else if (!hasToken) {
+      return '❌ Falta WHATSAPP_ACCESS_TOKEN';
+    } else {
+      return '❌ Falta WHATSAPP_PHONE_NUMBER_ID';
+    }
+  }
+  
+  // Formatear número de teléfono chileno para WhatsApp
+  private formatChileanPhoneNumber(phoneNumber: string): string {
+    // Remover todos los caracteres no numéricos excepto +
+    let cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    
+    // Si empieza con +56, usar como está
+    if (cleaned.startsWith('+56')) {
+      return cleaned.substring(1); // Remover el + para la API
+    }
+    
+    // Si empieza con 56, usar como está
+    if (cleaned.startsWith('56')) {
+      return cleaned;
+    }
+    
+    // Si empieza con 9 (número móvil chileno), agregar código de país
+    if (cleaned.startsWith('9') && cleaned.length === 9) {
+      return `56${cleaned}`;
+    }
+    
+    // Si no tiene código de país, asumir que es chileno
+    if (cleaned.length === 8 || cleaned.length === 9) {
+      return `56${cleaned}`;
+    }
+    
+    return cleaned;
+  }
+
   // Enviar notificación de WhatsApp usando WhatsApp Business API Oficial
   async sendWhatsAppNotification(phoneNumber: string, message: string): Promise<boolean> {
     try {
@@ -69,18 +118,25 @@ export class NotificationService {
         return true; // Simular éxito para testing
       }
 
-      // Formatear número de teléfono (remover caracteres no numéricos excepto +)
-      const formattedPhone = phoneNumber.replace(/[^\d+]/g, '');
-      const cleanPhone = formattedPhone.startsWith('+') ? formattedPhone.slice(1) : formattedPhone;
+      // Formatear número de teléfono para Chile
+      const formattedPhone = this.formatChileanPhoneNumber(phoneNumber);
+      
+      // Validar que el número tenga formato válido
+      if (!formattedPhone || formattedPhone.length < 10) {
+        console.error('❌ Número de teléfono inválido:', phoneNumber);
+        return false;
+      }
       
       const whatsappData = {
         messaging_product: "whatsapp",
-        to: cleanPhone,
+        to: formattedPhone,
         type: "text",
         text: {
           body: message
         }
       };
+
+      console.log('📱 Enviando WhatsApp a:', formattedPhone);
 
       const response = await fetch(`https://graph.facebook.com/v18.0/${process.env.WHATSAPP_PHONE_NUMBER_ID}/messages`, {
         method: 'POST',
@@ -94,6 +150,11 @@ export class NotificationService {
       if (!response.ok) {
         const errorData = await response.json();
         console.error('❌ Error en WhatsApp Business API:', errorData);
+        
+        // Mostrar errores específicos más útiles
+        if (errorData.error?.error_data?.details) {
+          console.error('💡 Detalles del error:', errorData.error.error_data.details);
+        }
         return false;
       }
 

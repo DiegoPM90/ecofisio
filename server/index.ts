@@ -4,6 +4,7 @@ import MemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { connectToMongoDB } from "./mongodb";
+import { notificationService } from "./notifications";
 
 const app = express();
 
@@ -104,6 +105,9 @@ app.use((req, res, next) => {
   } else {
     console.log('📝 Usando almacenamiento en memoria - Para usar MongoDB, configura MONGODB_URI');
   }
+
+  // Mostrar estado de configuración de WhatsApp
+  console.log(notificationService.getWhatsAppConfigStatus());
 
   const server = await registerRoutes(app);
 

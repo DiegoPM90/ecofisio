@@ -193,6 +193,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === RUTAS DE PRUEBAS ===
+  
+  // Endpoint de prueba para WhatsApp (solo para testing)
+  app.post("/api/test/whatsapp", async (req, res) => {
+    try {
+      const { phoneNumber, message } = req.body;
+      
+      if (!phoneNumber || !message) {
+        return res.status(400).json({ 
+          error: "Se requieren phoneNumber y message" 
+        });
+      }
+
+      const result = await notificationService.sendWhatsAppNotification(phoneNumber, message);
+      
+      if (result) {
+        res.json({ 
+          success: true, 
+          message: "Mensaje de WhatsApp enviado exitosamente",
+          configured: notificationService.isWhatsAppConfigured()
+        });
+      } else {
+        res.status(500).json({ 
+          error: "Error enviando mensaje de WhatsApp",
+          configured: notificationService.isWhatsAppConfigured()
+        });
+      }
+    } catch (error) {
+      console.error("Error en endpoint de prueba WhatsApp:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+    }
+  });
+
   // === RUTAS DE IA ===
   
   // Endpoint de diagnóstico para variables de entorno
