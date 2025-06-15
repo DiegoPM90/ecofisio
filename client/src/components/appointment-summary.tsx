@@ -17,6 +17,7 @@ interface AppointmentSummaryProps {
     reason?: string;
     reasonDetail?: string;
     selectedServices?: string[];
+    age?: number;
   };
   selectedDate?: string;
   selectedTime?: string;
@@ -66,10 +67,10 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
   };
 
   const handleConfirmAppointment = () => {
-    if (!selectedDate || !selectedTime || !formData.selectedServices?.length || !formData.reasonDetail) {
+    if (!selectedDate || !selectedTime || !formData.selectedServices?.length || !formData.patientName || !formData.email || !formData.phone || !formData.age) {
       toast({
         title: "Información incompleta",
-        description: "Por favor completa la selección de servicios y descripción.",
+        description: "Por favor completa todos los campos requeridos.",
         variant: "destructive",
       });
       return;
@@ -88,19 +89,19 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
     }).join(', ');
 
     createAppointmentMutation.mutate({
-      patientName: "Cliente",
-      email: "cliente@kinesiologia.com",
-      phone: "1234567890",
+      patientName: formData.patientName,
+      email: formData.email,
+      phone: formData.phone,
       date: selectedDate,
       time: selectedTime,
       specialty: primaryService,
       sessions: formData.sessions || 1,
       reason: servicesDescription,
-      reasonDetail: formData.reasonDetail || "",
+      reasonDetail: `Edad: ${formData.age} años. Servicios solicitados: ${servicesDescription}`,
     });
   };
 
-  const isComplete = selectedDate && selectedTime && formData.selectedServices?.length && formData.reasonDetail;
+  const isComplete = selectedDate && selectedTime && formData.selectedServices?.length && formData.patientName && formData.email && formData.phone && formData.age;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -237,9 +238,21 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
               )}
             </div>
           </div>
-          <div className="flex justify-between items-start">
-            <span className="text-slate-600">Descripción:</span>
-            <span className="font-medium text-right flex-1 ml-2 break-words text-sm">{formData.reasonDetail || "No especificada"}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600">Paciente:</span>
+            <span className="font-medium text-right">{formData.patientName || "No especificado"}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600">Edad:</span>
+            <span className="font-medium text-right">{formData.age ? `${formData.age} años` : "No especificada"}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600">Teléfono:</span>
+            <span className="font-medium text-right">{formData.phone || "No especificado"}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-600">Email:</span>
+            <span className="font-medium text-right text-sm break-all">{formData.email || "No especificado"}</span>
           </div>
         </div>
 
@@ -256,7 +269,7 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
         
         {!isComplete && (
           <p className="text-xs text-slate-500 mt-2 text-center">
-            Selecciona al menos un servicio y proporciona una descripción para confirmar tu cita
+            Completa todos los campos requeridos para confirmar tu cita
           </p>
         )}
         

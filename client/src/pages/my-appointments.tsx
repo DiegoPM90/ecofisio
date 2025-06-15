@@ -58,6 +58,7 @@ interface FormData {
   reason: string;
   reasonDetail: string;
   selectedServices: string[];
+  age?: number;
 }
 
 export default function MyAppointments() {
@@ -78,6 +79,7 @@ export default function MyAppointments() {
     reason: "",
     reasonDetail: "",
     selectedServices: [],
+    age: undefined,
   });
 
   // Reset flow when starting new appointment
@@ -96,6 +98,7 @@ export default function MyAppointments() {
         reason: "",
         reasonDetail: "",
         selectedServices: [],
+        age: undefined,
       });
     }
   };
@@ -417,19 +420,69 @@ export default function MyAppointments() {
                       </div>
                       
                       {formData.selectedServices?.length > 0 && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Describe tu situación específica
-                          </label>
-                          <textarea
-                            value={formData.reasonDetail}
-                            onChange={(e) => setFormData({...formData, reasonDetail: e.target.value})}
-                            placeholder="Explica con más detalle tu molestia, necesidad o lo que esperas del tratamiento..."
-                            className="w-full p-3 border border-gray-300 rounded-md h-24 resize-none"
-                            maxLength={400}
-                          />
-                          <div className="text-xs text-gray-500 mt-1">
-                            {formData.reasonDetail?.length || 0}/400 caracteres
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-medium text-gray-700 border-b border-gray-200 pb-2">
+                            Información Personal Básica
+                          </h4>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Nombre Completo *
+                              </label>
+                              <input
+                                type="text"
+                                value={formData.patientName}
+                                onChange={(e) => setFormData({...formData, patientName: e.target.value})}
+                                placeholder="Tu nombre completo"
+                                className="w-full p-3 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Edad *
+                              </label>
+                              <input
+                                type="number"
+                                value={formData.age || ''}
+                                onChange={(e) => setFormData({...formData, age: parseInt(e.target.value) || undefined})}
+                                placeholder="Tu edad"
+                                className="w-full p-3 border border-gray-300 rounded-md"
+                                min="1"
+                                max="120"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Teléfono *
+                              </label>
+                              <input
+                                type="tel"
+                                value={formData.phone}
+                                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                placeholder="Tu número de teléfono"
+                                className="w-full p-3 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Email *
+                              </label>
+                              <input
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                placeholder="Tu correo electrónico"
+                                className="w-full p-3 border border-gray-300 rounded-md"
+                                required
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
@@ -437,10 +490,17 @@ export default function MyAppointments() {
                       {formData.selectedServices?.length > 0 && (
                         <Button
                           onClick={() => setCurrentStep("calendar")}
+                          disabled={!formData.patientName || !formData.email || !formData.phone || !formData.age}
                           className="w-full"
                         >
                           Continuar al Calendario
                         </Button>
+                      )}
+                      
+                      {formData.selectedServices?.length > 0 && (!formData.patientName || !formData.email || !formData.phone || !formData.age) && (
+                        <p className="text-xs text-amber-600 mt-2 text-center">
+                          Completa toda la información personal para continuar
+                        </p>
                       )}
                     </div>
                   </CardContent>
