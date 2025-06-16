@@ -259,6 +259,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Endpoint de diagnóstico para Gmail
+  app.get("/api/debug/gmail", async (req, res) => {
+    res.json({
+      EMAIL_USER: process.env.EMAIL_USER || 'NO_CONFIGURADO',
+      EMAIL_PASS_SET: !!process.env.EMAIL_PASS,
+      EMAIL_PASS_LENGTH: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
+      EMAIL_PASS_PREVIEW: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.substring(0, 4) + '...' + process.env.EMAIL_PASS.substring(-4) : 'NO_SET',
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'NO_CONFIGURADO',
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // === RUTAS DE IA ===
   
   // Endpoint de diagnóstico para variables de entorno

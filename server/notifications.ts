@@ -14,19 +14,17 @@ const getEmailTransporter = () => {
     });
   }
   
-  // Opción 1b: Gmail con configuración SMTP robusta
+  // Opción 1b: Gmail con configuración optimizada
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    return nodemailer.createTransport({
-      service: 'Gmail',
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+    console.log('🔧 Configurando Gmail SMTP...');
+    console.log('   Email:', process.env.EMAIL_USER);
+    console.log('   Pass length:', process.env.EMAIL_PASS.length);
+    
+    return nodemailer.createTransporter({
+      service: 'gmail',
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false
+        user: process.env.EMAIL_USER.trim(),
+        pass: process.env.EMAIL_PASS.trim(),
       }
     });
   }
