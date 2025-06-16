@@ -14,12 +14,13 @@ const getEmailTransporter = () => {
     });
   }
   
-  // Opción 1b: Gmail con configuración SMTP directa (menos segura pero funciona)
+  // Opción 1b: Gmail con configuración SMTP robusta
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     return nodemailer.createTransport({
+      service: 'Gmail',
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -185,6 +186,13 @@ export class NotificationService {
 
       const fromEmail = process.env.EMAIL_USER || process.env.OUTLOOK_USER || 'noreply@kinesiologia.com';
       
+      // Diagnóstico antes del envío
+      console.log('🔍 VERIFICACIÓN PREVIA AL ENVÍO:');
+      console.log('   - Email User:', process.env.EMAIL_USER);
+      console.log('   - Email Pass configurado:', process.env.EMAIL_PASS ? 'SÍ' : 'NO');
+      console.log('   - Email Pass exacto:', process.env.EMAIL_PASS);
+      console.log('   - From Email:', fromEmail);
+      
       try {
         await transporter.sendMail({
           from: fromEmail,
@@ -195,8 +203,38 @@ export class NotificationService {
 
         console.log(`✅ Email enviado exitosamente a: ${to}`);
         return true;
-      } catch (emailError) {
+      } catch (emailError: any) {
         console.error('❌ Error enviando email:', emailError);
+        
+        // Diagnóstico específico del error
+        if (emailError.code === 'EAUTH') {
+          console.log('🔍 DIAGNÓSTICO GMAIL:');
+          console.log('   - Error de autenticación detectado');
+          console.log('   - Email configurado:', process.env.EMAIL_USER);
+          console.log('   - Contraseña configurada:', process.env.EMAIL_PASS ? 'SÍ (16 chars)' : 'NO');
+          console.log('   - Response code:', emailError.responseCode);
+          
+          if (emailError.response && emailError.response.includes('BadCredentials')) {
+            console.log('');
+            console.log('🚨 PROBLEMA IDENTIFICADO: BadCredentials');
+            console.log('');
+            console.log('✅ SOLUCIONES POSIBLES:');
+            console.log('   1. Verificar que la verificación en 2 pasos esté ACTIVADA');
+            console.log('   2. Regenerar la contraseña de aplicación desde cero');
+            console.log('   3. Verificar que el email sea exactamente: canalmovimiento@gmail.com');
+            console.log('   4. La contraseña debe ser EXACTAMENTE: raasgpggwcbcebnx (sin espacios)');
+            console.log('');
+            console.log('🔗 PASOS DETALLADOS:');
+            console.log('   - Ir a: https://myaccount.google.com/security');
+            console.log('   - Verificar que "Verificación en 2 pasos" esté ON');
+            console.log('   - Buscar "Contraseñas de aplicaciones"');
+            console.log('   - ELIMINAR la contraseña anterior si existe');
+            console.log('   - Crear una nueva para "Correo"');
+            console.log('   - Copiar el código SIN espacios');
+            console.log('');
+          }
+        }
+        
         console.log('📧 FALLBACK: Mostrando contenido del email que se enviaría:');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         console.log(`📨 Para: ${to}`);
@@ -206,8 +244,6 @@ export class NotificationService {
         console.log('📄 Contenido HTML:');
         console.log(html.replace(/<[^>]*>/g, '').substring(0, 300) + '...');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('⚠️  El email no se pudo enviar por problemas de configuración SMTP');
-        console.log('💡 Revisa que tengas la contraseña de aplicación correcta de Gmail');
         return true; // Retorna true para que la aplicación siga funcionando
       }
     } catch (error) {
