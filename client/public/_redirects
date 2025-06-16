@@ -1,0 +1,6 @@
+# Netlify redirects file
+# Redirect API calls to Netlify Functions
+/api/*  /.netlify/functions/api/:splat  200
+
+# Serve the React app for all other routes (SPA routing)
+/*    /index.html   200
