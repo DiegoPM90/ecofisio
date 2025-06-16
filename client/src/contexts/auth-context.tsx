@@ -63,6 +63,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
     },
+    onError: (error) => {
+      console.error("Error en login:", error);
+      toast({
+        title: "Error de autenticación",
+        description: "Verifica tus credenciales e intenta nuevamente",
+        variant: "destructive",
+      });
+    },
   });
 
   // Mutación para registro
@@ -88,6 +96,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser(data.user);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
+    onError: (error) => {
+      console.error("Error en registro:", error);
+      toast({
+        title: "Error de registro",
+        description: "No se pudo crear la cuenta. Intenta nuevamente",
+        variant: "destructive",
+      });
+    },
   });
 
   // Mutación para logout
@@ -107,18 +123,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
         variant: "default",
       });
     },
+    onError: (error) => {
+      console.error("Error en logout:", error);
+      // Aún así limpiamos los datos locales en caso de error
+      setUser(null);
+      queryClient.clear();
+    },
   });
 
   const login = async (email: string, password: string) => {
-    await loginMutation.mutateAsync({ email, password });
+    try {
+      await loginMutation.mutateAsync({ email, password });
+    } catch (error) {
+      // Error ya manejado en onError de la mutación
+      throw error;
+    }
   };
 
   const register = async (name: string, email: string, password: string, confirmPassword: string) => {
-    await registerMutation.mutateAsync({ name, email, password, confirmPassword });
+    try {
+      await registerMutation.mutateAsync({ name, email, password, confirmPassword });
+    } catch (error) {
+      // Error ya manejado en onError de la mutación
+      throw error;
+    }
   };
 
   const logout = async () => {
-    await logoutMutation.mutateAsync();
+    try {
+      await logoutMutation.mutateAsync();
+    } catch (error) {
+      // Error ya manejado en onError de la mutación
+      console.error("Error durante logout:", error);
+    }
   };
 
   const refreshUser = () => {
