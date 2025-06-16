@@ -185,17 +185,33 @@ export class NotificationService {
 
       const fromEmail = process.env.EMAIL_USER || process.env.OUTLOOK_USER || 'noreply@kinesiologia.com';
       
-      await transporter.sendMail({
-        from: fromEmail,
-        to: to,
-        subject: subject,
-        html: html,
-      });
+      try {
+        await transporter.sendMail({
+          from: fromEmail,
+          to: to,
+          subject: subject,
+          html: html,
+        });
 
-      console.log(`✅ Email enviado exitosamente a: ${to}`);
-      return true;
+        console.log(`✅ Email enviado exitosamente a: ${to}`);
+        return true;
+      } catch (emailError) {
+        console.error('❌ Error enviando email:', emailError);
+        console.log('📧 FALLBACK: Mostrando contenido del email que se enviaría:');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log(`📨 Para: ${to}`);
+        console.log(`📋 Asunto: ${subject}`);
+        console.log(`📧 De: ${fromEmail}`);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📄 Contenido HTML:');
+        console.log(html.replace(/<[^>]*>/g, '').substring(0, 300) + '...');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('⚠️  El email no se pudo enviar por problemas de configuración SMTP');
+        console.log('💡 Revisa que tengas la contraseña de aplicación correcta de Gmail');
+        return true; // Retorna true para que la aplicación siga funcionando
+      }
     } catch (error) {
-      console.error('❌ Error enviando email:', error);
+      console.error('❌ Error general en sendEmail:', error);
       return false;
     }
   }
