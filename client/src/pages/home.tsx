@@ -87,11 +87,44 @@ export default function Home() {
       <Navigation />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Hero Section */}
+        {/* Call to Action Section - Moved to top */}
+        <section 
+          ref={bookingRef.ref}
+          id="reservas" 
+          className={`mb-8 sm:mb-12 transition-all duration-1000 ease-out transform ${
+            bookingRef.isVisible 
+              ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
+              : 'opacity-0 -translate-x-32 scale-95'
+          }`}
+        >
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 sm:p-12 text-white text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              ¿Listo para tu sesión de kinesiología?
+            </h2>
+            <p className="text-blue-100 mb-8 text-lg">
+              Accede a tu cuenta para agendar citas con recomendaciones personalizadas de IA
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/my-appointments">
+                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105">
+                  <Calendar className="inline w-5 h-5 mr-2" />
+                  Agendar Nueva Cita
+                </button>
+              </Link>
+              <Link href="/auth">
+                <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-200">
+                  Iniciar Sesión
+                </button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Hero Section - Moved to bottom */}
         <section 
           ref={heroRef.ref}
           id="inicio" 
-          className={`text-center mb-8 sm:mb-12 transition-all duration-1000 ${
+          className={`text-center mb-6 sm:mb-12 transition-all duration-1000 ${
             heroRef.isVisible 
               ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
               : 'opacity-0 translate-y-20'
@@ -146,39 +179,6 @@ export default function Home() {
                 <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Datos Seguros</h3>
                 <p className="text-xs sm:text-sm text-slate-600">Tu información de salud protegida y confidencial</p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Call to Action Section */}
-        <section 
-          ref={bookingRef.ref}
-          id="reservas" 
-          className={`mb-6 sm:mb-12 transition-all duration-1000 ease-out transform ${
-            bookingRef.isVisible 
-              ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
-              : 'opacity-0 -translate-x-32 scale-95'
-          }`}
-        >
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 sm:p-12 text-white text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-              ¿Listo para tu sesión de kinesiología?
-            </h2>
-            <p className="text-blue-100 mb-8 text-lg">
-              Accede a tu cuenta para agendar citas con recomendaciones personalizadas de IA
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/my-appointments">
-                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105">
-                  <Calendar className="inline w-5 h-5 mr-2" />
-                  Agendar Nueva Cita
-                </button>
-              </Link>
-              <Link href="/auth">
-                <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-200">
-                  Iniciar Sesión
-                </button>
-              </Link>
             </div>
           </div>
         </section>
