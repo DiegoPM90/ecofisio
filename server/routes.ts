@@ -226,6 +226,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Endpoint de prueba para Email
+  app.post("/api/test/email", async (req, res) => {
+    try {
+      const { to, subject, message } = req.body;
+      
+      if (!to || !subject || !message) {
+        return res.status(400).json({ 
+          error: "Se requieren to, subject y message" 
+        });
+      }
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #3b82f6; color: white; padding: 20px; text-align: center;">
+            <h1 style="margin: 0;">ECOFISIO - Prueba de Email</h1>
+          </div>
+          <div style="padding: 20px;">
+            <h2>Prueba del sistema de notificaciones</h2>
+            <p>${message}</p>
+            <p><em>Este es un email de prueba del sistema ECOFISIO</em></p>
+          </div>
+        </div>
+      `;
+
+      const result = await notificationService.sendEmail(to, subject, html);
+      
+      if (result) {
+        res.json({ 
+          success: true, 
+          message: "Email de prueba enviado exitosamente"
+        });
+      } else {
+        res.status(500).json({ 
+          error: "Error enviando email de prueba"
+        });
+      }
+    } catch (error) {
+      console.error("Error en prueba de email:", error);
+      res.status(500).json({ 
+        error: "Error interno del servidor"
+      });
+    }
+  });
+
   // === RUTAS DE IA ===
   
   // Endpoint de diagnóstico para variables de entorno

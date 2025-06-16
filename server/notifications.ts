@@ -200,6 +200,61 @@ export class NotificationService {
     }
   }
 
+  // Enviar notificación al administrador sobre nueva cita
+  async sendAdminNotification(appointment: Appointment, action: 'confirmada' | 'cancelada'): Promise<void> {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@ecofisio.com';
+    
+    const subject = `${action === 'confirmada' ? '✅ Nueva cita confirmada' : '❌ Cita cancelada'} - ECOFISIO`;
+    
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: ${action === 'confirmada' ? '#10b981' : '#ef4444'}; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">ECOFISIO - Administración</h1>
+          <p style="margin: 5px 0 0 0;">${action === 'confirmada' ? 'Nueva cita confirmada' : 'Cita cancelada'}</p>
+        </div>
+        
+        <div style="padding: 30px; background: #f8f9fa;">
+          <h2 style="color: #333; margin-top: 0;">Detalles de la cita:</h2>
+          
+          <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 120px;">Paciente:</td><td>${appointment.patientName}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Email:</td><td>${appointment.email}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Teléfono:</td><td>${appointment.phone}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Fecha:</td><td>${appointment.date}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Hora:</td><td>${appointment.time}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Kinesiólogo:</td><td>${appointment.kinesiologistName}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Especialidad:</td><td>${this.getSpecialtyName(appointment.specialty)}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Sesiones:</td><td>${appointment.sessions}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold;">Motivo:</td><td>${appointment.reason}</td></tr>
+              ${appointment.reasonDetail ? `<tr><td style="padding: 8px 0; font-weight: bold;">Detalle:</td><td>${appointment.reasonDetail}</td></tr>` : ''}
+            </table>
+          </div>
+
+          <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #2c5282; margin-top: 0;">Próximos pasos:</h4>
+            <ul style="margin: 10px 0; color: #2c5282;">
+              ${action === 'confirmada' ? 
+                `<li>El paciente ha sido notificado por WhatsApp</li>
+                 <li>Preparar el historial clínico</li>
+                 <li>Confirmar disponibilidad del kinesiólogo</li>` :
+                `<li>Horario liberado para nuevas reservas</li>
+                 <li>Verificar motivo de cancelación si es necesario</li>`
+              }
+            </ul>
+          </div>
+        </div>
+        
+        <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 14px;">
+          <p style="margin: 0;">Sistema de gestión ECOFISIO</p>
+          <p style="margin: 5px 0 0 0;">Notificación automática</p>
+        </div>
+      </div>
+    `;
+
+    await this.sendEmail(adminEmail, subject, emailHtml);
+  }
+
   // Enviar confirmación de cita solo por WhatsApp
   async sendAppointmentConfirmation(appointment: Appointment): Promise<void> {
     const whatsappMessage = `
@@ -273,8 +328,11 @@ export class NotificationService {
       </div>
     `;
 
-    // Enviar solo notificación por WhatsApp
+    // Enviar notificación al paciente por WhatsApp
     await this.sendWhatsAppNotification(appointment.phone, whatsappMessage);
+    
+    // Enviar notificación al administrador por email
+    await this.sendAdminNotification(appointment, 'confirmada');
   }
 
   // Enviar recordatorio de cita
@@ -353,8 +411,11 @@ Para agendar una nueva cita, visite nuestra web.
       </div>
     `;
 
-    // Enviar solo notificación de cancelación por WhatsApp
+    // Enviar notificación al paciente por WhatsApp
     await this.sendWhatsAppNotification(appointment.phone, cancellationMessage);
+    
+    // Enviar notificación al administrador por email
+    await this.sendAdminNotification(appointment, 'cancelada');
   }
 
   // Obtener nombre de especialidad
