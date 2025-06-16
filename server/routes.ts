@@ -1,5 +1,4 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
@@ -14,7 +13,7 @@ import {
   requireAuth
 } from "./auth";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express): Promise<void> {
   
   // === RUTAS DE AUTENTICACIÓN ===
   
@@ -353,7 +352,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   console.log('Sistema de recordatorios automáticos configurado correctamente');
-
-  const httpServer = createServer(app);
-  return httpServer;
 }
