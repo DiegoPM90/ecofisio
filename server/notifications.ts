@@ -15,14 +15,14 @@ const getEmailTransporter = () => {
   }
   
   // Opción 1b: Gmail con configuración SMTP directa (menos segura pero funciona)
-  if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     return nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
       secure: false,
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
       tls: {
         rejectUnauthorized: false
