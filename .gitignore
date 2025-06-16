@@ -1,6 +1,99 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Production builds
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# Cache
+.npm
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache
+
+# OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Replit specific
+.replit
+.config/
+.breakpoints
+replit.nix
+
+# Server public files
 server/public
-vite.config.ts.*
+
+# Test and temp files
 *.tar.gz
+*.tmp
+temp/
+tmp/
+test-*.txt
+test-*.html
+*-cookies.txt
+cookies.txt
+
+# Build configuration backups
+vite.config.ts.*
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# ECOFISIO specific temporary files
+MONGODB_SETUP.md
+WHATSAPP_SETUP.md
+admin-cookies.txt
+fresh-cookies.txt
+login-cookies.txt
+register-cookies.txt
+test-cookies.txt
+test-login.txt
+test-ai.html
+test-whatsapp.html
+test-build.sh
+deploy.sh
+force-dev-deploy.sh
+update-admin.js

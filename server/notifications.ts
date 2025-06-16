@@ -3,9 +3,9 @@ import type { Appointment } from '@shared/schema';
 
 // Configuración de nodemailer con múltiples opciones
 const getEmailTransporter = () => {
-  // Opción 1: Gmail con credenciales correctas
+  // Opción 1: Gmail con credenciales desde variables de entorno
   const gmailUser = process.env.EMAIL_USER || 'canalmovimiento@gmail.com';
-  const gmailPass = process.env.EMAIL_PASS || 'raasgpggwcbcebnx';
+  const gmailPass = process.env.EMAIL_PASS || 'your-gmail-app-password-here';
   
   if (gmailUser && gmailPass) {
     console.log('🔧 Configurando Gmail SMTP...');
