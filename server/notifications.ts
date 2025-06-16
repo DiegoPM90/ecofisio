@@ -1,23 +1,25 @@
 import nodemailer from 'nodemailer';
 import type { Appointment } from '@shared/schema';
 
-// Configuración de nodemailer con credenciales correctas
+// Configuración de nodemailer con múltiples opciones
 const getEmailTransporter = () => {
-  // Gmail con configuración directa para desarrollo
-  const gmailUser = 'canalmovimiento@gmail.com';
-  const gmailPass = 'raasgpggwcbcebnx';
+  // Opción 1: Gmail con credenciales correctas
+  const gmailUser = process.env.EMAIL_USER || 'canalmovimiento@gmail.com';
+  const gmailPass = process.env.EMAIL_PASS || 'raasgpggwcbcebnx';
   
-  console.log('🔧 Configurando Gmail SMTP...');
-  console.log('   Email:', gmailUser);
-  console.log('   Pass configurado: SÍ');
-  
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: gmailUser,
-      pass: gmailPass,
-    }
-  });
+  if (gmailUser && gmailPass) {
+    console.log('🔧 Configurando Gmail SMTP...');
+    console.log('   Email:', gmailUser);
+    console.log('   Pass configurado: SÍ');
+    
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: gmailUser,
+        pass: gmailPass,
+      }
+    });
+  }
   
   // Opción 2: Outlook/Hotmail (más fácil de configurar)
   if (process.env.OUTLOOK_USER && process.env.OUTLOOK_PASS) {
