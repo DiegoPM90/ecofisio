@@ -29,25 +29,36 @@ app.use((req, res, next) => {
   }
 });
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false }));
+// Headers de seguridad críticos
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.removeHeader('X-Powered-By');
+  next();
+});
+
+app.use(express.json({ limit: '1mb' })); // Reducido de 10mb a 1mb
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 
 // Configurar sesiones
 const MemStore = MemoryStore(session);
 
-// Configuración de sesiones adaptable a desarrollo y producción
+// Configuración de sesiones con máxima seguridad
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'tu-clave-secreta-super-segura-kinesio-2024',
+  secret: process.env.SESSION_SECRET || require('crypto').randomBytes(64).toString('hex'),
   resave: false,
   saveUninitialized: false,
   store: new MemStore({
     checkPeriod: 86400000 // Limpiar sesiones expiradas cada 24 horas
   }),
   cookie: {
-    secure: false, // Siempre false para compatibilidad HTTP/HTTPS
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
-    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production', // HTTPS obligatorio en producción
+    httpOnly: true, // Previene acceso desde JavaScript del navegador
+    maxAge: 5 * 60 * 1000, // 5 minutos - coincide con timeout automático
+    sameSite: 'strict' as const, // Máxima protección CSRF
     path: '/'
   },
   name: 'ecofisio.session',

@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import { insertAppointmentSchema, aiConsultationSchema, requestPasswordResetSchema, resetPasswordSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
@@ -14,15 +15,48 @@ import {
   requireAuth
 } from "./auth";
 
+// Rate limiters críticos para seguridad
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 intentos por IP
+  message: { error: "Demasiados intentos de autenticación. Intenta en 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 3, // máximo 3 solicitudes por IP por hora
+  message: { error: "Demasiadas solicitudes de recuperación. Intenta en 1 hora." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const appointmentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 10, // máximo 10 citas por IP por hora
+  message: { error: "Demasiadas citas solicitadas. Intenta en 1 hora." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const aiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5, // máximo 5 consultas IA por IP por hora
+  message: { error: "Límite de consultas IA alcanzado. Intenta en 1 hora." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export async function registerRoutes(app: Express): Promise<void> {
   
   // === RUTAS DE AUTENTICACIÓN ===
   
-  // Registro de usuario
-  app.post("/api/auth/register", registerUser);
+  // Registro de usuario con rate limiting
+  app.post("/api/auth/register", authLimiter, registerUser);
   
-  // Inicio de sesión
-  app.post("/api/auth/login", loginUser);
+  // Inicio de sesión con rate limiting
+  app.post("/api/auth/login", authLimiter, loginUser);
   
   // Cerrar sesión
   app.post("/api/auth/logout", logoutUser);
@@ -33,8 +67,8 @@ export async function registerRoutes(app: Express): Promise<void> {
   // Obtener citas del usuario actual
   app.get("/api/user/appointments", requireAuth, getUserAppointments);
 
-  // Solicitar recuperación de contraseña
-  app.post("/api/auth/request-password-reset", async (req, res) => {
+  // Solicitar recuperación de contraseña con rate limiting
+  app.post("/api/auth/request-password-reset", passwordResetLimiter, async (req, res) => {
     try {
       const { email } = requestPasswordResetSchema.parse(req.body);
       

@@ -1,9 +1,11 @@
-# Archivos de entorno y credenciales
+# Archivos de entorno y credenciales - CRÍTICO PARA SEGURIDAD
 .env
+.env.*
 .env.local
 .env.production
 .env.development
 .env.netlify
+.env.example
 
 # Archivos de texto sensibles
 *.txt
