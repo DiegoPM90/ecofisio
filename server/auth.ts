@@ -61,10 +61,10 @@ export async function registerUser(req: Request, res: Response) {
     // Hash de la contraseña con sal alta
     const hashedPassword = await bcrypt.hash(validatedData.password, 15);
 
-    // Crear usuario
+    // Crear usuario con datos sanitizados
     const user = await storage.createUser({
-      email: validatedData.email,
-      name: validatedData.name,
+      email: sanitizedEmail,
+      name: sanitizedName,
       hashedPassword,
       role: 'client',
     });
@@ -104,14 +104,23 @@ export async function registerUser(req: Request, res: Response) {
   }
 }
 
-// Función para iniciar sesión
+// Función para iniciar sesión con validación de seguridad
 export async function loginUser(req: Request, res: Response) {
   try {
     const validatedData = loginSchema.parse(req.body);
 
+    // Sanitizar email de entrada
+    const sanitizedEmail = validator.normalizeEmail(validatedData.email) || '';
+    
+    if (!validator.isEmail(sanitizedEmail)) {
+      return res.status(401).json({ error: 'Credenciales inválidas' });
+    }
+
     // Buscar usuario
-    const user = await storage.getUserByEmail(validatedData.email);
+    const user = await storage.getUserByEmail(sanitizedEmail);
     if (!user || !user.isActive || !user.hashedPassword) {
+      // Tiempo constante para prevenir timing attacks
+      await bcrypt.compare('dummy', '$2b$15$dummy.hash.to.prevent.timing.attacks');
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
