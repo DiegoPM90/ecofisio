@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 interface CalendarViewProps {
@@ -134,20 +134,37 @@ export default function CalendarView({ onDateSelect, onTimeSelect }: CalendarVie
   const availableSlots = getAvailableSlots(selectedDate);
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Date Selection Calendar */}
-      <Card className="w-full">
-        <CardContent className="p-3 sm:p-4 lg:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 space-y-2 sm:space-y-0">
-            <h3 className="text-base sm:text-lg font-semibold text-slate-900">Seleccionar Fecha</h3>
-            <div className="flex items-center justify-center sm:justify-end space-x-2">
-              <Button variant="ghost" size="sm" onClick={previousMonth} className="p-2">
-                <ChevronLeft className="w-4 h-4" />
+    <div className="space-y-6 sm:space-y-8">
+      {/* Enhanced Date Selection Calendar */}
+      <Card className="w-full shadow-2xl border-0 bg-gradient-to-br from-white via-green-50/20 to-blue-50/20 backdrop-blur-sm">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
+                <Calendar className="text-white w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                Seleccionar Fecha
+              </h3>
+            </div>
+            <div className="flex items-center justify-center sm:justify-end space-x-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={previousMonth} 
+                className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 hover:scale-105"
+              >
+                <ChevronLeft className="w-5 h-5" />
               </Button>
-              <span className="font-medium text-slate-900 px-2 min-w-[120px] sm:min-w-[140px] text-center text-sm sm:text-base">
+              <span className="font-bold text-slate-800 px-4 py-2 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl min-w-[160px] text-center text-lg border border-blue-100">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </span>
-              <Button variant="ghost" size="sm" onClick={nextMonth} className="p-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={nextMonth} 
+                className="p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 hover:scale-105"
+              >
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
