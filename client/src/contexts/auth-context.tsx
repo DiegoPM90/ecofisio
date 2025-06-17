@@ -117,11 +117,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     onSuccess: () => {
       setUser(null);
       queryClient.clear();
-      toast({
-        title: "Sesión cerrada",
-        description: "Has cerrado sesión correctamente",
-        variant: "default",
-      });
     },
     onError: (error) => {
       console.error("Error en logout:", error);

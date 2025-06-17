@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/auth-context";
 import NetworkStatus from "@/components/network-status";
+import { SessionManager } from "@/components/session-manager";
+import { SessionIndicator } from "@/components/session-indicator";
 
 // Direct imports to fix dynamic loading issues
 import Home from "@/pages/home";
@@ -50,6 +52,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <NetworkStatus />
+          <SessionManager />
           <Toaster />
           <Router />
         </TooltipProvider>
