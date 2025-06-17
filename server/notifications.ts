@@ -277,7 +277,7 @@ export class NotificationService {
             <h4 style="color: #2c5282; margin-top: 0;">Próximos pasos:</h4>
             <ul style="margin: 10px 0; color: #2c5282;">
               ${action === 'confirmada' ? 
-                `<li>El paciente ha sido notificado por WhatsApp</li>
+                `<li>El paciente ha sido notificado por email</li>
                  <li>Preparar el historial clínico</li>
                  <li>Confirmar disponibilidad del kinesiólogo</li>` :
                 `<li>Horario liberado para nuevas reservas</li>
@@ -297,34 +297,13 @@ export class NotificationService {
     await this.sendEmail(adminEmail, subject, emailHtml);
   }
 
-  // Enviar confirmación de cita solo por WhatsApp
+  // Enviar confirmación de cita por email
   async sendAppointmentConfirmation(appointment: Appointment): Promise<void> {
-    const whatsappMessage = `
-🏥 *ECOFISIO - Confirmación de Cita*
-
-✅ Su cita ha sido confirmada exitosamente:
-
-📅 *Fecha:* ${appointment.date}
-🕐 *Hora:* ${appointment.time}
-👨‍⚕️ *Kinesiólogo:* ${appointment.kinesiologistName}
-🏥 *Especialidad:* ${this.getSpecialtyName(appointment.specialty)}
-📋 *Sesiones:* ${appointment.sessions}
-
-📍 *Dirección:* Av. Providencia 1234, Santiago
-☎️ *Teléfono:* +56 9 1234 5678
-
-💡 *Importante:*
-• Llegue 10 minutos antes
-• Traiga ropa cómoda
-• Código de cancelación: ${appointment.cancelToken}
-
-¡Esperamos verle pronto!
-    `.trim();
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0;">ECOFISIO</h1>
+        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">KinesioFisio</h1>
           <p style="margin: 5px 0 0 0;">Centro de Kinesiología</p>
         </div>
         
@@ -370,8 +349,8 @@ export class NotificationService {
       </div>
     `;
 
-    // Enviar notificación al paciente por WhatsApp
-    await this.sendWhatsAppNotification(appointment.phone, whatsappMessage);
+    // Enviar confirmación al paciente por email
+    await this.sendEmail(appointment.email, "✅ Cita confirmada - KinesioFisio", emailHtml);
     
     // Enviar notificación al administrador por email
     await this.sendAdminNotification(appointment, 'confirmada');

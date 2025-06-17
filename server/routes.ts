@@ -51,6 +51,22 @@ export async function registerRoutes(app: Express): Promise<void> {
   app.post("/api/appointments", async (req, res) => {
     try {
       const validatedData = insertAppointmentSchema.parse(req.body);
+      
+      // Verificar si el horario ya está ocupado
+      const existingAppointments = await storage.getAppointmentsByDate(validatedData.date);
+      const isSlotTaken = existingAppointments.some(apt => 
+        apt.time === validatedData.time && 
+        apt.specialty === validatedData.specialty &&
+        apt.status !== 'cancelada'
+      );
+      
+      if (isSlotTaken) {
+        return res.status(409).json({ 
+          message: "Este horario ya está ocupado",
+          error: "SLOT_TAKEN"
+        });
+      }
+      
       const appointment = await storage.createAppointment(validatedData);
       
       // Enviar notificaciones inmediatamente después de crear la cita

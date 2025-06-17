@@ -35,7 +35,12 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 409) {
+          throw new Error("SLOT_TAKEN");
+        }
         throw new Error(`Error creating appointment: ${response.statusText}`);
       }
       return response.json();
@@ -44,16 +49,24 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
       setBookedAppointment(data);
       toast({
         title: "¡Cita confirmada!",
-        description: "Tu sesión de kinesiología ha sido reservada exitosamente. Los códigos se han enviado automáticamente a tu WhatsApp.",
+        description: "Tu sesión de kinesiología ha sido reservada exitosamente. Recibirás confirmación por email.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
     },
     onError: (error) => {
-      toast({
-        title: "Error al reservar",
-        description: "No se pudo confirmar tu cita. Por favor intenta nuevamente.",
-        variant: "destructive",
-      });
+      if (error.message === "SLOT_TAKEN") {
+        toast({
+          title: "Lo sentimos, esta hora ya está tomada",
+          description: "Por favor selecciona otro horario disponible.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error al reservar",
+          description: "No se pudo confirmar tu cita. Por favor intenta nuevamente.",
+          variant: "destructive",
+        });
+      }
     },
   });
 

@@ -52,12 +52,12 @@ export default function Navigation() {
           <div className="flex items-center">
             <Link href="/">
               <div className="flex-shrink-0 flex items-center cursor-pointer">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-                  <span className="text-white font-bold text-xs sm:text-sm">EC</span>
+                <div className="h-7 w-7 sm:h-8 sm:w-8 bg-green-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
+                  <span className="text-white font-bold text-xs sm:text-sm">KF</span>
                 </div>
                 <span className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white">
-                  <span className="hidden sm:inline">EcoFisio Centro</span>
-                  <span className="sm:hidden">EcoFisio</span>
+                  <span className="hidden sm:inline">KinesioFisio</span>
+                  <span className="sm:hidden">KinesioFisio</span>
                 </span>
               </div>
             </Link>
