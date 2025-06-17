@@ -210,7 +210,6 @@ export default function HomePage() {
               <div className="space-y-2 text-gray-600">
                 <p>Sábados: 10:00 - 13:00</p>
                 <p>canalmovimiento@gmail.com</p>
-                <p>+56 9 XXXX XXXX</p>
               </div>
             </div>
           </div>
