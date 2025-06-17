@@ -1,6 +1,6 @@
-import { type Appointment, type InsertAppointment, type User, type InsertUser, type Session } from "@shared/schema";
+import { type Appointment, type InsertAppointment, type User, type InsertUser, type Session, type PasswordResetToken } from "@shared/schema";
 import { v4 as uuidv4 } from 'uuid';
-import { AppointmentModel, UserModel, SessionModel } from './mongodb';
+import { AppointmentModel, UserModel, SessionModel, PasswordResetTokenModel } from './mongodb';
 import bcrypt from 'bcryptjs';
 
 export interface IStorage {

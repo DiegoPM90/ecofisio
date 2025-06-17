@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { type Appointment, type InsertAppointment, type User, type Session } from "@shared/schema";
+import { type Appointment, type InsertAppointment, type User, type Session, type PasswordResetToken } from "@shared/schema";
 
 // Esquema de MongoDB para usuarios
 const userSchema = new mongoose.Schema({
@@ -18,6 +18,16 @@ const sessionSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   expiresAt: { type: Date, required: true },
+}, {
+  timestamps: true,
+});
+
+// Esquema de MongoDB para tokens de recuperación de contraseña
+const passwordResetTokenSchema = new mongoose.Schema({
+  token: { type: String, required: true, unique: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  expiresAt: { type: Date, required: true },
+  used: { type: Boolean, default: false },
 }, {
   timestamps: true,
 });
@@ -54,6 +64,7 @@ appointmentSchema.index({ createdAt: -1 });
 
 export const UserModel = mongoose.model('User', userSchema);
 export const SessionModel = mongoose.model('Session', sessionSchema);
+export const PasswordResetTokenModel = mongoose.model('PasswordResetToken', passwordResetTokenSchema);
 export const AppointmentModel = mongoose.model('Appointment', appointmentSchema);
 
 // Función para conectar a MongoDB
