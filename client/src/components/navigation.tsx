@@ -52,12 +52,40 @@ export default function Navigation() {
           <div className="flex items-center">
             <Link href="/">
               <div className="flex-shrink-0 flex items-center cursor-pointer">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
-                  <span className="text-white font-bold text-xs sm:text-sm">EC</span>
-                </div>
+                <svg width="32" height="32" viewBox="0 0 32 32" className="mr-2 sm:mr-3">
+                  <defs>
+                    <linearGradient id="exerciseGradientNav" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
+                      <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 1 }} />
+                      <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="16" cy="16" r="15" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1"/>
+                  <g transform="translate(8, 8)">
+                    <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradientNav)"/>
+                    <rect x="-0.5" y="1.5" width="1" height="3" fill="url(#exerciseGradientNav)"/>
+                    <line x1="-2" y1="2.5" x2="2" y2="2.5" stroke="url(#exerciseGradientNav)" strokeWidth="1.5" strokeLinecap="round"/>
+                    <rect x="-2.5" y="2" width="1" height="1" fill="#64748b"/>
+                    <rect x="1.5" y="2" width="1" height="1" fill="#64748b"/>
+                    <line x1="-0.5" y1="4.5" x2="-1" y2="6" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <line x1="0.5" y1="4.5" x2="1" y2="6" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <circle cx="-2" cy="2.5" r="0.3" fill="#22c55e"/>
+                    <circle cx="2" cy="2.5" r="0.3" fill="#22c55e"/>
+                  </g>
+                  <g transform="translate(20, 8)">
+                    <circle cx="0" cy="0" r="1.2" fill="url(#exerciseGradientNav)"/>
+                    <rect x="-0.4" y="1.2" width="0.8" height="2.5" fill="url(#exerciseGradientNav)"/>
+                    <line x1="-0.8" y1="2" x2="-1.5" y2="3.5" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <line x1="0.8" y1="2" x2="1.5" y2="3.5" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <line x1="-0.4" y1="3.7" x2="-1.2" y2="5.5" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <line x1="0.4" y1="3.7" x2="1.2" y2="5.5" stroke="url(#exerciseGradientNav)" strokeWidth="1"/>
+                    <circle cx="-0.8" cy="1.5" r="0.2" fill="#ef4444"/>
+                    <circle cx="0.8" cy="1.5" r="0.2" fill="#ef4444"/>
+                  </g>
+                  <text x="16" y="28" textAnchor="middle" fontSize="3" fill="#3b82f6" fontWeight="bold">KINESIO</text>
+                </svg>
                 <span className="font-bold text-lg sm:text-xl text-gray-900 dark:text-white">
-                  <span className="hidden sm:inline">EcoFisio Centro</span>
-                  <span className="sm:hidden">EcoFisio</span>
+                  ECOFISIO
                 </span>
               </div>
             </Link>

@@ -183,7 +183,7 @@ export default function HomePage() {
                 <EcofisioLogo size={40} />
                 <div className="ml-3">
                   <h3 className="font-bold text-lg text-gray-900">ECOFISIO</h3>
-                  <p className="text-sm text-gray-600">Centro de Kinesiología</p>
+                  <p className="text-sm text-gray-600">Kinesiología</p>
                 </div>
               </div>
               <p className="text-gray-600 mb-4">
