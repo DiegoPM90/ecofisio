@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --production=false && npm run build"
+  command = "npm install --production=false && npx vite build --config vite.config.netlify.ts"
   functions = "netlify/functions"
   publish = "dist"
 
