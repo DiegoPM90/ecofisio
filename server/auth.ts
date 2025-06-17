@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
 import { registerUserSchema, loginSchema } from '@shared/schema';
 import { z } from 'zod';
+import validator from 'validator';
 
 // Middleware para verificar autenticación
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
@@ -38,19 +39,27 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 // Middleware para verificar rol de administrador
 
 
-// Función para registrar usuario
+// Función para registrar usuario con validación de seguridad
 export async function registerUser(req: Request, res: Response) {
   try {
     const validatedData = registerUserSchema.parse(req.body);
 
+    // Sanitización adicional de entrada
+    const sanitizedEmail = validator.normalizeEmail(validatedData.email) || '';
+    const sanitizedName = validator.escape(validatedData.name.trim());
+
+    if (!validator.isEmail(sanitizedEmail)) {
+      return res.status(400).json({ error: 'Email inválido' });
+    }
+
     // Verificar si el usuario ya existe
-    const existingUser = await storage.getUserByEmail(validatedData.email);
+    const existingUser = await storage.getUserByEmail(sanitizedEmail);
     if (existingUser) {
       return res.status(400).json({ error: 'El email ya está registrado' });
     }
 
-    // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+    // Hash de la contraseña con sal alta
+    const hashedPassword = await bcrypt.hash(validatedData.password, 15);
 
     // Crear usuario
     const user = await storage.createUser({

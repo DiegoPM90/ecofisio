@@ -108,8 +108,8 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Restablecer contraseña con token
-  app.post("/api/auth/reset-password", async (req, res) => {
+  // Restablecer contraseña con token y rate limiting
+  app.post("/api/auth/reset-password", passwordResetLimiter, async (req, res) => {
     try {
       const { token, password } = resetPasswordSchema.parse(req.body);
       
@@ -157,8 +157,8 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Crear nueva cita con validación exhaustiva
-  app.post("/api/appointments", async (req, res) => {
+  // Crear nueva cita con validación exhaustiva y rate limiting
+  app.post("/api/appointments", appointmentLimiter, async (req, res) => {
     try {
       const validatedData = insertAppointmentSchema.parse(req.body);
       
@@ -460,35 +460,14 @@ export async function registerRoutes(app: Express): Promise<void> {
     });
   });
 
-  // Endpoint de diagnóstico para Gmail
-  app.get("/api/debug/gmail", async (req, res) => {
-    res.json({
-      EMAIL_USER: process.env.EMAIL_USER || 'NO_CONFIGURADO',
-      EMAIL_PASS_SET: !!process.env.EMAIL_PASS,
-      EMAIL_PASS_LENGTH: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.length : 0,
-      EMAIL_PASS_PREVIEW: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.substring(0, 4) + '...' + process.env.EMAIL_PASS.substring(-4) : 'NO_SET',
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'NO_CONFIGURADO',
-      environment: process.env.NODE_ENV,
-      timestamp: new Date().toISOString()
-    });
-  });
+  // Endpoint de diagnóstico para Gmail - REMOVIDO POR SEGURIDAD
 
   // === RUTAS DE IA ===
   
-  // Endpoint de diagnóstico para variables de entorno
-  app.get("/api/env-check", (req, res) => {
-    const envCheck = {
-      nodeEnv: process.env.NODE_ENV,
-      hasOpenAI: !!process.env.OPENAI_API_KEY,
-      openAIKeyLength: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0,
-      availableEnvVars: Object.keys(process.env).filter(k => k.includes('OPENAI') || k.includes('API')),
-      timestamp: new Date().toISOString()
-    };
-    res.json(envCheck);
-  });
+  // Endpoint de diagnóstico - REMOVIDO POR SEGURIDAD
   
-  // Consulta de IA (limitada a 2 consultas por usuario)
-  app.post("/api/ai-consultation", requireAuth, async (req, res) => {
+  // Consulta de IA con rate limiting y autenticación
+  app.post("/api/ai-consultation", aiLimiter, requireAuth, async (req, res) => {
     try {
       const userId = (req as any).user?.id;
       if (!userId) {
