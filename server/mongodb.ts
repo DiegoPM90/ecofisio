@@ -43,7 +43,11 @@ const appointmentSchema = new mongoose.Schema({
   timestamps: true, // Agrega createdAt y updatedAt automáticamente
 });
 
-// Índices para optimizar búsquedas (sin duplicar el índice de cancelToken)
+// Índices únicos críticos para prevenir duplicados
+appointmentSchema.index({ date: 1, time: 1 }, { unique: true, partialFilterExpression: { status: { $ne: 'cancelada' } } });
+appointmentSchema.index({ date: 1, email: 1 }, { unique: true, partialFilterExpression: { status: { $ne: 'cancelada' } } });
+
+// Índices para optimizar búsquedas
 appointmentSchema.index({ date: 1, specialty: 1 });
 appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ createdAt: -1 });

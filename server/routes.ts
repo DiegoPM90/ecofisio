@@ -90,6 +90,7 @@ export async function registerRoutes(app: Express): Promise<void> {
       );
       
       if (isSlotTaken) {
+        console.warn(`⚠️ INTENTO DE DUPLICACIÓN - Horario ocupado: ${validatedData.date} ${validatedData.time} por ${validatedData.email}`);
         return res.status(409).json({ 
           message: "Este horario ya está ocupado",
           error: "SLOT_TAKEN"
@@ -103,13 +104,24 @@ export async function registerRoutes(app: Express): Promise<void> {
       );
       
       if (duplicateByEmail) {
+        console.warn(`⚠️ INTENTO DE DUPLICACIÓN - Email duplicado: ${validatedData.email} para fecha ${validatedData.date}`);
         return res.status(409).json({ 
           message: "Ya tienes una cita agendada para esta fecha",
           error: "DUPLICATE_EMAIL"
         });
       }
       
+      // Validación 6: Verificar que no exceda el límite de citas por día (máximo 4)
+      if (existingAppointments.filter(apt => apt.status !== 'cancelada').length >= 4) {
+        console.warn(`⚠️ LÍMITE EXCEDIDO - Fecha completa: ${validatedData.date} (${existingAppointments.length} citas)`);
+        return res.status(409).json({ 
+          message: "No hay más horarios disponibles para esta fecha",
+          error: "DATE_FULL"
+        });
+      }
+      
       // Crear la cita si pasa todas las validaciones
+      console.log(`🔄 CREANDO CITA: ${validatedData.date} ${validatedData.time} - ${validatedData.email} - ${validatedData.specialty}`);
       const appointment = await storage.createAppointment(validatedData);
       
       // Enviar notificaciones inmediatamente después de crear la cita
@@ -122,8 +134,25 @@ export async function registerRoutes(app: Express): Promise<void> {
       
       res.status(201).json(appointment);
     } catch (error: any) {
-      console.error("Error creando cita:", error);
-      if (error?.name === 'ZodError') {
+      console.error("❌ ERROR GENERAL CREANDO CITA:", error);
+      
+      // Manejo específico de errores de duplicación desde storage
+      if (error.message === 'SLOT_TAKEN') {
+        return res.status(409).json({ 
+          message: "Este horario ya está ocupado",
+          error: "SLOT_TAKEN"
+        });
+      } else if (error.message === 'DUPLICATE_EMAIL') {
+        return res.status(409).json({ 
+          message: "Ya tienes una cita agendada para esta fecha",
+          error: "DUPLICATE_EMAIL"
+        });
+      } else if (error.message === 'DUPLICATE_ENTRY') {
+        return res.status(409).json({ 
+          message: "Esta cita ya existe en el sistema",
+          error: "DUPLICATE_ENTRY"
+        });
+      } else if (error?.name === 'ZodError') {
         res.status(400).json({ message: "Datos de cita inválidos", errors: error.errors });
       } else {
         res.status(500).json({ message: "Error interno del servidor" });

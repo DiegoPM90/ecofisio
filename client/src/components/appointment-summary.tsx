@@ -86,6 +86,18 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
           description: "No se pueden agendar citas en fechas pasadas.",
           variant: "destructive",
         });
+      } else if (errorMessage === "DATE_FULL") {
+        toast({
+          title: "Fecha completa",
+          description: "No hay más horarios disponibles para esta fecha. Selecciona otro sábado.",
+          variant: "destructive",
+        });
+      } else if (errorMessage === "DUPLICATE_ENTRY") {
+        toast({
+          title: "Cita duplicada",
+          description: "Esta cita ya existe en el sistema. Verifica tus reservas.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Error al reservar",

@@ -95,10 +95,10 @@ export class MemStorage implements IStorage {
     // Saturday slots only
     const allSlots = ['10:00', '11:00', '12:00', '13:00'];
 
+    // Buscar todas las citas activas (no canceladas) para la fecha, sin filtrar por specialty
     const bookedSlots = Array.from(this.appointments.values())
       .filter(appointment => 
         appointment.date === date && 
-        appointment.specialty === specialty &&
         appointment.status !== 'cancelada'
       )
       .map(appointment => appointment.time);
@@ -233,20 +233,39 @@ export class MemStorage implements IStorage {
 // Clase de almacenamiento MongoDB (para producción)
 export class MongoStorage implements IStorage {
   async createAppointment(insertAppointment: InsertAppointment, userId?: number): Promise<Appointment> {
-    const appointmentDoc = new AppointmentModel({
-      ...insertAppointment,
-      phone: insertAppointment.phone || "",
-      userId: userId || null,
-      status: 'pendiente',
-      kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
-      aiRecommendation: null,
-      cancelToken: uuidv4(),
-      reminderSent: false,
-      reasonDetail: insertAppointment.reasonDetail || null,
-    });
+    try {
+      const appointmentDoc = new AppointmentModel({
+        ...insertAppointment,
+        phone: insertAppointment.phone || "",
+        userId: userId || null,
+        status: 'pendiente',
+        kinesiologistName: this.getKinesiologistForSpecialty(insertAppointment.specialty),
+        aiRecommendation: null,
+        cancelToken: uuidv4(),
+        reminderSent: false,
+        reasonDetail: insertAppointment.reasonDetail || null,
+      });
 
-    const savedDoc = await appointmentDoc.save();
-    return this.transformDocToAppointment(savedDoc);
+      const savedDoc = await appointmentDoc.save();
+      console.log(`✅ CITA CREADA EXITOSAMENTE: ${insertAppointment.date} ${insertAppointment.time} - ${insertAppointment.email}`);
+      return this.transformDocToAppointment(savedDoc);
+    } catch (error: any) {
+      // Manejar errores de duplicación a nivel de MongoDB
+      if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyValue)[0];
+        console.error(`❌ ERROR DE DUPLICACIÓN EN MONGODB: Campo ${duplicateField} - ${JSON.stringify(error.keyValue)}`);
+        
+        if (error.keyValue.time) {
+          throw new Error('SLOT_TAKEN');
+        } else if (error.keyValue.email) {
+          throw new Error('DUPLICATE_EMAIL');
+        } else {
+          throw new Error('DUPLICATE_ENTRY');
+        }
+      }
+      console.error('❌ ERROR CREANDO CITA EN MONGODB:', error);
+      throw error;
+    }
   }
 
   async getAppointments(): Promise<Appointment[]> {
