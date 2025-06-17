@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ECOFISIO - Sistema de Reserva de Kinesiología
 
 Sistema completo de reserva de sesiones de kinesiología y fisioterapia con consulta IA, notificaciones automáticas y gestión integral de citas médicas.
@@ -379,3 +380,6 @@ curl http://localhost:5000/api/health
 **ECOFISIO** - Innovando la atención kinesiológica con tecnología de vanguardia.
 
 *Desarrollado con dedicación para mejorar la calidad de vida de los pacientes y optimizar la gestión médica profesional.*
+=======
+# ecofisio
+>>>>>>> 6f109b7b2c0f5c1c6b7eb94567ecd3cb160d3525
