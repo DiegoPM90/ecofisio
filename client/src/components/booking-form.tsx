@@ -63,18 +63,13 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
   ];
 
   return (
-    <Card className="w-full shadow-2xl border-0 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20 backdrop-blur-sm">
-      <CardContent className="p-6 sm:p-8">
-        <div className="flex items-center space-x-4 mb-6 sm:mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
-            <UserRound className="text-white w-6 h-6" />
+    <Card className="w-full">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <UserRound className="text-white w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          <div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Información de la Reserva
-            </h3>
-            <p className="text-slate-600 mt-1">Complete sus datos para agendar la cita</p>
-          </div>
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900">Información de la Reserva</h3>
         </div>
 
         <Form {...form}>
@@ -84,18 +79,12 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
                 control={form.control}
                 name="patientName"
                 render={({ field }) => (
-                  <FormItem className="group">
-                    <FormLabel className="text-slate-700 font-semibold group-focus-within:text-blue-600 transition-colors">
-                      Nombre Completo *
-                    </FormLabel>
+                  <FormItem>
+                    <FormLabel>Nombre Completo *</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Ingresa tu nombre completo" 
-                        {...field} 
-                        className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200 hover:border-slate-300"
-                      />
+                      <Input placeholder="Ingresa tu nombre completo" {...field} />
                     </FormControl>
-                    <FormMessage className="text-red-500 text-sm" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -103,19 +92,12 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem className="group">
-                    <FormLabel className="text-slate-700 font-semibold group-focus-within:text-blue-600 transition-colors">
-                      Correo Electrónico *
-                    </FormLabel>
+                  <FormItem>
+                    <FormLabel>Correo Electrónico *</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="email" 
-                        placeholder="tu@email.com" 
-                        {...field} 
-                        className="border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200 hover:border-slate-300"
-                      />
+                      <Input type="email" placeholder="tu@email.com" {...field} />
                     </FormControl>
-                    <FormMessage className="text-red-500 text-sm" />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
