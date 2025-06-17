@@ -27,6 +27,12 @@ export interface IStorage {
   getSession(sessionId: string): Promise<Session | undefined>;
   deleteSession(sessionId: string): Promise<boolean>;
   deleteUserSessions(userId: number): Promise<void>;
+  
+  // Password reset methods
+  createPasswordResetToken(userId: number): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markTokenAsUsed(token: string): Promise<boolean>;
+  cleanupExpiredTokens(): Promise<void>;
 }
 
 // Clase de almacenamiento en memoria (para desarrollo sin base de datos)
@@ -34,6 +40,7 @@ export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment>;
   private users: Map<number, User>;
   private sessions: Map<string, Session>;
+  private passwordResetTokens: Map<string, PasswordResetToken>;
   private currentAppointmentId: number;
   private currentUserId: number;
 
@@ -41,6 +48,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.users = new Map();
     this.sessions = new Map();
+    this.passwordResetTokens = new Map();
     this.currentAppointmentId = 1;
     this.currentUserId = 1;
   }
@@ -222,6 +230,58 @@ export class MemStorage implements IStorage {
     
     sessionsToDelete.forEach(sessionId => {
       this.sessions.delete(sessionId);
+    });
+  }
+
+  // Password reset methods
+  async createPasswordResetToken(userId: number): Promise<PasswordResetToken> {
+    const token: PasswordResetToken = {
+      id: Date.now(),
+      token: uuidv4(),
+      userId,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hora
+      used: false,
+      createdAt: new Date(),
+    };
+    
+    this.passwordResetTokens.set(token.token, token);
+    return token;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const resetToken = this.passwordResetTokens.get(token);
+    if (!resetToken) return undefined;
+    
+    // Verificar si el token expiró
+    if (resetToken.expiresAt < new Date() || resetToken.used) {
+      this.passwordResetTokens.delete(token);
+      return undefined;
+    }
+
+    return resetToken;
+  }
+
+  async markTokenAsUsed(token: string): Promise<boolean> {
+    const resetToken = this.passwordResetTokens.get(token);
+    if (!resetToken) return false;
+    
+    resetToken.used = true;
+    this.passwordResetTokens.set(token, resetToken);
+    return true;
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    const now = new Date();
+    const tokensToDelete: string[] = [];
+    
+    this.passwordResetTokens.forEach((token, tokenKey) => {
+      if (token.expiresAt < now || token.used) {
+        tokensToDelete.push(tokenKey);
+      }
+    });
+    
+    tokensToDelete.forEach(tokenKey => {
+      this.passwordResetTokens.delete(tokenKey);
     });
   }
 
@@ -413,6 +473,51 @@ export class MongoStorage implements IStorage {
     await SessionModel.deleteMany({ userId });
   }
 
+  // Password reset methods
+  async createPasswordResetToken(userId: number): Promise<PasswordResetToken> {
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    const tokenDoc = new PasswordResetTokenModel({
+      token,
+      userId,
+      expiresAt,
+      used: false,
+    });
+
+    const savedDoc = await tokenDoc.save();
+    return this.transformDocToPasswordResetToken(savedDoc);
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const doc = await PasswordResetTokenModel.findOne({ 
+      token, 
+      used: false,
+      expiresAt: { $gt: new Date() }
+    });
+    
+    if (!doc) return undefined;
+    return this.transformDocToPasswordResetToken(doc);
+  }
+
+  async markTokenAsUsed(token: string): Promise<boolean> {
+    const result = await PasswordResetTokenModel.findOneAndUpdate(
+      { token },
+      { used: true },
+      { new: true }
+    );
+    return !!result;
+  }
+
+  async cleanupExpiredTokens(): Promise<void> {
+    await PasswordResetTokenModel.deleteMany({
+      $or: [
+        { expiresAt: { $lt: new Date() } },
+        { used: true }
+      ]
+    });
+  }
+
   private transformDocToAppointment(doc: any): Appointment {
     return {
       id: doc._id.toString(),
@@ -456,6 +561,21 @@ export class MongoStorage implements IStorage {
       expiresAt: doc.expiresAt,
       createdAt: doc.createdAt || new Date(),
     };
+  }
+
+  private transformDocToPasswordResetToken(doc: any): PasswordResetToken {
+    return {
+      id: parseInt(doc._id.toString()),
+      token: doc.token,
+      userId: parseInt(doc.userId),
+      expiresAt: doc.expiresAt,
+      used: doc.used,
+      createdAt: doc.createdAt || new Date(),
+    };
+  }
+
+  private getKinesiologistForSpecialty(specialty: string): string {
+    return 'Diego Pizarro Monroy';
   }
 }
 
