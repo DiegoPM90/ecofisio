@@ -282,20 +282,163 @@ export const handler = async (event, context) => {
 
     // Horarios disponibles
     if (apiPath === '/api/appointments/available-slots' && httpMethod === 'GET') {
-      const { date, specialty } = queryStringParameters || {};
-      
-      // Horarios para sábados únicamente
-      const availableSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
-      
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          date,
-          specialty,
-          availableSlots
-        }),
-      };
+      try {
+        const { date, specialty } = queryStringParameters || {};
+        
+        await client.connect();
+        const db = client.db();
+        
+        // Obtener citas existentes para la fecha
+        const existingAppointments = await db.collection('appointments').find({
+          selectedDate: date,
+          specialty: specialty,
+          status: { $ne: 'cancelled' }
+        }).toArray();
+        
+        // Horarios base para sábados
+        const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+        
+        // Filtrar horarios ocupados
+        const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
+        const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
+        
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            date,
+            specialty,
+            availableSlots
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Available slots error:', error);
+        // En caso de error, devolver horarios base
+        const availableSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            date: queryStringParameters?.date,
+            specialty: queryStringParameters?.specialty,
+            availableSlots
+          }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Endpoint para availability (alias de available-slots)
+    if (apiPath === '/api/appointments/availability' && httpMethod === 'GET') {
+      try {
+        const { date, specialty } = queryStringParameters || {};
+        
+        await client.connect();
+        const db = client.db();
+        
+        const existingAppointments = await db.collection('appointments').find({
+          selectedDate: date,
+          specialty: specialty,
+          status: { $ne: 'cancelled' }
+        }).toArray();
+        
+        const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+        const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
+        const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
+        
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            availableSlots,
+            bookedSlots: bookedTimes
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Availability error:', error);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            availableSlots: ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'],
+            bookedSlots: []
+          }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Obtener citas del usuario
+    if (apiPath === '/api/appointments' && httpMethod === 'GET') {
+      try {
+        const cookieHeader = headers.cookie || '';
+        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
+        const sessionToken = sessionMatch ? sessionMatch[1] : null;
+        
+        if (!sessionToken) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'No autenticado' }),
+          };
+        }
+        
+        await client.connect();
+        const db = client.db();
+        
+        // Verificar sesión
+        const session = await db.collection('sessions').findOne({ 
+          sessionId: sessionToken,
+          expiresAt: { $gt: new Date() }
+        });
+        
+        if (!session) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Sesión expirada' }),
+          };
+        }
+        
+        // Obtener citas del usuario
+        const appointments = await db.collection('appointments').find({ 
+          userId: session.userId 
+        }).sort({ createdAt: -1 }).toArray();
+        
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(appointments.map(apt => ({
+            id: apt._id,
+            patientName: apt.patientName,
+            email: apt.email,
+            phone: apt.phone,
+            specialty: apt.specialty,
+            reason: apt.reason,
+            reasonDetail: apt.reasonDetail,
+            selectedDate: apt.selectedDate,
+            selectedTime: apt.selectedTime,
+            status: apt.status,
+            token: apt.token,
+            createdAt: apt.createdAt,
+            updatedAt: apt.updatedAt
+          }))),
+        };
+        
+      } catch (error) {
+        console.error('Get appointments error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al cargar las citas' }),
+        };
+      } finally {
+        await client.close();
+      }
     }
 
     // Crear cita
@@ -307,8 +450,25 @@ export const handler = async (event, context) => {
         const appointmentData = JSON.parse(body || '{}');
         const token = 'apt_' + Date.now() + '_' + Math.random().toString(36);
         
+        // Verificar si hay usuario autenticado
+        const cookieHeader = headers.cookie || '';
+        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
+        const sessionToken = sessionMatch ? sessionMatch[1] : null;
+        let userId = null;
+        
+        if (sessionToken) {
+          const session = await db.collection('sessions').findOne({ 
+            sessionId: sessionToken,
+            expiresAt: { $gt: new Date() }
+          });
+          if (session) {
+            userId = session.userId;
+          }
+        }
+        
         const appointment = {
           ...appointmentData,
+          userId,
           token,
           status: 'pending',
           createdAt: new Date(),
@@ -338,6 +498,56 @@ export const handler = async (event, context) => {
           statusCode: 500,
           headers: corsHeaders,
           body: JSON.stringify({ error: 'Error al crear cita' }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Obtener estado de cita por token
+    if (apiPath.startsWith('/api/appointments/status/') && httpMethod === 'GET') {
+      try {
+        const token = apiPath.split('/').pop();
+        
+        await client.connect();
+        const db = client.db();
+        
+        const appointment = await db.collection('appointments').findOne({ token });
+        
+        if (!appointment) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Cita no encontrada' }),
+          };
+        }
+        
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            appointment: {
+              id: appointment._id,
+              patientName: appointment.patientName,
+              email: appointment.email,
+              phone: appointment.phone,
+              specialty: appointment.specialty,
+              reason: appointment.reason,
+              selectedDate: appointment.selectedDate,
+              selectedTime: appointment.selectedTime,
+              status: appointment.status,
+              token: appointment.token,
+              createdAt: appointment.createdAt
+            }
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Get appointment status error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al obtener estado de la cita' }),
         };
       } finally {
         await client.close();
