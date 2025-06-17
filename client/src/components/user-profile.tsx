@@ -16,7 +16,16 @@ export default function UserProfile() {
 
   // Consultar las citas del usuario
   const { data: appointmentsData, isLoading: appointmentsLoading } = useQuery({
-    queryKey: ["/api/auth/my-appointments"],
+    queryKey: ["/api/appointments"],
+    queryFn: async () => {
+      const response = await fetch("/api/appointments", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Error al cargar las citas");
+      }
+      return response.json();
+    },
     enabled: isAuthenticated,
   });
 
@@ -39,7 +48,7 @@ export default function UserProfile() {
     );
   }
 
-  const appointments: Appointment[] = (appointmentsData as any)?.appointments || [];
+  const appointments: Appointment[] = Array.isArray(appointmentsData) ? appointmentsData : [];
   const userInitials = user.name
     .split(" ")
     .map(name => name.charAt(0))
@@ -110,15 +119,22 @@ export default function UserProfile() {
             
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Estado:</span>
-              <Badge variant={user.isActive ? "default" : "destructive"}>
-                {user.isActive ? "Activo" : "Inactivo"}
+              <Badge variant={(user.isActive !== false) ? "default" : "destructive"}>
+                {(user.isActive !== false) ? "Activo" : "Inactivo"}
               </Badge>
             </div>
 
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Miembro desde:</span>
               <span className="text-sm">
-                {new Date(user.createdAt).toLocaleDateString("es-ES")}
+                {user.createdAt 
+                  ? new Date(user.createdAt).toLocaleDateString("es-ES", {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  : "Fecha no disponible"
+                }
               </span>
             </div>
 

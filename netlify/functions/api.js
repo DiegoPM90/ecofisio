@@ -212,7 +212,10 @@ export const handler = async (event, context) => {
             id: sessionData.user._id,
             name: sessionData.user.name,
             email: sessionData.user.email,
-            role: sessionData.user.role
+            role: sessionData.user.role,
+            isActive: sessionData.user.isActive || true,
+            createdAt: sessionData.user.createdAt,
+            updatedAt: sessionData.user.updatedAt
           }
         }),
       };
@@ -235,6 +238,74 @@ export const handler = async (event, context) => {
           'Set-Cookie': `session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/`
         },
         body: JSON.stringify({ message: 'Logout exitoso', success: true }),
+      };
+    }
+
+    // Update user profile
+    if (apiPath === '/api/auth/profile' && httpMethod === 'PUT') {
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      const sessionData = await verifySession(sessionToken);
+      
+      if (!sessionData) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'No autenticado' }),
+        };
+      }
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const updateData = JSON.parse(body || '{}');
+      const allowedFields = ['name', 'email'];
+      const filteredUpdate = {};
+      
+      for (const field of allowedFields) {
+        if (updateData[field]) {
+          filteredUpdate[field] = updateData[field];
+        }
+      }
+      
+      if (Object.keys(filteredUpdate).length === 0) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'No hay campos válidos para actualizar' }),
+        };
+      }
+      
+      filteredUpdate.updatedAt = new Date();
+      
+      const updatedUser = await db.collection('users').findOneAndUpdate(
+        { _id: sessionData.user._id },
+        { $set: filteredUpdate },
+        { returnDocument: 'after' }
+      );
+      
+      if (!updatedUser.value) {
+        return {
+          statusCode: 404,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Usuario no encontrado' }),
+        };
+      }
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Perfil actualizado exitosamente',
+          user: {
+            id: updatedUser.value._id,
+            name: updatedUser.value.name,
+            email: updatedUser.value.email,
+            role: updatedUser.value.role,
+            isActive: updatedUser.value.isActive,
+            createdAt: updatedUser.value.createdAt,
+            updatedAt: updatedUser.value.updatedAt
+          }
+        }),
       };
     }
 

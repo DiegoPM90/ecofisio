@@ -9,6 +9,9 @@ import { notificationService } from "./notifications";
 
 const app = express();
 
+// Configurar trust proxy para manejar headers X-Forwarded-For correctamente
+app.set('trust proxy', true);
+
 // Middleware personalizado para manejar JSON enviado como text/plain
 app.use((req, res, next) => {
   if (req.headers['content-type'] === 'text/plain;charset=UTF-8') {
