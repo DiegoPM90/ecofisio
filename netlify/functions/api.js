@@ -1,16 +1,51 @@
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
 
-const client = new MongoClient(process.env.MONGODB_URI);
+let cachedClient = null;
+
+async function connectToDatabase() {
+  if (cachedClient) {
+    return cachedClient;
+  }
+  
+  const client = new MongoClient(process.env.MONGODB_URI);
+  await client.connect();
+  cachedClient = client;
+  return client;
+}
+
+// Helper function to get session from cookies
+function getSessionFromCookies(cookieHeader) {
+  if (!cookieHeader) return null;
+  const sessionMatch = cookieHeader.match(/session=([^;]+)/);
+  return sessionMatch ? sessionMatch[1] : null;
+}
+
+// Helper function to verify session
+async function verifySession(sessionToken) {
+  if (!sessionToken) return null;
+  
+  const client = await connectToDatabase();
+  const db = client.db();
+  
+  const session = await db.collection('sessions').findOne({ 
+    sessionId: sessionToken,
+    expiresAt: { $gt: new Date() }
+  });
+  
+  if (!session) return null;
+  
+  const user = await db.collection('users').findOne({ _id: session.userId });
+  return user ? { user, session } : null;
+}
 
 export const handler = async (event, context) => {
   const { httpMethod, path, body, headers, queryStringParameters } = event;
   
-  // CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie',
     'Content-Type': 'application/json',
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
@@ -18,7 +53,6 @@ export const handler = async (event, context) => {
     'Referrer-Policy': 'strict-origin-when-cross-origin'
   };
 
-  // Handle preflight requests
   if (httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -29,536 +63,502 @@ export const handler = async (event, context) => {
 
   try {
     const apiPath = path.replace('/.netlify/functions/api', '');
+    console.log(`${httpMethod} ${apiPath}`);
     
     // Health check
     if (apiPath === '/api/health') {
       return {
         statusCode: 200,
         headers: corsHeaders,
-        body: JSON.stringify({ status: 'OK', message: 'ECOFISIO API funcionando en Netlify' }),
+        body: JSON.stringify({ 
+          status: 'OK', 
+          message: 'ECOFISIO API funcionando en Netlify',
+          timestamp: new Date().toISOString()
+        }),
       };
     }
 
-    // Registro de usuario
+    // AUTH ENDPOINTS
+    
+    // Register
     if (apiPath === '/api/auth/register' && httpMethod === 'POST') {
-      try {
-        await client.connect();
-        const db = client.db();
-        
-        const userData = JSON.parse(body || '{}');
-        const { name, email, password } = userData;
-        
-        // Validar datos básicos
-        if (!name || !email || !password) {
-          return {
-            statusCode: 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Todos los campos son requeridos' }),
-          };
-        }
-        
-        // Verificar si el usuario ya existe
-        const existingUser = await db.collection('users').findOne({ email });
-        if (existingUser) {
-          return {
-            statusCode: 400,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'El email ya está registrado' }),
-          };
-        }
-        
-        // Hash de la contraseña
-        const hashedPassword = await bcrypt.hash(password, 15);
-        
-        // Crear usuario
-        const newUser = {
-          name,
-          email,
-          hashedPassword,
-          role: 'user',
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        const result = await db.collection('users').insertOne(newUser);
-        
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const userData = JSON.parse(body || '{}');
+      const { name, email, password, confirmPassword } = userData;
+      
+      if (!name || !email || !password || !confirmPassword) {
         return {
-          statusCode: 201,
+          statusCode: 400,
           headers: corsHeaders,
-          body: JSON.stringify({
-            message: 'Usuario registrado exitosamente',
-            user: {
-              id: result.insertedId,
-              name,
-              email,
-              role: 'user'
-            }
-          }),
+          body: JSON.stringify({ error: 'Todos los campos son requeridos' }),
         };
-        
-      } catch (error) {
-        console.error('Register error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al registrar usuario' }),
-        };
-      } finally {
-        await client.close();
       }
-    }
-
-    // Login de usuario
-    if (apiPath === '/api/auth/login' && httpMethod === 'POST') {
-      try {
-        await client.connect();
-        const db = client.db();
-        
-        const loginData = JSON.parse(body || '{}');
-        const { email, password } = loginData;
-        
-        // Buscar usuario
-        const user = await db.collection('users').findOne({ email });
-        if (!user) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Credenciales inválidas' }),
-          };
-        }
-        
-        // Verificar contraseña
-        const validPassword = await bcrypt.compare(password, user.hashedPassword);
-        if (!validPassword) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Credenciales inválidas' }),
-          };
-        }
-        
-        // Crear sesión simple
-        const sessionToken = 'session_' + Date.now() + '_' + Math.random().toString(36);
-        
-        await db.collection('sessions').insertOne({
-          sessionId: sessionToken,
-          userId: user._id,
-          createdAt: new Date(),
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutos
-        });
-        
+      
+      if (password !== confirmPassword) {
         return {
-          statusCode: 200,
-          headers: {
-            ...corsHeaders,
-            'Set-Cookie': `session=${sessionToken}; HttpOnly; SameSite=Lax; Max-Age=300; Path=/`
-          },
-          body: JSON.stringify({
-            message: 'Login exitoso',
-            success: true,
-            user: {
-              id: user._id,
-              name: user.name,
-              email: user.email,
-              role: user.role
-            },
-            sessionToken: sessionToken
-          }),
-        };
-        
-      } catch (error) {
-        console.error('Login error:', error);
-        return {
-          statusCode: 500,
+          statusCode: 400,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al iniciar sesión' }),
+          body: JSON.stringify({ error: 'Las contraseñas no coinciden' }),
         };
-      } finally {
-        await client.close();
       }
-    }
-
-    // Verificar usuario actual
-    if (apiPath === '/api/auth/me' && httpMethod === 'GET') {
-      try {
-        const cookieHeader = headers.cookie || '';
-        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
-        const sessionToken = sessionMatch ? sessionMatch[1] : null;
-        
-        if (!sessionToken) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'No autenticado' }),
-          };
-        }
-        
-        await client.connect();
-        const db = client.db();
-        
-        // Buscar sesión
-        const session = await db.collection('sessions').findOne({ 
-          sessionId: sessionToken,
-          expiresAt: { $gt: new Date() }
-        });
-        
-        if (!session) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Sesión expirada' }),
-          };
-        }
-        
-        // Buscar usuario
-        const user = await db.collection('users').findOne({ _id: session.userId });
-        if (!user) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Usuario no encontrado' }),
-          };
-        }
-        
+      
+      const existingUser = await db.collection('users').findOne({ email });
+      if (existingUser) {
         return {
-          statusCode: 200,
+          statusCode: 400,
           headers: corsHeaders,
-          body: JSON.stringify({
-            user: {
-              id: user._id,
-              name: user.name,
-              email: user.email,
-              role: user.role
-            }
-          }),
+          body: JSON.stringify({ error: 'El email ya está registrado' }),
         };
-        
-      } catch (error) {
-        console.error('Auth check error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al verificar autenticación' }),
-        };
-      } finally {
-        await client.close();
       }
-    }
-
-    // Logout de usuario
-    if (apiPath === '/api/auth/logout' && httpMethod === 'POST') {
-      try {
-        const cookieHeader = headers.cookie || '';
-        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
-        const sessionToken = sessionMatch ? sessionMatch[1] : null;
-        
-        if (sessionToken) {
-          await client.connect();
-          const db = client.db();
-          await db.collection('sessions').deleteOne({ sessionId: sessionToken });
-        }
-        
-        return {
-          statusCode: 200,
-          headers: {
-            ...corsHeaders,
-            'Set-Cookie': `session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/`
-          },
-          body: JSON.stringify({ message: 'Logout exitoso' }),
-        };
-        
-      } catch (error) {
-        console.error('Logout error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al cerrar sesión' }),
-        };
-      } finally {
-        await client.close();
-      }
-    }
-
-    // Horarios disponibles
-    if (apiPath === '/api/appointments/available-slots' && httpMethod === 'GET') {
-      try {
-        const { date, specialty } = queryStringParameters || {};
-        
-        await client.connect();
-        const db = client.db();
-        
-        // Obtener citas existentes para la fecha
-        const existingAppointments = await db.collection('appointments').find({
-          selectedDate: date,
-          specialty: specialty,
-          status: { $ne: 'cancelled' }
-        }).toArray();
-        
-        // Horarios base para sábados
-        const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
-        
-        // Filtrar horarios ocupados
-        const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
-        const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
-        
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            date,
-            specialty,
-            availableSlots
-          }),
-        };
-        
-      } catch (error) {
-        console.error('Available slots error:', error);
-        // En caso de error, devolver horarios base
-        const availableSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            date: queryStringParameters?.date,
-            specialty: queryStringParameters?.specialty,
-            availableSlots
-          }),
-        };
-      } finally {
-        await client.close();
-      }
-    }
-
-    // Endpoint para availability (alias de available-slots)
-    if (apiPath === '/api/appointments/availability' && httpMethod === 'GET') {
-      try {
-        const { date, specialty } = queryStringParameters || {};
-        
-        await client.connect();
-        const db = client.db();
-        
-        const existingAppointments = await db.collection('appointments').find({
-          selectedDate: date,
-          specialty: specialty,
-          status: { $ne: 'cancelled' }
-        }).toArray();
-        
-        const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
-        const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
-        const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
-        
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            availableSlots,
-            bookedSlots: bookedTimes
-          }),
-        };
-        
-      } catch (error) {
-        console.error('Availability error:', error);
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            availableSlots: ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'],
-            bookedSlots: []
-          }),
-        };
-      } finally {
-        await client.close();
-      }
-    }
-
-    // Obtener citas del usuario
-    if (apiPath === '/api/appointments' && httpMethod === 'GET') {
-      try {
-        const cookieHeader = headers.cookie || '';
-        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
-        const sessionToken = sessionMatch ? sessionMatch[1] : null;
-        
-        if (!sessionToken) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'No autenticado' }),
-          };
-        }
-        
-        await client.connect();
-        const db = client.db();
-        
-        // Verificar sesión
-        const session = await db.collection('sessions').findOne({ 
-          sessionId: sessionToken,
-          expiresAt: { $gt: new Date() }
-        });
-        
-        if (!session) {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Sesión expirada' }),
-          };
-        }
-        
-        // Obtener citas del usuario
-        const appointments = await db.collection('appointments').find({ 
-          userId: session.userId 
-        }).sort({ createdAt: -1 }).toArray();
-        
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify(appointments.map(apt => ({
-            id: apt._id,
-            patientName: apt.patientName,
-            email: apt.email,
-            phone: apt.phone,
-            specialty: apt.specialty,
-            reason: apt.reason,
-            reasonDetail: apt.reasonDetail,
-            selectedDate: apt.selectedDate,
-            selectedTime: apt.selectedTime,
-            status: apt.status,
-            token: apt.token,
-            createdAt: apt.createdAt,
-            updatedAt: apt.updatedAt
-          }))),
-        };
-        
-      } catch (error) {
-        console.error('Get appointments error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al cargar las citas' }),
-        };
-      } finally {
-        await client.close();
-      }
-    }
-
-    // Crear cita
-    if (apiPath === '/api/appointments' && httpMethod === 'POST') {
-      try {
-        await client.connect();
-        const db = client.db();
-        
-        const appointmentData = JSON.parse(body || '{}');
-        const token = 'apt_' + Date.now() + '_' + Math.random().toString(36);
-        
-        // Verificar si hay usuario autenticado
-        const cookieHeader = headers.cookie || '';
-        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
-        const sessionToken = sessionMatch ? sessionMatch[1] : null;
-        let userId = null;
-        
-        if (sessionToken) {
-          const session = await db.collection('sessions').findOne({ 
-            sessionId: sessionToken,
-            expiresAt: { $gt: new Date() }
-          });
-          if (session) {
-            userId = session.userId;
+      
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
+      const newUser = {
+        name,
+        email,
+        hashedPassword,
+        role: 'user',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await db.collection('users').insertOne(newUser);
+      
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Usuario registrado exitosamente',
+          user: {
+            id: result.insertedId,
+            name,
+            email,
+            role: 'user'
           }
-        }
-        
-        const appointment = {
-          ...appointmentData,
-          userId,
-          token,
-          status: 'pending',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        const result = await db.collection('appointments').insertOne(appointment);
-        
-        return {
-          statusCode: 201,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            success: true,
-            message: 'Cita registrada exitosamente. Te contactaremos para confirmar.',
-            appointment: {
-              id: result.insertedId,
-              token,
-              status: 'pending',
-              ...appointmentData
-            }
-          }),
-        };
-        
-      } catch (error) {
-        console.error('Appointment error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al crear cita' }),
-        };
-      } finally {
-        await client.close();
-      }
+        }),
+      };
     }
 
-    // Obtener estado de cita por token
-    if (apiPath.startsWith('/api/appointments/status/') && httpMethod === 'GET') {
-      try {
-        const token = apiPath.split('/').pop();
-        
-        await client.connect();
+    // Login
+    if (apiPath === '/api/auth/login' && httpMethod === 'POST') {
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const loginData = JSON.parse(body || '{}');
+      const { email, password } = loginData;
+      
+      const user = await db.collection('users').findOne({ email });
+      if (!user || !await bcrypt.compare(password, user.hashedPassword)) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Credenciales inválidas' }),
+        };
+      }
+      
+      // Delete existing sessions for this user
+      await db.collection('sessions').deleteMany({ userId: user._id });
+      
+      const sessionToken = 'session_' + Date.now() + '_' + Math.random().toString(36);
+      
+      await db.collection('sessions').insertOne({
+        sessionId: sessionToken,
+        userId: user._id,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000) // 30 minutes
+      });
+      
+      return {
+        statusCode: 200,
+        headers: {
+          ...corsHeaders,
+          'Set-Cookie': `session=${sessionToken}; HttpOnly; SameSite=Lax; Max-Age=1800; Path=/`
+        },
+        body: JSON.stringify({
+          message: 'Login exitoso',
+          success: true,
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role
+          },
+          sessionToken: sessionToken
+        }),
+      };
+    }
+
+    // Get current user
+    if (apiPath === '/api/auth/me' && httpMethod === 'GET') {
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      const sessionData = await verifySession(sessionToken);
+      
+      if (!sessionData) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'No autenticado' }),
+        };
+      }
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          user: {
+            id: sessionData.user._id,
+            name: sessionData.user.name,
+            email: sessionData.user.email,
+            role: sessionData.user.role
+          }
+        }),
+      };
+    }
+
+    // Logout
+    if (apiPath === '/api/auth/logout' && httpMethod === 'POST') {
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      
+      if (sessionToken) {
+        const client = await connectToDatabase();
         const db = client.db();
-        
-        const appointment = await db.collection('appointments').findOne({ token });
-        
-        if (!appointment) {
+        await db.collection('sessions').deleteOne({ sessionId: sessionToken });
+      }
+      
+      return {
+        statusCode: 200,
+        headers: {
+          ...corsHeaders,
+          'Set-Cookie': `session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/`
+        },
+        body: JSON.stringify({ message: 'Logout exitoso', success: true }),
+      };
+    }
+
+    // APPOINTMENT ENDPOINTS
+    
+    // Get user appointments
+    if (apiPath === '/api/appointments' && httpMethod === 'GET') {
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      const sessionData = await verifySession(sessionToken);
+      
+      if (!sessionData) {
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'No autenticado' }),
+        };
+      }
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const appointments = await db.collection('appointments').find({ 
+        userId: sessionData.user._id 
+      }).sort({ createdAt: -1 }).toArray();
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify(appointments.map(apt => ({
+          id: apt._id,
+          patientName: apt.patientName,
+          email: apt.email,
+          phone: apt.phone,
+          specialty: apt.specialty,
+          reason: apt.reason,
+          reasonDetail: apt.reasonDetail,
+          selectedDate: apt.selectedDate,
+          selectedTime: apt.selectedTime,
+          status: apt.status,
+          token: apt.token,
+          createdAt: apt.createdAt,
+          updatedAt: apt.updatedAt
+        }))),
+      };
+    }
+
+    // Create appointment
+    if (apiPath === '/api/appointments' && httpMethod === 'POST') {
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const appointmentData = JSON.parse(body || '{}');
+      const token = 'apt_' + Date.now() + '_' + Math.random().toString(36);
+      
+      // Check for authenticated user
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      const sessionData = await verifySession(sessionToken);
+      const userId = sessionData ? sessionData.user._id : null;
+      
+      // Validate required fields
+      const required = ['patientName', 'email', 'phone', 'specialty', 'selectedDate', 'selectedTime'];
+      for (const field of required) {
+        if (!appointmentData[field]) {
           return {
-            statusCode: 404,
+            statusCode: 400,
             headers: corsHeaders,
-            body: JSON.stringify({ error: 'Cita no encontrada' }),
+            body: JSON.stringify({ error: `Campo requerido: ${field}` }),
           };
         }
-        
-        return {
-          statusCode: 200,
-          headers: corsHeaders,
-          body: JSON.stringify({
-            appointment: {
-              id: appointment._id,
-              patientName: appointment.patientName,
-              email: appointment.email,
-              phone: appointment.phone,
-              specialty: appointment.specialty,
-              reason: appointment.reason,
-              selectedDate: appointment.selectedDate,
-              selectedTime: appointment.selectedTime,
-              status: appointment.status,
-              token: appointment.token,
-              createdAt: appointment.createdAt
-            }
-          }),
-        };
-        
-      } catch (error) {
-        console.error('Get appointment status error:', error);
-        return {
-          statusCode: 500,
-          headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al obtener estado de la cita' }),
-        };
-      } finally {
-        await client.close();
       }
+      
+      const appointment = {
+        ...appointmentData,
+        userId,
+        token,
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await db.collection('appointments').insertOne(appointment);
+      
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          success: true,
+          message: 'Cita registrada exitosamente. Te contactaremos para confirmar.',
+          appointment: {
+            id: result.insertedId,
+            token,
+            status: 'pending',
+            ...appointmentData
+          }
+        }),
+      };
     }
 
-    // Default para rutas no encontradas
+    // Get available time slots
+    if (apiPath === '/api/appointments/available-slots' && httpMethod === 'GET') {
+      const { date, specialty } = queryStringParameters || {};
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const existingAppointments = await db.collection('appointments').find({
+        selectedDate: date,
+        specialty: specialty,
+        status: { $ne: 'cancelled' }
+      }).toArray();
+      
+      const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+      const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
+      const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          date,
+          specialty,
+          availableSlots
+        }),
+      };
+    }
+
+    // Get availability (alias)
+    if (apiPath === '/api/appointments/availability' && httpMethod === 'GET') {
+      const { date, specialty } = queryStringParameters || {};
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const existingAppointments = await db.collection('appointments').find({
+        selectedDate: date,
+        specialty: specialty,
+        status: { $ne: 'cancelled' }
+      }).toArray();
+      
+      const allSlots = ['10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+      const bookedTimes = existingAppointments.map(apt => apt.selectedTime);
+      const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          availableSlots,
+          bookedSlots: bookedTimes
+        }),
+      };
+    }
+
+    // Get appointment status by token
+    if (apiPath.startsWith('/api/appointments/status/') && httpMethod === 'GET') {
+      const token = apiPath.split('/').pop();
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const appointment = await db.collection('appointments').findOne({ token });
+      
+      if (!appointment) {
+        return {
+          statusCode: 404,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Cita no encontrada' }),
+        };
+      }
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          appointment: {
+            id: appointment._id,
+            patientName: appointment.patientName,
+            email: appointment.email,
+            phone: appointment.phone,
+            specialty: appointment.specialty,
+            reason: appointment.reason,
+            selectedDate: appointment.selectedDate,
+            selectedTime: appointment.selectedTime,
+            status: appointment.status,
+            token: appointment.token,
+            createdAt: appointment.createdAt
+          }
+        }),
+      };
+    }
+
+    // Cancel appointment by token
+    if (apiPath.startsWith('/api/appointments/cancel/') && httpMethod === 'POST') {
+      const token = apiPath.split('/').pop();
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const appointment = await db.collection('appointments').findOne({ token });
+      
+      if (!appointment) {
+        return {
+          statusCode: 404,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Cita no encontrada' }),
+        };
+      }
+      
+      if (appointment.status === 'cancelled') {
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'La cita ya está cancelada' }),
+        };
+      }
+      
+      const updatedAppointment = await db.collection('appointments').findOneAndUpdate(
+        { token },
+        { 
+          $set: { 
+            status: 'cancelled', 
+            updatedAt: new Date(),
+            cancelledAt: new Date()
+          } 
+        },
+        { returnDocument: 'after' }
+      );
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Cita cancelada exitosamente',
+          appointment: {
+            id: updatedAppointment.value._id,
+            status: updatedAppointment.value.status,
+            token: updatedAppointment.value.token
+          }
+        }),
+      };
+    }
+
+    // Update appointment status (admin)
+    if (apiPath.startsWith('/api/appointments/') && apiPath.endsWith('/status') && httpMethod === 'PUT') {
+      const appointmentId = apiPath.split('/')[3];
+      const { status } = JSON.parse(body || '{}');
+      
+      // Verify admin session
+      const sessionToken = getSessionFromCookies(headers.cookie);
+      const sessionData = await verifySession(sessionToken);
+      
+      if (!sessionData || sessionData.user.role !== 'admin') {
+        return {
+          statusCode: 403,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Acceso denegado' }),
+        };
+      }
+      
+      const client = await connectToDatabase();
+      const db = client.db();
+      
+      const updatedAppointment = await db.collection('appointments').findOneAndUpdate(
+        { _id: appointmentId },
+        { 
+          $set: { 
+            status, 
+            updatedAt: new Date()
+          } 
+        },
+        { returnDocument: 'after' }
+      );
+      
+      if (!updatedAppointment.value) {
+        return {
+          statusCode: 404,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Cita no encontrada' }),
+        };
+      }
+      
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          message: 'Estado de cita actualizado',
+          appointment: updatedAppointment.value
+        }),
+      };
+    }
+
+    // AI CONSULTATION ENDPOINT
+    if (apiPath === '/api/ai/consultation' && httpMethod === 'POST') {
+      return {
+        statusCode: 503,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          error: 'Consulta IA temporalmente no disponible',
+          message: 'Reserve su cita para consulta personalizada'
+        }),
+      };
+    }
+
+    // NOTIFICATION ENDPOINTS
+    if (apiPath === '/api/notifications/send' && httpMethod === 'POST') {
+      return {
+        statusCode: 503,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          error: 'Notificaciones temporalmente no disponibles',
+          message: 'El servicio será habilitado próximamente'
+        }),
+      };
+    }
+
+    // Default 404
     return {
       statusCode: 404,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Endpoint no encontrado' }),
+      body: JSON.stringify({ 
+        error: 'Endpoint no encontrado',
+        path: apiPath,
+        method: httpMethod
+      }),
     };
 
   } catch (error) {
@@ -568,7 +568,8 @@ export const handler = async (event, context) => {
       headers: corsHeaders,
       body: JSON.stringify({ 
         error: 'Error interno del servidor',
-        message: 'Intente nuevamente en unos minutos'
+        message: 'Intente nuevamente en unos minutos',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       }),
     };
   }
