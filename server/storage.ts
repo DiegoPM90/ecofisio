@@ -390,10 +390,6 @@ export class MongoStorage implements IStorage {
     return docs.map(doc => this.transformDocToAppointment(doc));
   }
 
-  private getKinesiologistForSpecialty(specialty: string): string {
-    return 'Diego Pizarro Monroy';
-  }
-
   async getUserAppointments(userId: number): Promise<Appointment[]> {
     // Convertir el ID numérico a string para MongoDB
     const userIdString = userId.toString();

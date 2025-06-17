@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { storage } from "./storage";
-import { insertAppointmentSchema, aiConsultationSchema } from "@shared/schema";
+import { insertAppointmentSchema, aiConsultationSchema, requestPasswordResetSchema, resetPasswordSchema } from "@shared/schema";
 import { getAIConsultationResponse } from "./openai";
 import { notificationService } from "./notifications";
+import bcrypt from "bcryptjs";
 import * as cron from 'node-cron';
 import { 
   registerUser, 
@@ -31,8 +32,83 @@ export async function registerRoutes(app: Express): Promise<void> {
   
   // Obtener citas del usuario actual
   app.get("/api/user/appointments", requireAuth, getUserAppointments);
-  
 
+  // Solicitar recuperación de contraseña
+  app.post("/api/auth/request-password-reset", async (req, res) => {
+    try {
+      const { email } = requestPasswordResetSchema.parse(req.body);
+      
+      // Buscar usuario por email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Por seguridad, no revelar si el email existe o no
+        return res.json({ message: "Si el email existe, recibirás instrucciones para recuperar tu contraseña." });
+      }
+
+      // Crear token de recuperación
+      const resetToken = await storage.createPasswordResetToken(user.id);
+      
+      // Enviar email con enlace de recuperación
+      const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken.token}`;
+      const emailContent = `
+        <h2>Recuperación de Contraseña - ECOFISIO</h2>
+        <p>Hola ${user.name},</p>
+        <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+        <p><a href="${resetUrl}" style="background: #0066cc; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a></p>
+        <p>Este enlace expirará en 1 hora.</p>
+        <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
+        <br>
+        <p>Equipo ECOFISIO</p>
+      `;
+      
+      await notificationService.sendEmail(
+        email,
+        "Recuperación de Contraseña - ECOFISIO",
+        emailContent
+      );
+
+      res.json({ message: "Si el email existe, recibirás instrucciones para recuperar tu contraseña." });
+    } catch (error) {
+      console.error("Error en solicitud de reset:", error);
+      res.status(400).json({ message: "Datos inválidos" });
+    }
+  });
+
+  // Restablecer contraseña con token
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = resetPasswordSchema.parse(req.body);
+      
+      // Validar token
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken) {
+        return res.status(400).json({ message: "Token inválido o expirado" });
+      }
+
+      // Obtener usuario
+      const user = await storage.getUserById(resetToken.userId);
+      if (!user) {
+        return res.status(400).json({ message: "Usuario no encontrado" });
+      }
+
+      // Hashear nueva contraseña
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Actualizar contraseña del usuario
+      await storage.updateUser(user.id, { hashedPassword });
+
+      // Marcar token como usado
+      await storage.markTokenAsUsed(token);
+
+      // Eliminar todas las sesiones del usuario
+      await storage.deleteUserSessions(user.id);
+
+      res.json({ message: "Contraseña restablecida exitosamente" });
+    } catch (error) {
+      console.error("Error al restablecer contraseña:", error);
+      res.status(400).json({ message: "Error al procesar la solicitud" });
+    }
+  });
   
   // === RUTAS DE CITAS ===
   
