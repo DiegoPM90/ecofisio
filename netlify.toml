@@ -1,7 +1,7 @@
 [build]
-  command = "cd client && npm install && npx update-browserslist-db@latest && npx vite build"
+  command = "npm install && npx update-browserslist-db@latest && npx vite build"
   functions = "netlify/functions"
-  publish = "client/dist"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "18"
