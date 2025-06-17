@@ -53,6 +53,7 @@ function App() {
         <TooltipProvider>
           <NetworkStatus />
           <SessionManager />
+          <SessionIndicator />
           <Toaster />
           <Router />
         </TooltipProvider>
