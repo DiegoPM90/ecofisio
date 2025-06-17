@@ -13,6 +13,8 @@ import Status from "@/pages/status";
 import Auth from "@/pages/auth";
 import MyAppointments from "@/pages/my-appointments";
 import Profile from "@/pages/profile";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 
 // Loading component for Suspense fallback
@@ -32,8 +34,11 @@ function Router() {
       <Route path="/cancel" component={Cancel} />
       <Route path="/status" component={Status} />
       <Route path="/auth" component={Auth} />
+      <Route path="/login" component={Auth} />
       <Route path="/my-appointments" component={MyAppointments} />
       <Route path="/profile" component={Profile} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -140,15 +140,27 @@ export default function LoginForm({ onSuccess, onSwitchToRegister }: LoginFormPr
             {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
           </Button>
 
-          <div className="text-center">
-            <Button
-              type="button"
-              variant="link"
-              onClick={onSwitchToRegister}
-              className="text-sm text-muted-foreground"
-            >
-              ¿No tienes cuenta? Regístrate
-            </Button>
+          <div className="text-center space-y-2">
+            <div>
+              <Button
+                type="button"
+                variant="link"
+                onClick={onSwitchToRegister}
+                className="text-sm text-muted-foreground"
+              >
+                ¿No tienes cuenta? Regístrate
+              </Button>
+            </div>
+            <div>
+              <Button
+                type="button"
+                variant="link"
+                onClick={() => window.location.href = '/forgot-password'}
+                className="text-sm text-muted-foreground"
+              >
+                ¿Olvidaste tu contraseña?
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>

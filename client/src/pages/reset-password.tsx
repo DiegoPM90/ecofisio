@@ -1,4 +1,4 @@
-import { useSearch } from "wouter/use-search";
+import { useLocation } from "wouter";
 import ResetPasswordForm from "@/components/auth/reset-password-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,8 @@ import { Link } from "wouter";
 import { AlertCircle } from "lucide-react";
 
 export default function ResetPasswordPage() {
-  const search = useSearch();
-  const urlParams = new URLSearchParams(search);
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const token = urlParams.get("token");
 
   if (!token) {
