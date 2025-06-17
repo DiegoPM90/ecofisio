@@ -1,5 +1,5 @@
 [build]
-  command = "node build-netlify.js"
+  command = "npx vite build --outDir=dist"
   functions = "netlify/functions"
   publish = "dist"
 
