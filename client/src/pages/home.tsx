@@ -120,7 +120,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Hero Section - Moved to bottom */}
+        {/* Hero Section - Enhanced */}
         <section 
           ref={heroRef.ref}
           id="inicio" 
@@ -130,22 +130,23 @@ export default function Home() {
               : 'opacity-0 translate-y-20'
           }`}
         >
-          <div className="max-w-3xl mx-auto px-2">
-            <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-3 sm:mb-4 transition-all duration-700 delay-200 ${
-              heroRef.isVisible 
-                ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.2s_forwards]' 
-                : 'opacity-0 translate-y-10'
-            }`}>
-              Reserva tu Sesión de Kinesiología
-            </h2>
-            <p className={`text-base sm:text-lg lg:text-xl text-slate-600 mb-6 sm:mb-8 px-2 transition-all duration-700 delay-400 ${
-              heroRef.isVisible 
-                ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.4s_forwards]' 
-                : 'opacity-0 translate-y-10'
-            }`}>
-              Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="max-w-4xl mx-auto px-2">
+            <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl p-8 sm:p-12 shadow-2xl border border-blue-100">
+              <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4 sm:mb-6 transition-all duration-700 delay-200 ${
+                heroRef.isVisible 
+                  ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.2s_forwards]' 
+                  : 'opacity-0 translate-y-10'
+              }`}>
+                Reserva tu Sesión de Kinesiología
+              </h2>
+              <p className={`text-lg sm:text-xl lg:text-2xl text-slate-700 mb-8 sm:mb-10 px-2 transition-all duration-700 delay-400 ${
+                heroRef.isVisible 
+                  ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.4s_forwards]' 
+                  : 'opacity-0 translate-y-10'
+              }`}>
+                Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica profesional
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
                 heroRef.isVisible 
                   ? 'opacity-100 animate-[cardFadeIn_1.5s_ease-out_0.8s_forwards]' 
@@ -178,6 +179,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Datos Seguros</h3>
                 <p className="text-xs sm:text-sm text-slate-600">Tu información de salud protegida y confidencial</p>
+              </div>
               </div>
             </div>
           </div>

@@ -246,12 +246,12 @@ export class NotificationService {
   async sendAdminNotification(appointment: Appointment, action: 'confirmada' | 'cancelada'): Promise<void> {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@ecofisio.com';
     
-    const subject = `${action === 'confirmada' ? '✅ Nueva cita confirmada' : '❌ Cita cancelada'} - KinesioFisio`;
+    const subject = `${action === 'confirmada' ? '✅ Nueva cita confirmada' : '❌ Cita cancelada'} - ECOFISIO`;
     
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: ${action === 'confirmada' ? '#10b981' : '#ef4444'}; color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0;">KinesioFisio - Administración</h1>
+          <h1 style="margin: 0;">ECOFISIO - Administración</h1>
           <p style="margin: 5px 0 0 0;">${action === 'confirmada' ? 'Nueva cita confirmada' : 'Cita cancelada'}</p>
         </div>
         
@@ -288,7 +288,7 @@ export class NotificationService {
         </div>
         
         <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 14px;">
-          <p style="margin: 0;">Sistema de gestión KinesioFisio</p>
+          <p style="margin: 0;">Sistema de gestión ECOFISIO</p>
           <p style="margin: 5px 0 0 0;">Notificación automática</p>
         </div>
       </div>
@@ -302,8 +302,8 @@ export class NotificationService {
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0;">KinesioFisio</h1>
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">ECOFISIO</h1>
           <p style="margin: 5px 0 0 0;">Centro de Kinesiología</p>
         </div>
         
@@ -343,14 +343,14 @@ export class NotificationService {
         </div>
         
         <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 14px;">
-          <p style="margin: 0;">KinesioFisio - Centro de Kinesiología</p>
+          <p style="margin: 0;">ECOFISIO - Centro de Kinesiología</p>
           <p style="margin: 5px 0 0 0;">Recuperación profesional para su bienestar</p>
         </div>
       </div>
     `;
 
     // Enviar confirmación al paciente por email
-    await this.sendEmail(appointment.email, "✅ Cita confirmada - KinesioFisio", emailHtml);
+    await this.sendEmail(appointment.email, "✅ Cita confirmada - ECOFISIO", emailHtml);
     
     // Enviar notificación al administrador por email
     await this.sendAdminNotification(appointment, 'confirmada');
