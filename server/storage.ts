@@ -563,6 +563,12 @@ export class MongoStorage implements IStorage {
     };
   }
 
+  async getUserAppointments(userId: number): Promise<Appointment[]> {
+    const userIdString = userId.toString();
+    const docs = await AppointmentModel.find({ userId: userIdString }).sort({ createdAt: -1 });
+    return docs.map(doc => this.transformDocToAppointment(doc));
+  }
+
   private getKinesiologistForSpecialty(specialty: string): string {
     return 'Diego Pizarro Monroy';
   }
