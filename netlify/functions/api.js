@@ -1,3 +1,8 @@
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcryptjs';
+
+const client = new MongoClient(process.env.MONGODB_URI);
+
 export const handler = async (event, context) => {
   const { httpMethod, path, body, headers, queryStringParameters } = event;
   
@@ -34,6 +39,144 @@ export const handler = async (event, context) => {
       };
     }
 
+    // Registro de usuario
+    if (apiPath === '/api/auth/register' && httpMethod === 'POST') {
+      try {
+        await client.connect();
+        const db = client.db();
+        
+        const userData = JSON.parse(body || '{}');
+        const { name, email, password } = userData;
+        
+        // Validar datos básicos
+        if (!name || !email || !password) {
+          return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Todos los campos son requeridos' }),
+          };
+        }
+        
+        // Verificar si el usuario ya existe
+        const existingUser = await db.collection('users').findOne({ email });
+        if (existingUser) {
+          return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'El email ya está registrado' }),
+          };
+        }
+        
+        // Hash de la contraseña
+        const hashedPassword = await bcrypt.hash(password, 15);
+        
+        // Crear usuario
+        const newUser = {
+          name,
+          email,
+          hashedPassword,
+          role: 'user',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        const result = await db.collection('users').insertOne(newUser);
+        
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            message: 'Usuario registrado exitosamente',
+            user: {
+              id: result.insertedId,
+              name,
+              email,
+              role: 'user'
+            }
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Register error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al registrar usuario' }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Login de usuario
+    if (apiPath === '/api/auth/login' && httpMethod === 'POST') {
+      try {
+        await client.connect();
+        const db = client.db();
+        
+        const loginData = JSON.parse(body || '{}');
+        const { email, password } = loginData;
+        
+        // Buscar usuario
+        const user = await db.collection('users').findOne({ email });
+        if (!user) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Credenciales inválidas' }),
+          };
+        }
+        
+        // Verificar contraseña
+        const validPassword = await bcrypt.compare(password, user.hashedPassword);
+        if (!validPassword) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Credenciales inválidas' }),
+          };
+        }
+        
+        // Crear sesión simple
+        const sessionToken = 'session_' + Date.now() + '_' + Math.random().toString(36);
+        
+        await db.collection('sessions').insertOne({
+          sessionId: sessionToken,
+          userId: user._id,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutos
+        });
+        
+        return {
+          statusCode: 200,
+          headers: {
+            ...corsHeaders,
+            'Set-Cookie': `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=300`
+          },
+          body: JSON.stringify({
+            message: 'Login exitoso',
+            user: {
+              id: user._id,
+              name: user.name,
+              email: user.email,
+              role: user.role
+            }
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al iniciar sesión' }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
     // Horarios disponibles
     if (apiPath === '/api/appointments/available-slots' && httpMethod === 'GET') {
       const { date, specialty } = queryStringParameters || {};
@@ -52,48 +195,50 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Crear cita (simplificado para producción inicial)
+    // Crear cita
     if (apiPath === '/api/appointments' && httpMethod === 'POST') {
-      const appointmentData = JSON.parse(body || '{}');
-      
-      return {
-        statusCode: 201,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          success: true,
-          message: 'Cita registrada exitosamente. Te contactaremos para confirmar.',
-          appointment: {
-            id: Date.now(),
-            token: 'temp_' + Date.now(),
-            status: 'pending',
-            ...appointmentData
-          }
-        }),
-      };
-    }
-
-    // Endpoints de autenticación (respuesta temporal)
-    if (apiPath.startsWith('/api/auth')) {
-      return {
-        statusCode: 503,
-        headers: corsHeaders,
-        body: JSON.stringify({ 
-          error: 'Sistema de autenticación en mantenimiento',
-          message: 'Para citas, use el formulario público'
-        }),
-      };
-    }
-
-    // Consulta IA (respuesta temporal)
-    if (apiPath === '/api/ai/consultation' && httpMethod === 'POST') {
-      return {
-        statusCode: 503,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          error: 'Consulta IA temporalmente no disponible',
-          message: 'Reserve su cita para consulta personalizada'
-        }),
-      };
+      try {
+        await client.connect();
+        const db = client.db();
+        
+        const appointmentData = JSON.parse(body || '{}');
+        const token = 'apt_' + Date.now() + '_' + Math.random().toString(36);
+        
+        const appointment = {
+          ...appointmentData,
+          token,
+          status: 'pending',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        const result = await db.collection('appointments').insertOne(appointment);
+        
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify({
+            success: true,
+            message: 'Cita registrada exitosamente. Te contactaremos para confirmar.',
+            appointment: {
+              id: result.insertedId,
+              token,
+              status: 'pending',
+              ...appointmentData
+            }
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Appointment error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al crear cita' }),
+        };
+      } finally {
+        await client.close();
+      }
     }
 
     // Default para rutas no encontradas
