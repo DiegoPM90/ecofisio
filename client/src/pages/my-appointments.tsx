@@ -470,10 +470,11 @@ export default function MyAppointments() {
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 gap-3">
                           {[
-                            { id: 'rehabilitacion-fisioterapia', label: 'Rehabilitación y Fisioterapia' },
+                            { id: 'rehabilitacion-fisica-fisioterapia', label: 'Rehabilitación física y fisioterapia' },
+                            { id: 'educacion', label: 'Educación' },
                             { id: 'masajes-descontracturantes', label: 'Masajes Descontracturantes' },
                             { id: 'masajes-relajantes', label: 'Masajes Relajantes' },
-                            { id: 'intervencion-kinesica-adulto-mayor', label: 'Intervención Kinésica para el Adulto Mayor' }
+                            { id: 'kinesiterapia-adulto-mayor', label: 'Kinesiterapia Adulto Mayor' }
                           ].map((service) => (
                             <div key={service.id} className="flex items-center space-x-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50">
                               <input

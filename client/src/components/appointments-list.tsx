@@ -26,9 +26,15 @@ export default function AppointmentsList() {
 
   const getServiceLabel = (specialty: string) => {
     const labels = {
-      "sesiones-kinesiterapia-fisioterapia": "Sesiones de Kinesiterapia y Fisioterapia",
-      "masaje-descontracturante": "Masaje Descontracturante",
-      "masaje-relajacion": "Masaje de Relajación"
+      "rehabilitacion-fisica-fisioterapia": "Rehabilitación física y fisioterapia",
+      "educacion": "Educación",
+      "masajes-descontracturantes": "Masajes Descontracturantes",
+      "masajes-relajantes": "Masajes Relajantes",
+      "kinesiterapia-adulto-mayor": "Kinesiterapia Adulto Mayor",
+      // Mantener compatibilidad con servicios antiguos
+      "sesiones-kinesiterapia-fisioterapia": "Rehabilitación física y fisioterapia",
+      "masaje-descontracturante": "Masajes Descontracturantes",
+      "masaje-relajacion": "Masajes Relajantes"
     };
     return labels[specialty as keyof typeof labels] || specialty;
   };

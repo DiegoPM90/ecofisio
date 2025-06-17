@@ -196,10 +196,11 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-4">Servicios</h3>
               <ul className="space-y-2 text-gray-600">
-                <li>Kinesiología Deportiva</li>
-                <li>Rehabilitación</li>
-                <li>Terapia Manual</li>
-                <li>Prevención</li>
+                <li>Rehabilitación física y fisioterapia</li>
+                <li>Educación</li>
+                <li>Masajes Descontracturantes</li>
+                <li>Masajes Relajantes</li>
+                <li>Kinesiterapia Adulto Mayor</li>
               </ul>
             </div>
 
@@ -208,7 +209,7 @@ export default function HomePage() {
               <h3 className="font-semibold text-gray-900 mb-4">Contacto</h3>
               <div className="space-y-2 text-gray-600">
                 <p>Sábados: 10:00 - 13:00</p>
-                <p>info@ecofisio.com</p>
+                <p>canalmovimiento@gmail.com</p>
                 <p>+56 9 XXXX XXXX</p>
               </div>
             </div>

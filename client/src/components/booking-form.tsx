@@ -130,9 +130,11 @@ export default function BookingForm({ onFormDataChange, formData, showNavigation
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="sesiones-kinesiterapia-fisioterapia">Sesiones de Kinesiterapia y Fisioterapia</SelectItem>
-                        <SelectItem value="masaje-descontracturante">Masaje Descontracturante</SelectItem>
-                        <SelectItem value="masaje-relajacion">Masaje de Relajación</SelectItem>
+                        <SelectItem value="rehabilitacion-fisica-fisioterapia">Rehabilitación física y fisioterapia</SelectItem>
+                        <SelectItem value="educacion">Educación</SelectItem>
+                        <SelectItem value="masajes-descontracturantes">Masajes Descontracturantes</SelectItem>
+                        <SelectItem value="masajes-relajantes">Masajes Relajantes</SelectItem>
+                        <SelectItem value="kinesiterapia-adulto-mayor">Kinesiterapia Adulto Mayor</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
