@@ -36,6 +36,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Query para obtener el usuario actual
   const { data: userData, isLoading, error } = useQuery({
     queryKey: ["/api/auth/me"],
+    queryFn: async () => {
+      const response = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("No autenticado");
+      }
+      return response.json();
+    },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
@@ -52,22 +61,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Mutación para login
   const loginMutation = useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const response = await apiRequest("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error de autenticación");
+      }
+      
+      return response.json();
     },
     onSuccess: (data) => {
-      setUser(data.user);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+      if (data.success && data.user) {
+        setUser(data.user);
+        // Guardar token en localStorage como respaldo
+        if (data.sessionToken) {
+          localStorage.setItem('sessionToken', data.sessionToken);
+        }
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
+        toast({
+          title: "¡Bienvenido!",
+          description: `Hola ${data.user.name}, has iniciado sesión correctamente`,
+        });
+      }
     },
     onError: (error) => {
       console.error("Error en login:", error);
       toast({
         title: "Error de autenticación",
-        description: "Verifica tus credenciales e intenta nuevamente",
+        description: error.message || "Verifica tus credenciales e intenta nuevamente",
         variant: "destructive",
       });
     },
@@ -109,19 +138,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Mutación para logout
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("/api/auth/logout", {
+      const response = await fetch("/api/auth/logout", {
         method: "POST",
+        credentials: "include",
       });
-      return response;
+      return response.json();
     },
     onSuccess: () => {
       setUser(null);
+      localStorage.removeItem('sessionToken');
       queryClient.clear();
+      toast({
+        title: "Sesión cerrada",
+        description: "Has cerrado sesión exitosamente",
+      });
     },
     onError: (error) => {
       console.error("Error en logout:", error);
       // Aún así limpiamos los datos locales en caso de error
       setUser(null);
+      localStorage.removeItem('sessionToken');
       queryClient.clear();
     },
   });

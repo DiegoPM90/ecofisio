@@ -152,10 +152,79 @@ export const handler = async (event, context) => {
           statusCode: 200,
           headers: {
             ...corsHeaders,
-            'Set-Cookie': `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=300`
+            'Set-Cookie': `session=${sessionToken}; HttpOnly; SameSite=Lax; Max-Age=300; Path=/`
           },
           body: JSON.stringify({
             message: 'Login exitoso',
+            success: true,
+            user: {
+              id: user._id,
+              name: user.name,
+              email: user.email,
+              role: user.role
+            },
+            sessionToken: sessionToken
+          }),
+        };
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al iniciar sesión' }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Verificar usuario actual
+    if (apiPath === '/api/auth/me' && httpMethod === 'GET') {
+      try {
+        const cookieHeader = headers.cookie || '';
+        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
+        const sessionToken = sessionMatch ? sessionMatch[1] : null;
+        
+        if (!sessionToken) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'No autenticado' }),
+          };
+        }
+        
+        await client.connect();
+        const db = client.db();
+        
+        // Buscar sesión
+        const session = await db.collection('sessions').findOne({ 
+          sessionId: sessionToken,
+          expiresAt: { $gt: new Date() }
+        });
+        
+        if (!session) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Sesión expirada' }),
+          };
+        }
+        
+        // Buscar usuario
+        const user = await db.collection('users').findOne({ _id: session.userId });
+        if (!user) {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Usuario no encontrado' }),
+          };
+        }
+        
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({
             user: {
               id: user._id,
               name: user.name,
@@ -166,11 +235,45 @@ export const handler = async (event, context) => {
         };
         
       } catch (error) {
-        console.error('Login error:', error);
+        console.error('Auth check error:', error);
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Error al iniciar sesión' }),
+          body: JSON.stringify({ error: 'Error al verificar autenticación' }),
+        };
+      } finally {
+        await client.close();
+      }
+    }
+
+    // Logout de usuario
+    if (apiPath === '/api/auth/logout' && httpMethod === 'POST') {
+      try {
+        const cookieHeader = headers.cookie || '';
+        const sessionMatch = cookieHeader.match(/session=([^;]+)/);
+        const sessionToken = sessionMatch ? sessionMatch[1] : null;
+        
+        if (sessionToken) {
+          await client.connect();
+          const db = client.db();
+          await db.collection('sessions').deleteOne({ sessionId: sessionToken });
+        }
+        
+        return {
+          statusCode: 200,
+          headers: {
+            ...corsHeaders,
+            'Set-Cookie': `session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/`
+          },
+          body: JSON.stringify({ message: 'Logout exitoso' }),
+        };
+        
+      } catch (error) {
+        console.error('Logout error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Error al cerrar sesión' }),
         };
       } finally {
         await client.close();
