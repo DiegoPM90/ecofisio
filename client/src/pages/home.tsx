@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { HeartPulse, Calendar, Bot, Shield } from "lucide-react";
+import { HeartPulse, Calendar, Bot, Shield, Clock, Users, Award, Phone, Mail, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import { useScrollIntoView } from "@/hooks/use-scroll-effects";
 import { useSEO } from "@/hooks/use-seo";
 import Navigation from "@/components/navigation";
-
 
 // Loading skeleton for form components
 const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
@@ -23,204 +22,298 @@ const ComponentLoader = ({ height = "h-96" }: { height?: string }) => (
   </div>
 );
 
-
-// Logo component inline
-const EcofisioLogo = ({ size = 32 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 32 32">
-    <defs>
-      <linearGradient id="exerciseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-        <stop offset="50%" style={{ stopColor: '#06b6d4', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
-      </linearGradient>
-    </defs>
-    <circle cx="16" cy="16" r="15" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1"/>
-    {/* Persona 1: Levantando pesas */}
-    <g transform="translate(8, 8)">
-      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
-      <rect x="-0.5" y="1.5" width="1" height="3" fill="url(#exerciseGradient)"/>
-      <line x1="-2" y1="2.5" x2="2" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-      <rect x="-2.5" y="2" width="1" height="1" fill="#64748b"/>
-      <rect x="1.5" y="2" width="1" height="1" fill="#64748b"/>
-      <line x1="-0.5" y1="4.5" x2="-1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <line x1="0.5" y1="4.5" x2="1" y2="6" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <circle cx="-2" cy="2.5" r="0.3" fill="#22c55e"/>
-      <circle cx="2" cy="2.5" r="0.3" fill="#22c55e"/>
-    </g>
-    {/* Persona 2: Corriendo */}
-    <g transform="translate(16, 20)">
-      <circle cx="0" cy="0" r="1.5" fill="url(#exerciseGradient)"/>
-      <line x1="0" y1="1.5" x2="0.5" y2="3.5" stroke="url(#exerciseGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="0" y1="2" x2="-1.5" y2="1.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <line x1="0" y1="2" x2="1.5" y2="2.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <line x1="0.5" y1="3.5" x2="0" y2="5.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <line x1="0.5" y1="3.5" x2="1.5" y2="4.5" stroke="url(#exerciseGradient)" strokeWidth="1"/>
-      <rect x="-1.7" y="1.3" width="0.4" height="0.4" fill="#8b5cf6"/>
-      <circle cx="0" cy="2.5" r="0.3" fill="#ef4444"/>
-    </g>
-    {/* Conexiones */}
-    <path d="M6 11 Q16 8 26 11" stroke="#06b6d4" strokeWidth="1" strokeDasharray="2,2" fill="none" opacity="0.6"/>
-    <circle cx="4" cy="4" r="1" fill="#22c55e" opacity="0.8"/>
-    <circle cx="28" cy="28" r="1" fill="#ef4444" opacity="0.8"/>
-  </svg>
+// Enhanced ECOFISIO Logo component
+const EcofisioLogo = ({ size = 48 }: { size?: number }) => (
+  <div className="flex items-center space-x-3">
+    <div className={`bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-3 shadow-lg`} style={{ width: size, height: size }}>
+      <HeartPulse className="text-white w-full h-full" />
+    </div>
+    <div className="text-left">
+      <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        ECOFISIO
+      </h1>
+      <p className="text-sm text-slate-600">Centro de Kinesiología</p>
+    </div>
+  </div>
 );
 
-export default function Home() {
-  // SEO optimization for homepage
+export default function HomePage() {
   useSEO({
-    title: 'Ecofisio - Reserva tu Sesión de Kinesiología Online',
-    description: 'Agenda sesiones de kinesiología y fisioterapia con profesionales certificados. Sistema inteligente con IA para orientación personalizada. Reserva fácil y rápida.',
-    keywords: 'kinesiología online, fisioterapia, reserva cita, rehabilitación, masajes terapéuticos, consulta IA, profesionales certificados',
-    ogTitle: 'Ecofisio - Tu Centro de Kinesiología Digital',
-    ogDescription: 'Reserva sesiones de kinesiología con los mejores profesionales. Sistema inteligente y consulta IA incluida.'
+    title: "ECOFISIO - Centro de Kinesiología Profesional | Reserva tu Cita",
+    description: "Centro especializado en kinesiología con sistema inteligente de reservas y asistencia de IA. Profesionales certificados para tu recuperación y bienestar.",
+    keywords: "kinesiología, fisioterapia, rehabilitación, citas médicas, reservas, IA, salud"
   });
 
-
-
-  // Scroll animation hooks for each section
+  // Animation refs
   const heroRef = useScrollIntoView(0.2);
-  const bookingRef = useScrollIntoView(0.3);
-
+  const featuresRef = useScrollIntoView(0.3);
+  const servicesRef = useScrollIntoView(0.3);
+  const ctaRef = useScrollIntoView(0.3);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30">
       <Navigation />
-
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Call to Action Section - Moved to top */}
-        <section 
-          ref={bookingRef.ref}
-          id="reservas" 
-          className={`mb-8 sm:mb-12 transition-all duration-1000 ease-out transform ${
-            bookingRef.isVisible 
-              ? 'opacity-100 animate-[scrollSlideInLeft_1s_ease-out_forwards]' 
-              : 'opacity-0 -translate-x-32 scale-95'
-          }`}
-        >
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 sm:p-12 text-white text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
-              ¿Listo para tu sesión de kinesiología?
-            </h2>
-            <p className="text-blue-100 mb-8 text-lg">
-              Accede a tu cuenta para agendar citas con recomendaciones personalizadas de IA
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/my-appointments">
-                <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105">
-                  <Calendar className="inline w-5 h-5 mr-2" />
-                  Agendar Nueva Cita
-                </button>
-              </Link>
-              <Link href="/auth">
-                <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-lg font-semibold transition-all duration-200">
-                  Iniciar Sesión
-                </button>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Hero Section - Enhanced */}
+      
+      <main className="pt-16 pb-8">
+        {/* Enhanced Hero Section */}
         <section 
           ref={heroRef.ref}
-          id="inicio" 
-          className={`text-center mb-6 sm:mb-12 transition-all duration-1000 ${
+          className={`relative px-4 py-16 sm:py-24 transition-all duration-1000 ${
             heroRef.isVisible 
-              ? 'opacity-100 animate-[scrollBounceIn_1s_ease-out_forwards]' 
+              ? 'opacity-100 animate-[fadeInUp_1s_ease-out]' 
               : 'opacity-0 translate-y-20'
           }`}
         >
-          <div className="max-w-4xl mx-auto px-2">
-            <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-3xl p-8 sm:p-12 shadow-2xl border border-blue-100">
-              <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-4 sm:mb-6 transition-all duration-700 delay-200 ${
+          <div className="max-w-7xl mx-auto">
+            {/* Background Elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/5 via-purple-400/5 to-blue-400/5 rounded-3xl"></div>
+            
+            <div className="relative z-10 text-center">
+              {/* Logo and Branding */}
+              <div className="flex justify-center mb-8">
+                <EcofisioLogo size={64} />
+              </div>
+
+              {/* Main Headline */}
+              <h1 className={`text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 transition-all duration-700 delay-200 ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.2s_forwards]' 
+                  ? 'opacity-100 animate-[slideInUp_0.8s_ease-out_0.2s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
-                Reserva tu Sesión de Kinesiología
-              </h2>
-              <p className={`text-lg sm:text-xl lg:text-2xl text-slate-700 mb-8 sm:mb-10 px-2 transition-all duration-700 delay-400 ${
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                  Recuperación
+                </span>
+                <br />
+                <span className="text-slate-800">
+                  Profesional
+                </span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className={`text-xl sm:text-2xl lg:text-3xl text-slate-600 mb-12 max-w-4xl mx-auto leading-relaxed transition-all duration-700 delay-400 ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[scrollFadeInUp_0.8s_ease-out_0.4s_forwards]' 
+                  ? 'opacity-100 animate-[slideInUp_0.8s_ease-out_0.4s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
-                Sistema inteligente de reservas con asistencia de IA para orientación kinesiológica profesional
+                Centro especializado en kinesiología con tecnología avanzada y atención personalizada
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
+
+              {/* CTA Buttons */}
+              <div className={`flex flex-col sm:flex-row gap-6 justify-center mb-16 transition-all duration-700 delay-600 ${
                 heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardFadeIn_1.5s_ease-out_0.8s_forwards]' 
+                  ? 'opacity-100 animate-[slideInUp_0.8s_ease-out_0.6s_forwards]' 
                   : 'opacity-0 translate-y-10'
               }`}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Calendar className="text-blue-600 w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Reserva Rápida</h3>
-                <p className="text-xs sm:text-sm text-slate-600">Agenda tu cita en minutos con nuestro calendario inteligente</p>
-              </div>
-              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] ${
-                heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardSlideUp_1.5s_ease-out_1.2s_forwards]' 
-                  : 'opacity-0 translate-y-10'
-              }`}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Bot className="text-green-600 w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Asistente IA</h3>
-                <p className="text-xs sm:text-sm text-slate-600">Recibe orientación inicial sobre tu sesión de kinesiología</p>
-              </div>
-              <div className={`bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 transition-all duration-1000 hover:shadow-lg hover:-translate-y-1 hover:scale-[1.02] sm:col-span-2 lg:col-span-1 ${
-                heroRef.isVisible 
-                  ? 'opacity-100 animate-[cardGentleScale_1.5s_ease-out_1.6s_forwards]' 
-                  : 'opacity-0 scale-90'
-              }`}>
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <Shield className="text-amber-600 w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Datos Seguros</h3>
-                <p className="text-xs sm:text-sm text-slate-600">Tu información de salud protegida y confidencial</p>
-              </div>
+                <Link href="/my-appointments">
+                  <button className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1">
+                    <span className="flex items-center justify-center">
+                      <Calendar className="w-6 h-6 mr-3 group-hover:rotate-12 transition-transform duration-300" />
+                      Reservar Cita
+                    </span>
+                  </button>
+                </Link>
+                
+                <Link href="/ai-consultation">
+                  <button className="group border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105">
+                    <span className="flex items-center justify-center">
+                      <Bot className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+                      Consulta IA
+                    </span>
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
+        {/* Features Section */}
+        <section 
+          ref={featuresRef.ref}
+          className={`px-4 py-16 transition-all duration-1000 ${
+            featuresRef.isVisible 
+              ? 'opacity-100 animate-[fadeInUp_1s_ease-out]' 
+              : 'opacity-0 translate-y-20'
+          }`}
+        >
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-800 mb-16">
+              ¿Por qué elegir ECOFISIO?
+            </h2>
 
-
-
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center space-x-3 mb-4">
-                <EcofisioLogo size={32} />
-                <h1 className="text-xl font-semibold text-slate-900">Ecofisio</h1>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Feature 1 */}
+              <div className={`group bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-lg border border-white/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+                featuresRef.isVisible 
+                  ? 'opacity-100 animate-[slideInLeft_1s_ease-out_0.2s_forwards]' 
+                  : 'opacity-0 -translate-x-10'
+              }`}>
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Calendar className="text-white w-10 h-10" />
+                </div>
+                <h3 className="font-bold text-2xl text-slate-900 mb-4 text-center">Sistema Inteligente</h3>
+                <p className="text-slate-600 leading-relaxed text-center">
+                  Reserva tu cita de forma rápida y eficiente con nuestro sistema de calendario avanzado que se adapta a tus necesidades.
+                </p>
               </div>
-              <p className="text-slate-600 mb-4">
-                Sistema inteligente de reservas de kinesiología con asistencia de IA para una mejor atención fisioterapéutica.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-4">Servicios</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Sesiones de Kinesiterapia y Fisioterapia</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Masaje Descontracturante</a></li>
-                <li><a href="#" className="hover:text-blue-600 transition-colors">Masaje de Relajación</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-4">Contacto</h3>
-              <ul className="space-y-2 text-sm text-slate-600">
-                <li>canalmovimiento@gmail.com</li>
-              </ul>
+
+              {/* Feature 2 */}
+              <div className={`group bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-lg border border-white/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+                featuresRef.isVisible 
+                  ? 'opacity-100 animate-[slideInUp_1s_ease-out_0.4s_forwards]' 
+                  : 'opacity-0 translate-y-10'
+              }`}>
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Bot className="text-white w-10 h-10" />
+                </div>
+                <h3 className="font-bold text-2xl text-slate-900 mb-4 text-center">Asistencia IA</h3>
+                <p className="text-slate-600 leading-relaxed text-center">
+                  Recibe orientación personalizada con inteligencia artificial antes de tu sesión para optimizar tu tratamiento.
+                </p>
+              </div>
+
+              {/* Feature 3 */}
+              <div className={`group bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-lg border border-white/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 hover:scale-105 ${
+                featuresRef.isVisible 
+                  ? 'opacity-100 animate-[slideInRight_1s_ease-out_0.6s_forwards]' 
+                  : 'opacity-0 translate-x-10'
+              }`}>
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="text-white w-10 h-10" />
+                </div>
+                <h3 className="font-bold text-2xl text-slate-900 mb-4 text-center">Datos Protegidos</h3>
+                <p className="text-slate-600 leading-relaxed text-center">
+                  Tu información médica está completamente segura con nuestros protocolos de seguridad certificados.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="border-t border-slate-200 mt-8 pt-8 text-center text-sm text-slate-600">
+        </section>
 
-            <p>&copy; 2025 Ecofisio. Todos los derechos reservados.</p>
+        {/* Services Section */}
+        <section 
+          ref={servicesRef.ref}
+          className={`px-4 py-16 bg-white/50 transition-all duration-1000 ${
+            servicesRef.isVisible 
+              ? 'opacity-100 animate-[fadeInUp_1s_ease-out]' 
+              : 'opacity-0 translate-y-20'
+          }`}
+        >
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-800 mb-16">
+              Nuestros Servicios
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: HeartPulse, title: "Kinesiología Deportiva", desc: "Recuperación especializada para atletas" },
+                { icon: Users, title: "Rehabilitación", desc: "Tratamientos post-operatorios y lesiones" },
+                { icon: Clock, title: "Terapia Manual", desc: "Técnicas especializadas de recuperación" },
+                { icon: Award, title: "Prevención", desc: "Programas preventivos personalizados" }
+              ].map((service, index) => (
+                <div 
+                  key={index}
+                  className={`bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+                    servicesRef.isVisible 
+                      ? `opacity-100 animate-[slideInUp_1s_ease-out_${index * 0.2}s_forwards]` 
+                      : 'opacity-0 translate-y-10'
+                  }`}
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mb-4">
+                    <service.icon className="text-white w-6 h-6" />
+                  </div>
+                  <h3 className="font-bold text-lg text-slate-900 mb-2">{service.title}</h3>
+                  <p className="text-slate-600 text-sm">{service.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Enhanced CTA Section */}
+        <section 
+          ref={ctaRef.ref}
+          className={`px-4 py-16 transition-all duration-1000 ${
+            ctaRef.isVisible 
+              ? 'opacity-100 animate-[fadeInUp_1s_ease-out]' 
+              : 'opacity-0 translate-y-20'
+          }`}
+        >
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+                ¿Listo para tu recuperación?
+              </h2>
+              <p className="text-blue-100 mb-8 text-xl">
+                Agenda tu cita ahora y comienza tu camino hacia una mejor calidad de vida
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/my-appointments">
+                  <button className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-200 hover:scale-105 shadow-lg">
+                    <Calendar className="inline w-6 h-6 mr-2" />
+                    Agendar Cita
+                  </button>
+                </Link>
+                <Link href="/auth">
+                  <button className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-200 hover:scale-105">
+                    Iniciar Sesión
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Enhanced Footer */}
+      <footer className="bg-slate-800 text-white mt-16">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Company Info */}
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex items-center mb-4">
+                <EcofisioLogo size={40} />
+              </div>
+              <p className="text-slate-300 mb-4 leading-relaxed">
+                Centro especializado en kinesiología con más de 10 años de experiencia. 
+                Comprometidos con tu bienestar y recuperación integral.
+              </p>
+              <div className="flex space-x-4">
+                <div className="bg-blue-600 p-2 rounded-lg">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="bg-purple-600 p-2 rounded-lg">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div className="bg-emerald-600 p-2 rounded-lg">
+                  <MapPin className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+
+            {/* Services */}
+            <div>
+              <h3 className="font-bold text-lg mb-4">Servicios</h3>
+              <ul className="space-y-2 text-slate-300">
+                <li>Kinesiología Deportiva</li>
+                <li>Rehabilitación</li>
+                <li>Terapia Manual</li>
+                <li>Prevención</li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h3 className="font-bold text-lg mb-4">Contacto</h3>
+              <div className="space-y-2 text-slate-300">
+                <p>Sábados: 10:00 - 13:00</p>
+                <p>info@ecofisio.com</p>
+                <p>+56 9 XXXX XXXX</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-700 mt-8 pt-8 text-center text-slate-400">
+            <p>&copy; 2024 ECOFISIO Centro de Kinesiología. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
