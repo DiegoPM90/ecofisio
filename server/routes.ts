@@ -47,16 +47,45 @@ export async function registerRoutes(app: Express): Promise<void> {
     }
   });
 
-  // Crear nueva cita
+  // Crear nueva cita con validación exhaustiva
   app.post("/api/appointments", async (req, res) => {
     try {
       const validatedData = insertAppointmentSchema.parse(req.body);
       
-      // Verificar si el horario ya está ocupado
+      // Validación 1: Verificar que la fecha sea un sábado
+      const appointmentDate = new Date(validatedData.date);
+      const dayOfWeek = appointmentDate.getDay();
+      if (dayOfWeek !== 6) {
+        return res.status(400).json({ 
+          message: "Solo se pueden agendar citas los sábados",
+          error: "INVALID_DAY"
+        });
+      }
+      
+      // Validación 2: Verificar que la hora esté dentro del rango permitido
+      const allowedTimes = ['10:00', '11:00', '12:00', '13:00'];
+      if (!allowedTimes.includes(validatedData.time)) {
+        return res.status(400).json({ 
+          message: "Hora no válida. Solo disponible de 10:00 a 13:00",
+          error: "INVALID_TIME"
+        });
+      }
+      
+      // Validación 3: Verificar que la fecha no sea en el pasado
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      appointmentDate.setHours(0, 0, 0, 0);
+      if (appointmentDate < today) {
+        return res.status(400).json({ 
+          message: "No se pueden agendar citas en fechas pasadas",
+          error: "PAST_DATE"
+        });
+      }
+      
+      // Validación 4: Verificar duplicados por horario
       const existingAppointments = await storage.getAppointmentsByDate(validatedData.date);
       const isSlotTaken = existingAppointments.some(apt => 
         apt.time === validatedData.time && 
-        apt.specialty === validatedData.specialty &&
         apt.status !== 'cancelada'
       );
       
@@ -67,6 +96,20 @@ export async function registerRoutes(app: Express): Promise<void> {
         });
       }
       
+      // Validación 5: Verificar duplicados por email en la misma fecha
+      const duplicateByEmail = existingAppointments.some(apt => 
+        apt.email.toLowerCase() === validatedData.email.toLowerCase() && 
+        apt.status !== 'cancelada'
+      );
+      
+      if (duplicateByEmail) {
+        return res.status(409).json({ 
+          message: "Ya tienes una cita agendada para esta fecha",
+          error: "DUPLICATE_EMAIL"
+        });
+      }
+      
+      // Crear la cita si pasa todas las validaciones
       const appointment = await storage.createAppointment(validatedData);
       
       // Enviar notificaciones inmediatamente después de crear la cita
@@ -78,9 +121,13 @@ export async function registerRoutes(app: Express): Promise<void> {
       }
       
       res.status(201).json(appointment);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creando cita:", error);
-      res.status(400).json({ message: "Datos de cita inválidos" });
+      if (error?.name === 'ZodError') {
+        res.status(400).json({ message: "Datos de cita inválidos", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
     }
   });
 

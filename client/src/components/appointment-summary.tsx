@@ -38,8 +38,8 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        if (response.status === 409) {
-          throw new Error("SLOT_TAKEN");
+        if (response.status === 409 || response.status === 400) {
+          throw new Error(errorData.error || "UNKNOWN_ERROR");
         }
         throw new Error(`Error creating appointment: ${response.statusText}`);
       }
@@ -54,10 +54,36 @@ export default function AppointmentSummary({ formData, selectedDate, selectedTim
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
     },
     onError: (error) => {
-      if (error.message === "SLOT_TAKEN") {
+      const errorMessage = error.message;
+      
+      if (errorMessage === "SLOT_TAKEN") {
         toast({
-          title: "Lo sentimos, esta hora ya está tomada",
-          description: "Por favor selecciona otro horario disponible.",
+          title: "Horario ocupado",
+          description: "Este horario ya está reservado. Por favor selecciona otro disponible.",
+          variant: "destructive",
+        });
+      } else if (errorMessage === "DUPLICATE_EMAIL") {
+        toast({
+          title: "Cita duplicada",
+          description: "Ya tienes una cita agendada para esta fecha. Verifica tus reservas existentes.",
+          variant: "destructive",
+        });
+      } else if (errorMessage === "INVALID_DAY") {
+        toast({
+          title: "Día no válido",
+          description: "Solo se pueden agendar citas los días sábados.",
+          variant: "destructive",
+        });
+      } else if (errorMessage === "INVALID_TIME") {
+        toast({
+          title: "Hora no válida",
+          description: "Solo disponible de 10:00 a 13:00 los sábados.",
+          variant: "destructive",
+        });
+      } else if (errorMessage === "PAST_DATE") {
+        toast({
+          title: "Fecha no válida",
+          description: "No se pueden agendar citas en fechas pasadas.",
           variant: "destructive",
         });
       } else {

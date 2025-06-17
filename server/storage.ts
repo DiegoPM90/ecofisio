@@ -272,9 +272,9 @@ export class MongoStorage implements IStorage {
     // Saturday slots only
     const allSlots = ['10:00', '11:00', '12:00', '13:00'];
 
+    // Buscar todas las citas activas (no canceladas) para la fecha
     const bookedAppointments = await AppointmentModel.find({
       date,
-      specialty,
       status: { $ne: 'cancelada' }
     }, 'time');
 
